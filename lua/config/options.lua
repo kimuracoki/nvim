@@ -16,4 +16,6 @@ opt.scrolloff = 4
 opt.sidescrolloff = 8
 opt.cursorline = true
 opt.cursorcolumn = true
+opt.splitright = true  -- 右側に分割
+opt.splitbelow = true  -- 下側に分割
 

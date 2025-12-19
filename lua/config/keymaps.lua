@@ -20,19 +20,22 @@ map("i", "jk", "<Esc>", { noremap = true })
 map("t", "<Esc>", [[<C-\><C-n>]])
 map("t", "jk", [[<C-\><C-n>]])
 
--- 下にターミナルをトグル
-local term_buf = nil
-
-map("n", "<leader>t", function()
-  if term_buf and vim.api.nvim_buf_is_valid(term_buf) then
-    vim.api.nvim_set_current_buf(term_buf)
-  else
-    vim.cmd("belowright split | terminal")
-    term_buf = vim.api.nvim_get_current_buf()
-  end
+-- ToggleTermを使用したターミナル管理
+-- <C-\> でターミナルをトグル（toggleterm.nvimのデフォルト）
+-- 追加のターミナルを開く
+map("n", "<leader>tt", function()
+  require("toggleterm").toggle(1)
 end, { desc = "Toggle terminal" })
 
-vim.keymap.set("n", "<leader>gL", function()
-  vim.cmd("belowright split | terminal lazygit")
-  vim.cmd("resize 18")
-end, { desc = "Lazygit (bottom split)" })
+-- 右側にターミナルを開く
+map("n", "<leader>tv", function()
+  require("toggleterm").toggle(2, nil, nil, "vertical", nil, 40)
+end, { desc = "Open terminal (vertical)" })
+
+-- Lazygitのキーマップはtoggleterm.nvimの設定で定義済み
+
+-- すべての分割画面を開く（手動）
+vim.keymap.set("n", "<leader>ww", function()
+  require("config.startup").setup_layout()
+end, { desc = "Setup all windows layout" })
+

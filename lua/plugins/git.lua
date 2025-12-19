@@ -44,4 +44,67 @@ return {
       end, { desc = "Git graph" })
     end,
   },
+
+  -- ToggleTerm（ターミナル管理とlazygit統合）
+  {
+    "akinsho/toggleterm.nvim",
+    version = "*",
+    config = function()
+      require("toggleterm").setup({
+        size = 20,
+        open_mapping = [[<c-\>]],
+        hide_numbers = true,
+        shade_filetypes = {},
+        shade_terminals = true,
+        shading_factor = 2,
+        start_in_insert = true,
+        insert_mappings = true,
+        persist_size = true,
+        direction = "float",
+        close_on_exit = true,
+        shell = vim.o.shell,
+        float_opts = {
+          border = "curved",
+          winblend = 0,
+          highlights = {
+            border = "Normal",
+            background = "Normal",
+          },
+        },
+      })
+
+      -- Lazygit用のカスタムターミナル（右側に開く）
+      local Terminal = require("toggleterm.terminal").Terminal
+      local lazygit = Terminal:new({
+        cmd = "lazygit",
+        dir = "git_dir",
+        direction = "vertical",
+        size = 80,
+        hidden = true,
+        close_on_exit = false, -- lazygitを閉じてもターミナルを閉じない
+        on_open = function(term)
+          -- ターミナルバッファのオプションを設定
+          vim.api.nvim_buf_set_option(term.bufnr, "number", false)
+          vim.api.nvim_buf_set_option(term.bufnr, "relativenumber", false)
+          vim.api.nvim_buf_set_option(term.bufnr, "cursorline", false)
+          vim.api.nvim_buf_set_option(term.bufnr, "cursorcolumn", false)
+          -- ターミナルモードに入る（キーマッピングが正しく動作するように）
+          vim.cmd("startinsert!")
+        end,
+        on_close = function(term)
+          -- 閉じる時の処理
+        end,
+      })
+
+      -- Lazygitをトグルする関数（グローバルに定義）
+      _lazygit_toggle = function()
+        lazygit:toggle()
+      end
+
+      -- キーマップ設定
+      vim.keymap.set("n", "<leader>gL", function()
+        _lazygit_toggle()
+      end, { desc = "LazyGit (right side)" })
+    end,
+  },
 }
