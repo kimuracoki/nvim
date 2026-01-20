@@ -112,6 +112,8 @@ map("n", "<leader>cs", function()
       local success, err = pcall(vim.cmd.colorscheme, next_cs)
       if success then
         vim.g.current_colorscheme = next_cs
+        -- 透過設定を再適用
+        require("config.highlight").setup()
         vim.notify("Colorscheme: " .. next_cs, vim.log.levels.INFO)
       else
         vim.notify("Failed: " .. next_cs .. " - " .. tostring(err), vim.log.levels.ERROR)
@@ -122,6 +124,8 @@ map("n", "<leader>cs", function()
     local success, err = pcall(vim.cmd.colorscheme, next_cs)
     if success then
       vim.g.current_colorscheme = next_cs
+      -- 透過設定を再適用
+      require("config.highlight").setup()
       vim.notify("Colorscheme: " .. next_cs, vim.log.levels.INFO)
     else
       vim.notify("Failed: " .. next_cs .. " - " .. tostring(err), vim.log.levels.ERROR)
