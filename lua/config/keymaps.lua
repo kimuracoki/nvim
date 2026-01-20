@@ -42,3 +42,49 @@ end, { desc = "Setup all windows layout" })
 -- 終了（すべてのウィンドウを一度に閉じる）
 map("n", "<leader>q", ":qa<CR>", { desc = "Quit all" })
 
+-- LSP関連のキーマップ
+-- ホバーでツールチップ表示（VSCode風）
+map("n", "K", function()
+  require("lspsaga.hover"):render_hover_doc()
+end, { desc = "Show hover documentation" })
+
+-- 診断をクイックフィックスで開く（VSCodeのProblemsパネル風）
+map("n", "<leader>xx", function()
+  require("trouble").toggle("document_diagnostics")
+end, { desc = "Toggle document diagnostics" })
+map("n", "<leader>xw", function()
+  require("trouble").toggle("workspace_diagnostics")
+end, { desc = "Toggle workspace diagnostics" })
+map("n", "<leader>xq", function()
+  require("trouble").toggle("quickfix")
+end, { desc = "Toggle quickfix list" })
+
+-- カーソル位置の診断を表示
+map("n", "<leader>xd", function()
+  require("lspsaga.diagnostic"):show_line_diagnostics()
+end, { desc = "Show line diagnostics" })
+
+-- 次の/前の診断にジャンプ
+map("n", "[d", function()
+  vim.diagnostic.goto_prev({ severity = vim.diagnostic.severity.ERROR })
+end, { desc = "Go to previous diagnostic" })
+map("n", "]d", function()
+  vim.diagnostic.goto_next({ severity = vim.diagnostic.severity.ERROR })
+end, { desc = "Go to next diagnostic" })
+
+-- コードアクション（クイックフィックス）
+map({ "n", "v" }, "<leader>ca", function()
+  require("lspsaga.codeaction"):code_action()
+end, { desc = "Code action" })
+
+-- 定義・参照を表示
+map("n", "gd", function()
+  require("lspsaga.definition"):peek_definition()
+end, { desc = "Peek definition" })
+map("n", "gD", function()
+  vim.lsp.buf.definition()
+end, { desc = "Go to definition" })
+map("n", "gr", function()
+  require("lspsaga.references"):peek_references()
+end, { desc = "Peek references" })
+
