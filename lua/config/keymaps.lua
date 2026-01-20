@@ -90,7 +90,8 @@ map("n", "<leader>cs", function()
     gruvbox = "gruvbox",
   }
   
-  local current = vim.g.colors_name or "tokyonight"
+  -- 現在のカラースキーム名を取得（グローバル変数で追跡、なければvim.g.colors_nameを使用）
+  local current = vim.g.current_colorscheme or vim.g.colors_name or "tokyonight"
   local current_idx = 1
   for i, cs in ipairs(colorschemes) do
     if cs == current then
@@ -108,13 +109,25 @@ map("n", "<leader>cs", function()
     end)
     -- 少し待ってからカラースキームを適用
     vim.defer_fn(function()
-      pcall(vim.cmd.colorscheme, next_cs)
-      vim.notify("Colorscheme: " .. next_cs, vim.log.levels.INFO)
-    end, 50)
+      local success, err = pcall(vim.cmd.colorscheme, next_cs)
+      if success then
+        -- カラースキーム名を明示的に保存
+        vim.g.current_colorscheme = next_cs
+        vim.notify("Colorscheme: " .. next_cs, vim.log.levels.INFO)
+      else
+        vim.notify("Failed: " .. next_cs .. " - " .. tostring(err), vim.log.levels.ERROR)
+      end
+    end, 100)
   else
     -- ビルトインまたは既にロード済みのカラースキーム
-    pcall(vim.cmd.colorscheme, next_cs)
-    vim.notify("Colorscheme: " .. next_cs, vim.log.levels.INFO)
+    local success, err = pcall(vim.cmd.colorscheme, next_cs)
+    if success then
+      -- カラースキーム名を明示的に保存
+      vim.g.current_colorscheme = next_cs
+      vim.notify("Colorscheme: " .. next_cs, vim.log.levels.INFO)
+    else
+      vim.notify("Failed: " .. next_cs .. " - " .. tostring(err), vim.log.levels.ERROR)
+    end
   end
 end, { desc = "Switch colorscheme" })
 
