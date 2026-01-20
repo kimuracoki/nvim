@@ -25,7 +25,7 @@ require("lazy").setup({
     { import = "plugins" }, -- lua/plugins/*.lua を全部読む
   },
   install = {
-    colorscheme = { "habamax" }, -- デフォルトで適当なテーマ
+    colorscheme = { "tokyonight" }, -- デフォルトカラースキーム
   },
   checker = {
     enabled = false, -- 自動アップデートチェックはとりあえずOFF

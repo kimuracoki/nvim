@@ -8,17 +8,48 @@ return {
     config = function()
       require("nvim-treesitter.configs").setup({
         ensure_installed = {
+          -- 基本言語
           "lua",
+          "vim",
+          "bash",
+          -- フロントエンド
           "typescript",
           "tsx",
           "javascript",
-          "json",
-          "yaml",
           "html",
           "css",
+          "json",
+          "yaml",
+          -- バックエンド・汎用言語
+          "python",
+          "rust",
+          "go",
+          "java",
+          "c",
+          "cpp",
+          "php",
+          "haskell", -- Haskellパーサーを追加
+          -- その他
+          "markdown",
+          "dockerfile",
+          "sql",
         },
-        highlight = { enable = true },
+        highlight = {
+          enable = true,
+          -- 追加の設定でハイライトを強化
+          additional_vim_regex_highlighting = false,
+        },
         indent = { enable = true },
+        -- インクリメンタル選択
+        incremental_selection = {
+          enable = true,
+          keymaps = {
+            init_selection = "gnn",
+            node_incremental = "grn",
+            scope_incremental = "grc",
+            node_decremental = "grm",
+          },
+        },
       })
     end,
   },

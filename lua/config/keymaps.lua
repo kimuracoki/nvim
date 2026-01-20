@@ -42,6 +42,30 @@ end, { desc = "Setup all windows layout" })
 -- 終了（すべてのウィンドウを一度に閉じる）
 map("n", "<leader>q", ":qa<CR>", { desc = "Quit all" })
 
+-- カラースキーム切り替え（デバッグ用）
+map("n", "<leader>cs", function()
+  local colorschemes = {
+    "tokyonight",
+    "catppuccin",
+    "kanagawa",
+    "onedark",
+    "gruvbox-material",
+    "gruvbox",
+    "habamax",
+  }
+  local current = vim.g.colors_name or "tokyonight"
+  local current_idx = 1
+  for i, cs in ipairs(colorschemes) do
+    if cs == current then
+      current_idx = i
+      break
+    end
+  end
+  local next_idx = (current_idx % #colorschemes) + 1
+  vim.cmd.colorscheme(colorschemes[next_idx])
+  vim.notify("Colorscheme: " .. colorschemes[next_idx], vim.log.levels.INFO)
+end, { desc = "Switch colorscheme" })
+
 -- LSP関連のキーマップ
 -- ホバーでツールチップ表示（VSCode風）
 map("n", "K", function()
