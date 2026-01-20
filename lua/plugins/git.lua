@@ -107,4 +107,13 @@ return {
       end, { desc = "LazyGit (right side)" })
     end,
   },
+    -- Flog（コミットグラフ / 履歴ビュー）
+  {
+    "rbong/vim-flog",
+    cmd = { "Flog", "Flogsplit", "Floggit" },
+    dependencies = { "tpope/vim-fugitive" },
+    keys = {
+      { "<leader>gH", "<cmd>Flog<cr>", desc = "Flog (history graph)" },
+    },
+  }
 }
