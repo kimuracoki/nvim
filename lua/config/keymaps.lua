@@ -111,7 +111,6 @@ map("n", "<leader>cs", function()
     vim.defer_fn(function()
       local success, err = pcall(vim.cmd.colorscheme, next_cs)
       if success then
-        -- カラースキーム名を明示的に保存
         vim.g.current_colorscheme = next_cs
         vim.notify("Colorscheme: " .. next_cs, vim.log.levels.INFO)
       else
@@ -122,7 +121,6 @@ map("n", "<leader>cs", function()
     -- ビルトインまたは既にロード済みのカラースキーム
     local success, err = pcall(vim.cmd.colorscheme, next_cs)
     if success then
-      -- カラースキーム名を明示的に保存
       vim.g.current_colorscheme = next_cs
       vim.notify("Colorscheme: " .. next_cs, vim.log.levels.INFO)
     else

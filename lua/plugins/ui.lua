@@ -20,11 +20,54 @@ return {
     end,
   },
   -- その他の人気カラースキーム（必要に応じて切り替え可能）
-  { "catppuccin/nvim", name = "catppuccin", lazy = true },
-  { "rebelot/kanagawa.nvim", name = "kanagawa", lazy = true },
-  { "navarasu/onedark.nvim", name = "onedark", lazy = true },
-  { "sainnhe/gruvbox-material", name = "gruvbox-material", lazy = true },
-  { "morhetz/gruvbox", name = "gruvbox", lazy = true },
+  {
+    "catppuccin/nvim",
+    name = "catppuccin",
+    lazy = true,
+    config = function()
+      require("catppuccin").setup({
+        transparent_background = true,
+      })
+    end,
+  },
+  {
+    "rebelot/kanagawa.nvim",
+    name = "kanagawa",
+    lazy = true,
+    config = function()
+      require("kanagawa").setup({
+        transparent = true,
+      })
+    end,
+  },
+  {
+    "navarasu/onedark.nvim",
+    name = "onedark",
+    lazy = true,
+    config = function()
+      require("onedark").setup({
+        transparent = true,
+      })
+    end,
+  },
+  {
+    "sainnhe/gruvbox-material",
+    name = "gruvbox-material",
+    lazy = true,
+    config = function()
+      vim.g.gruvbox_material_enable_italic = 1
+      vim.g.gruvbox_material_transparent_background = 1
+    end,
+  },
+  {
+    "morhetz/gruvbox",
+    name = "gruvbox",
+    lazy = true,
+    config = function()
+      vim.g.gruvbox_italic = 1
+      vim.g.gruvbox_transparent_bg = 1
+    end,
+  },
   -- habamaxはNeovimに標準で含まれているため、プラグインとして追加不要
 
   -- ステータスライン
@@ -43,7 +86,16 @@ return {
   {
     "nvim-tree/nvim-tree.lua",
     config = function()
-      require("nvim-tree").setup()
+      require("nvim-tree").setup({
+        renderer = {
+          highlight_git = true,
+          icons = {
+            show = {
+              git = true,
+            },
+          },
+        },
+      })
       vim.keymap.set("n", "<leader>e", ":NvimTreeToggle<CR>")
     end,
   },
