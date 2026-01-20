@@ -21,10 +21,10 @@ return {
   },
   -- その他の人気カラースキーム（必要に応じて切り替え可能）
   { "catppuccin/nvim", name = "catppuccin", lazy = true },
-  { "rebelot/kanagawa.nvim", lazy = true },
-  { "navarasu/onedark.nvim", lazy = true },
-  { "sainnhe/gruvbox-material", lazy = true },
-  { "morhetz/gruvbox", lazy = true },
+  { "rebelot/kanagawa.nvim", name = "kanagawa", lazy = true },
+  { "navarasu/onedark.nvim", name = "onedark", lazy = true },
+  { "sainnhe/gruvbox-material", name = "gruvbox-material", lazy = true },
+  { "morhetz/gruvbox", name = "gruvbox", lazy = true },
   -- habamaxはNeovimに標準で含まれているため、プラグインとして追加不要
 
   -- ステータスライン

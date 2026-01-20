@@ -16,6 +16,33 @@ map("n", "<C-l>", "<C-w>l")
 
 map("i", "jk", "<Esc>", { noremap = true })
 
+-- 全選択機能（Leader+A）
+local function select_all()
+  local mode = vim.fn.mode()
+  if mode == "i" then
+    vim.cmd("stopinsert")
+  end
+  vim.cmd("normal! ggVG")
+end
+
+-- クリップボードにコピー（Leader+C）
+local function copy_to_clipboard()
+  local mode = vim.fn.mode()
+  if mode == "v" or mode == "V" or mode == "\22" then
+    -- ビジュアルモード: 選択範囲をコピー
+    vim.cmd('normal! "+y')
+  else
+    -- ノーマル/挿入モード: 現在の行をコピー
+    vim.cmd('normal! "+yy')
+  end
+end
+
+-- Leader+A: 全選択
+map({ "n", "i", "v" }, "<leader>a", select_all, { desc = "Select all" })
+
+-- Leader+C: クリップボードにコピー
+map({ "n", "i", "v" }, "<leader>c", copy_to_clipboard, { desc = "Copy to clipboard" })
+
 -- ターミナルモード用キーマップ
 map("t", "<Esc>", [[<C-\><C-n>]])
 map("t", "jk", [[<C-\><C-n>]])
@@ -42,7 +69,7 @@ end, { desc = "Setup all windows layout" })
 -- 終了（すべてのウィンドウを一度に閉じる）
 map("n", "<leader>q", ":qa<CR>", { desc = "Quit all" })
 
--- カラースキーム切り替え（デバッグ用）
+-- カラースキーム切り替え
 map("n", "<leader>cs", function()
   local colorschemes = {
     "tokyonight",
@@ -53,6 +80,16 @@ map("n", "<leader>cs", function()
     "gruvbox",
     "habamax",
   }
+  
+  -- lazyプラグイン名のマッピング
+  local plugin_map = {
+    catppuccin = "catppuccin",
+    kanagawa = "kanagawa",
+    onedark = "onedark",
+    ["gruvbox-material"] = "gruvbox-material",
+    gruvbox = "gruvbox",
+  }
+  
   local current = vim.g.colors_name or "tokyonight"
   local current_idx = 1
   for i, cs in ipairs(colorschemes) do
@@ -62,8 +99,23 @@ map("n", "<leader>cs", function()
     end
   end
   local next_idx = (current_idx % #colorschemes) + 1
-  vim.cmd.colorscheme(colorschemes[next_idx])
-  vim.notify("Colorscheme: " .. colorschemes[next_idx], vim.log.levels.INFO)
+  local next_cs = colorschemes[next_idx]
+  
+  -- lazyプラグインをロード（必要に応じて）
+  if plugin_map[next_cs] then
+    pcall(function()
+      require("lazy").load({ plugins = { plugin_map[next_cs] } })
+    end)
+    -- 少し待ってからカラースキームを適用
+    vim.defer_fn(function()
+      pcall(vim.cmd.colorscheme, next_cs)
+      vim.notify("Colorscheme: " .. next_cs, vim.log.levels.INFO)
+    end, 50)
+  else
+    -- ビルトインまたは既にロード済みのカラースキーム
+    pcall(vim.cmd.colorscheme, next_cs)
+    vim.notify("Colorscheme: " .. next_cs, vim.log.levels.INFO)
+  end
 end, { desc = "Switch colorscheme" })
 
 -- LSP関連のキーマップ
