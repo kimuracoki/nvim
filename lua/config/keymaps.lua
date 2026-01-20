@@ -39,3 +39,6 @@ vim.keymap.set("n", "<leader>ww", function()
   require("config.startup").setup_layout()
 end, { desc = "Setup all windows layout" })
 
+-- 終了（すべてのウィンドウを一度に閉じる）
+map("n", "<leader>q", ":qa<CR>", { desc = "Quit all" })
+
