@@ -38,10 +38,10 @@ local function copy_to_clipboard()
 end
 
 -- Leader+A: 全選択
-map({ "n", "i", "v" }, "<leader>a", select_all, { desc = "Select all" })
+map({ "n", "v" }, "<leader>a", select_all, { desc = "Select all" })
 
 -- Leader+C: クリップボードにコピー
-map({ "n", "i", "v" }, "<leader>c", copy_to_clipboard, { desc = "Copy to clipboard" })
+map({ "n", "v" }, "<leader>c", copy_to_clipboard, { desc = "Copy to clipboard" })
 
 -- ターミナルモード用キーマップ
 map("t", "<Esc>", [[<C-\><C-n>]])
