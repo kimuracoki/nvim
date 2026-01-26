@@ -110,7 +110,7 @@ return {
     "HiPhish/nvim-ts-rainbow2",
     dependencies = { "nvim-treesitter/nvim-treesitter" },
     config = function()
-      require("nvim-ts-rainbow").setup({})
+      -- nvim-ts-rainbow2は設定不要（treesitterの設定で有効化済み）
     end,
   },
 
@@ -149,6 +149,7 @@ return {
     dependencies = {
       "nvim-treesitter/nvim-treesitter",
       "MunifTanjim/nui.nvim",
+      "nvim-neotest/nvim-nio",
     },
     config = function()
       require("ufo").setup({
