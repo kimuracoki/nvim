@@ -173,20 +173,41 @@ end, { desc = "Show hover documentation" })
 map("n", "<leader>xd", function()
   -- 現在のバッファの診断を表示
   local diagnostics = vim.diagnostic.get(0)
-  if #diagnostics == 0 then
-    vim.notify("診断結果がありません", vim.log.levels.INFO)
-  else
-    vim.notify(string.format("診断結果: %d件", #diagnostics), vim.log.levels.INFO)
-    -- 診断結果を表示
-    for _, diag in ipairs(diagnostics) do
-      print(string.format("%s: %s", diag.severity, diag.message))
-    end
+  local workspace_diagnostics = vim.diagnostic.get()
+  
+  local buf_count = #diagnostics
+  local workspace_count = #workspace_diagnostics
+  
+  -- LSPクライアントの状態を確認
+  local clients = vim.lsp.get_active_clients({ bufnr = 0 })
+  local client_names = {}
+  for _, client in ipairs(clients) do
+    table.insert(client_names, client.name)
+  end
+  
+  local message = string.format(
+    "バッファ診断: %d件, ワークスペース診断: %d件\nLSPクライアント: %s",
+    buf_count,
+    workspace_count,
+    #client_names > 0 and table.concat(client_names, ", ") or "なし"
+  )
+  
+  vim.notify(message, vim.log.levels.INFO)
+  
+  if buf_count == 0 and workspace_count == 0 then
+    vim.notify("診断結果がありません。LSPサーバーが起動しているか確認してください。", vim.log.levels.WARN)
   end
 end, { desc = "Show diagnostics info" })
 
--- カーソル位置の診断を表示
-map("n", "<leader>xd", function()
-  require("lspsaga.diagnostic"):show_line_diagnostics()
+-- カーソル位置の診断を表示（lspsagaを使用）
+map("n", "<leader>xs", function()
+  local ok, saga = pcall(require, "lspsaga.diagnostic")
+  if ok then
+    saga.show_line_diagnostics()
+  else
+    -- lspsagaが利用できない場合は、標準の診断表示を使用
+    vim.diagnostic.open_float()
+  end
 end, { desc = "Show line diagnostics" })
 
 -- 次の/前の診断にジャンプ
