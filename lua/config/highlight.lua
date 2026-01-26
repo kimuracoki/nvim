@@ -1,4 +1,3 @@
-
 local M = {}
 
 function M.setup()
@@ -13,6 +12,14 @@ function M.setup()
   vim.api.nvim_set_hl(0, "NvimTreeNormalNC",     { bg = "none" })
   vim.api.nvim_set_hl(0, "NvimTreeEndOfBuffer", { bg = "none" })
   vim.api.nvim_set_hl(0, "NvimTreeWinSeparator", { bg = "none", fg = "none" })
+  
+  -- Trouble.nvimの透過
+  vim.api.nvim_set_hl(0, "TroubleNormal",   { bg = "none" })
+  vim.api.nvim_set_hl(0, "TroubleNormalNC", { bg = "none" })
+  
+  -- NormalFloatの透過（フローティングウィンドウ）
+  vim.api.nvim_set_hl(0, "NormalFloat", { bg = "none" })
+  vim.api.nvim_set_hl(0, "FloatBorder", { bg = "none" })
   
   -- その他の透過設定
   vim.api.nvim_set_hl(0, "StatusLine",   { bg = "none" })

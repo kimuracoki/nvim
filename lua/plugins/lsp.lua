@@ -43,6 +43,7 @@ return {
       open_no_results = true,
       win = {
         type = "split",
+        relative = "win",   -- 現在のウィンドウに対して相対的に開く
         position = "bottom",
         size = 10,
       },
