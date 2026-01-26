@@ -1,252 +1,84 @@
 local map = vim.keymap.set
 
--- 保存（Ctrl+SとCmd+Sの両方に対応）
-map("n", "<C-s>", ":w<CR>")
-map("i", "<C-s>", "<Esc>:w<CR>a")
--- macOSのCmd+Sで保存
-map("n", "<D-s>", ":w<CR>")
-map("i", "<D-s>", "<Esc>:w<CR>a")
+-- 保存
+map("n", "<C-s>", ":w<CR>", { desc = "Save" })
+map("i", "<C-s>", "<Esc>:w<CR>a", { desc = "Save" })
+map("n", "<D-s>", ":w<CR>", { desc = "Save (Cmd+S)" })
+map("i", "<D-s>", "<Esc>:w<CR>a", { desc = "Save (Cmd+S)" })
 
 -- バッファ移動
-map("n", "<leader>bn", ":bnext<CR>", { desc = "Next buffer" })
-map("n", "<leader>bp", ":bprevious<CR>", { desc = "Previous buffer" })
--- bufferline.nvimのタブ操作
 map("n", "<S-h>", ":BufferLineCyclePrev<CR>", { desc = "Previous buffer" })
 map("n", "<S-l>", ":BufferLineCycleNext<CR>", { desc = "Next buffer" })
 map("n", "<leader>bc", ":bdelete<CR>", { desc = "Close buffer" })
--- バッファ一覧表示（VSCodeのCmd+Shift+E相当）
 map("n", "<leader>bb", ":Telescope buffers<CR>", { desc = "List buffers" })
-map("n", "<D-S-e>", ":Telescope buffers<CR>", { desc = "List buffers (Cmd+Shift+E)" })
 
--- ウィンドウ移動（VSCode ぽく）
-map("n", "<C-h>", "<C-w>h")
-map("n", "<C-j>", "<C-w>j")
-map("n", "<C-k>", "<C-w>k")
-map("n", "<C-l>", "<C-w>l")
+-- ウィンドウ移動
+map("n", "<C-h>", "<C-w>h", { desc = "Move to left window" })
+map("n", "<C-j>", "<C-w>j", { desc = "Move to bottom window" })
+map("n", "<C-k>", "<C-w>k", { desc = "Move to top window" })
+map("n", "<C-l>", "<C-w>l", { desc = "Move to right window" })
 
+-- jkでノーマルモードに戻る
 map("i", "jk", "<Esc>", { noremap = true })
 
--- 全選択機能（Leader+A）
-local function select_all()
-  local mode = vim.fn.mode()
-  if mode == "i" then
-    vim.cmd("stopinsert")
-  end
-  vim.cmd("normal! ggVG")
-end
+-- 全選択
+map("n", "<leader>a", "ggVG", { desc = "Select all" })
+map("n", "<D-a>", "ggVG", { desc = "Select all (Cmd+A)" })
 
--- クリップボードにコピー（Leader+C）
-local function copy_to_clipboard()
-  local mode = vim.fn.mode()
-  if mode == "v" or mode == "V" or mode == "\22" then
-    -- ビジュアルモード: 選択範囲をコピー
-    vim.cmd('normal! "+y')
-  else
-    -- ノーマル/挿入モード: 現在の行をコピー
-    vim.cmd('normal! "+yy')
-  end
-end
+-- コピー・ペースト
+map("v", "<D-c>", '"+y', { desc = "Copy (Cmd+C)" })
+map({ "n", "i" }, "<D-v>", '"+p', { desc = "Paste (Cmd+V)" })
 
--- Leader+A: 全選択
-map({ "n", "v" }, "<leader>a", select_all, { desc = "Select all" })
--- macOSのCmd+Aで全選択
-map({ "n", "v", "i" }, "<D-a>", select_all, { desc = "Select all (Cmd+A)" })
+-- アンドゥ・リドゥ
+map("n", "<D-z>", "u", { desc = "Undo (Cmd+Z)" })
+map("n", "<D-S-z>", "<C-r>", { desc = "Redo (Cmd+Shift+Z)" })
 
--- Leader+C: クリップボードにコピー
-map({ "n", "v" }, "<leader>c", copy_to_clipboard, { desc = "Copy to clipboard" })
--- macOSのCmd+Cでコピー
-map({ "n", "v" }, "<D-c>", '"+y', { desc = "Copy to clipboard (Cmd+C)" })
-map("i", "<D-c>", "<Esc>\"+y", { desc = "Copy to clipboard (Cmd+C)" })
-
--- macOSのCmd+Vでペースト
-map({ "n", "i" }, "<D-v>", '"+p', { desc = "Paste from clipboard (Cmd+V)" })
-map("v", "<D-v>", '"+p', { desc = "Paste from clipboard (Cmd+V)" })
-
--- macOSのCmd+Xでカット
-map({ "n", "v" }, "<D-x>", '"+x', { desc = "Cut to clipboard (Cmd+X)" })
-map("i", "<D-x>", "<Esc>\"+x", { desc = "Cut to clipboard (Cmd+X)" })
-
--- macOSのCmd+Zでアンドゥ
-map({ "n", "i" }, "<D-z>", "u", { desc = "Undo (Cmd+Z)" })
-
--- macOSのCmd+Shift+Zでリドゥ
-map({ "n", "i" }, "<D-S-z>", "<C-r>", { desc = "Redo (Cmd+Shift+Z)" })
-
--- ターミナルモード用キーマップ
-map("t", "<Esc>", [[<C-\><C-n>]])
-map("t", "jk", [[<C-\><C-n>]])
-
--- ToggleTermを使用したターミナル管理
--- <C-\> でターミナルをトグル（toggleterm.nvimのデフォルト）
--- 追加のターミナルを開く
+-- ターミナル
+map("t", "<Esc>", [[<C-\><C-n>]], { desc = "Exit terminal mode" })
+map("t", "jk", [[<C-\><C-n>]], { desc = "Exit terminal mode" })
 map("n", "<leader>tt", function()
   require("toggleterm").toggle(1)
 end, { desc = "Toggle terminal" })
 
--- 右側にターミナルを開く
-map("n", "<leader>tv", function()
-  require("toggleterm").toggle(2, nil, nil, "vertical", nil, 40)
-end, { desc = "Open terminal (vertical)" })
-
--- Lazygitのキーマップはtoggleterm.nvimの設定で定義済み
-
--- すべての分割画面を開く（手動）
-vim.keymap.set("n", "<leader>ww", function()
+-- レイアウト
+map("n", "<leader>ww", function()
   require("config.startup").setup_layout()
-end, { desc = "Setup all windows layout" })
+end, { desc = "Setup layout" })
 
--- 終了（すべてのウィンドウを一度に閉じる）
+-- 終了
 map("n", "<leader>q", ":qa<CR>", { desc = "Quit all" })
 
--- カラースキーム切り替え
-map("n", "<leader>cs", function()
-  local colorschemes = {
-    "tokyonight",
-    "catppuccin",
-    "kanagawa",
-    "onedark",
-    "gruvbox-material",
-    "gruvbox",
-    "habamax",
-  }
-  
-  -- lazyプラグイン名のマッピング
-  local plugin_map = {
-    catppuccin = "catppuccin",
-    kanagawa = "kanagawa",
-    onedark = "onedark",
-    ["gruvbox-material"] = "gruvbox-material",
-    gruvbox = "gruvbox",
-  }
-  
-  -- 現在のカラースキーム名を取得（グローバル変数で追跡、なければvim.g.colors_nameを使用）
-  local current = vim.g.current_colorscheme or vim.g.colors_name or "tokyonight"
-  local current_idx = 1
-  for i, cs in ipairs(colorschemes) do
-    if cs == current then
-      current_idx = i
-      break
-    end
-  end
-  local next_idx = (current_idx % #colorschemes) + 1
-  local next_cs = colorschemes[next_idx]
-  
-  -- lazyプラグインをロード（必要に応じて）
-  if plugin_map[next_cs] then
-    pcall(function()
-      require("lazy").load({ plugins = { plugin_map[next_cs] } })
-    end)
-    -- 少し待ってからカラースキームを適用
-    vim.defer_fn(function()
-      local success, err = pcall(vim.cmd.colorscheme, next_cs)
-      if success then
-        vim.g.current_colorscheme = next_cs
-        -- 透過設定を再適用
-        require("config.highlight").setup()
-        vim.notify("Colorscheme: " .. next_cs, vim.log.levels.INFO)
-      else
-        vim.notify("Failed: " .. next_cs .. " - " .. tostring(err), vim.log.levels.ERROR)
-      end
-    end, 100)
-  else
-    -- ビルトインまたは既にロード済みのカラースキーム
-    local success, err = pcall(vim.cmd.colorscheme, next_cs)
-    if success then
-      vim.g.current_colorscheme = next_cs
-      -- 透過設定を再適用
-      require("config.highlight").setup()
-      vim.notify("Colorscheme: " .. next_cs, vim.log.levels.INFO)
-    else
-      vim.notify("Failed: " .. next_cs .. " - " .. tostring(err), vim.log.levels.ERROR)
-    end
-  end
-end, { desc = "Switch colorscheme" })
-
--- LSP関連のキーマップ
--- ホバーでツールチップ表示（VSCode風）
+-- LSP関連
 map("n", "K", function()
-  require("lspsaga.hover"):render_hover_doc()
-end, { desc = "Show hover documentation" })
+  vim.lsp.buf.hover()
+end, { desc = "Hover documentation" })
 
--- 診断はlsp.luaのTrouble.nvim設定で定義済み（<leader>xx, <leader>xw, <leader>xq, <leader>xl）
--- 診断の状態を確認するためのキーマップ
-map("n", "<leader>xd", function()
-  -- 現在のバッファの診断を表示
-  local diagnostics = vim.diagnostic.get(0)
-  local workspace_diagnostics = vim.diagnostic.get()
-  
-  local buf_count = #diagnostics
-  local workspace_count = #workspace_diagnostics
-  
-  -- LSPクライアントの状態を確認
-  local clients = vim.lsp.get_active_clients({ bufnr = 0 })
-  local client_names = {}
-  for _, client in ipairs(clients) do
-    table.insert(client_names, client.name)
-  end
-  
-  local message = string.format(
-    "バッファ診断: %d件, ワークスペース診断: %d件\nLSPクライアント: %s",
-    buf_count,
-    workspace_count,
-    #client_names > 0 and table.concat(client_names, ", ") or "なし"
-  )
-  
-  vim.notify(message, vim.log.levels.INFO)
-  
-  if buf_count == 0 and workspace_count == 0 then
-    vim.notify("診断結果がありません。LSPサーバーが起動しているか確認してください。", vim.log.levels.WARN)
-  end
-end, { desc = "Show diagnostics info" })
-
--- カーソル位置の診断を表示（lspsagaを使用）
-map("n", "<leader>xs", function()
-  local ok, saga = pcall(require, "lspsaga.diagnostic")
-  if ok then
-    saga.show_line_diagnostics()
-  else
-    -- lspsagaが利用できない場合は、標準の診断表示を使用
-    vim.diagnostic.open_float()
-  end
-end, { desc = "Show line diagnostics" })
-
--- 次の/前の診断にジャンプ
-map("n", "[d", function()
-  vim.diagnostic.goto_prev({ severity = vim.diagnostic.severity.ERROR })
-end, { desc = "Go to previous diagnostic" })
-map("n", "]d", function()
-  vim.diagnostic.goto_next({ severity = vim.diagnostic.severity.ERROR })
-end, { desc = "Go to next diagnostic" })
-
--- コードアクション（クイックフィックス）
-map({ "n", "v" }, "<leader>ca", function()
-  require("lspsaga.codeaction"):code_action()
-end, { desc = "Code action" })
-
--- 定義・参照を表示
 map("n", "gd", function()
-  require("lspsaga.definition"):peek_definition()
-end, { desc = "Peek definition" })
-map("n", "gD", function()
   vim.lsp.buf.definition()
 end, { desc = "Go to definition" })
+
 map("n", "gr", function()
-  require("lspsaga.references"):peek_references()
-end, { desc = "Peek references" })
+  vim.lsp.buf.references()
+end, { desc = "Find references" })
 
--- デバッグ・エラー確認用キーマップ
-map("n", "<leader>el", ":messages<CR>", { desc = "Show error messages" })
-map("n", "<leader>ec", function()
-  vim.cmd("checkhealth")
-end, { desc = "Check health" })
-map("n", "<leader>er", function()
-  local log_file = vim.fn.stdpath("log") .. "/nvim.log"
-  vim.cmd("edit " .. log_file)
-end, { desc = "Open Neovim log file" })
-map("n", "<leader>ed", function()
-  vim.cmd("Lazy debug")
-end, { desc = "Lazy.nvim debug" })
-map("n", "<leader>es", function()
-  vim.cmd("Lazy show")
-end, { desc = "Show Lazy.nvim status" })
+map("n", "<leader>ca", function()
+  vim.lsp.buf.code_action()
+end, { desc = "Code action" })
 
+-- 診断
+map("n", "<leader>xd", function()
+  vim.diagnostic.open_float()
+end, { desc = "Show diagnostics" })
+
+map("n", "[d", function()
+  vim.diagnostic.goto_prev()
+end, { desc = "Previous diagnostic" })
+
+map("n", "]d", function()
+  vim.diagnostic.goto_next()
+end, { desc = "Next diagnostic" })
+
+-- デバッグ用
+map("n", "<leader>el", ":messages<CR>", { desc = "Show messages" })
+map("n", "<leader>ec", ":checkhealth<CR>", { desc = "Check health" })
+map("n", "<leader>es", ":Lazy<CR>", { desc = "Lazy status" })
