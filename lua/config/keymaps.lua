@@ -78,6 +78,47 @@ map("n", "]d", function()
   vim.diagnostic.goto_next()
 end, { desc = "Next diagnostic" })
 
+-- カラースキーム切り替え
+local colorschemes = {
+  "tokyonight",
+  "catppuccin",
+  "kanagawa",
+  "onedark",
+  "gruvbox-material",
+  "gruvbox",
+  "habamax",
+}
+
+-- 現在のカラースキームのインデックスを取得
+local function get_current_colorscheme_index()
+  local current = vim.g.colors_name or "tokyonight"
+  for i, scheme in ipairs(colorschemes) do
+    if scheme == current then
+      return i
+    end
+  end
+  return 1  -- デフォルト
+end
+
+local current_colorscheme_index = get_current_colorscheme_index()
+
+map("n", "<leader>cs", function()
+  current_colorscheme_index = current_colorscheme_index + 1
+  if current_colorscheme_index > #colorschemes then
+    current_colorscheme_index = 1
+  end
+  local scheme = colorschemes[current_colorscheme_index]
+  vim.cmd.colorscheme(scheme)
+  vim.notify("Colorscheme: " .. scheme, vim.log.levels.INFO)
+end, { desc = "Cycle colorscheme" })
+
+-- カラースキーム変更時にインデックスを更新
+vim.api.nvim_create_autocmd("ColorScheme", {
+  callback = function()
+    current_colorscheme_index = get_current_colorscheme_index()
+  end,
+})
+
 -- デバッグ用
 map("n", "<leader>el", ":messages<CR>", { desc = "Show messages" })
 map("n", "<leader>ec", ":checkhealth<CR>", { desc = "Check health" })

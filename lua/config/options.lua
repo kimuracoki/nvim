@@ -21,3 +21,9 @@ opt.splitbelow = true  -- 下側に分割
 opt.clipboard = "unnamedplus"  -- システムクリップボードを使用
 opt.hidden = true  -- バッファを切り替えてもファイルを閉じない（複数ファイルを開くため）
 
+-- 折りたたみ設定（UFOが有効な場合は自動的に設定されるが、デフォルト値を設定）
+opt.foldenable = true  -- 折りたたみを有効化
+opt.foldlevel = 99  -- デフォルトで折りたたみを開く（99はほぼすべて開く）
+opt.foldlevelstart = 99  -- ファイルを開いたときに折りたたみを開く
+-- UFOが有効な場合は自動的にfoldmethodが設定されるため、ここでは設定しない
+

@@ -159,9 +159,24 @@ return {
         provider_selector = function(bufnr, filetype, buftype)
           return { "treesitter", "indent" }
         end,
+        -- 折りたたみを開く動作を改善
+        open_fold_hl_timeout = 400,
       })
       vim.keymap.set("n", "zR", require("ufo").openAllFolds)
       vim.keymap.set("n", "zM", require("ufo").closeAllFolds)
+      
+      -- ファイルを開いたときにすべての折りたたみを開く
+      vim.api.nvim_create_autocmd({ "BufReadPost", "BufEnter", "FileType" }, {
+        callback = function()
+          -- UFOが読み込まれるまで待つ
+          vim.defer_fn(function()
+            local ok, ufo = pcall(require, "ufo")
+            if ok and ufo then
+              ufo.openAllFolds()
+            end
+          end, 150)
+        end,
+      })
     end,
   },
 
