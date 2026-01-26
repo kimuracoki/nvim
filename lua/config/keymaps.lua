@@ -168,16 +168,21 @@ map("n", "K", function()
   require("lspsaga.hover"):render_hover_doc()
 end, { desc = "Show hover documentation" })
 
--- 診断をクイックフィックスで開く（VSCodeのProblemsパネル風）
-map("n", "<leader>xx", function()
-  require("trouble").toggle("document_diagnostics")
-end, { desc = "Toggle document diagnostics" })
-map("n", "<leader>xw", function()
-  require("trouble").toggle("workspace_diagnostics")
-end, { desc = "Toggle workspace diagnostics" })
-map("n", "<leader>xq", function()
-  require("trouble").toggle("quickfix")
-end, { desc = "Toggle quickfix list" })
+-- 診断はlsp.luaのTrouble.nvim設定で定義済み（<leader>xx, <leader>xw, <leader>xq, <leader>xl）
+-- 診断の状態を確認するためのキーマップ
+map("n", "<leader>xd", function()
+  -- 現在のバッファの診断を表示
+  local diagnostics = vim.diagnostic.get(0)
+  if #diagnostics == 0 then
+    vim.notify("診断結果がありません", vim.log.levels.INFO)
+  else
+    vim.notify(string.format("診断結果: %d件", #diagnostics), vim.log.levels.INFO)
+    -- 診断結果を表示
+    for _, diag in ipairs(diagnostics) do
+      print(string.format("%s: %s", diag.severity, diag.message))
+    end
+  end
+end, { desc = "Show diagnostics info" })
 
 -- カーソル位置の診断を表示
 map("n", "<leader>xd", function()

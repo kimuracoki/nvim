@@ -85,25 +85,41 @@ return {
   {
     "folke/trouble.nvim",
     dependencies = { "nvim-tree/nvim-web-devicons" },
-    config = function()
-      require("trouble").setup({
-        auto_open = false,
-        auto_close = false,
-        auto_preview = true,
-        auto_fold = false,
-        auto_jump = { "lsp_definitions" },
-        position = "right", -- 右側に表示（VSCodeのProblemsパネル風）
-        height = 10,
-        width = 50,
-        signs = {
-          error = "󰅚",
-          warning = "󰀪",
-          hint = "󰌶",
-          information = "󰋼",
-          other = "󰄬",
+    cmd = "Trouble",
+    opts = {
+      auto_close = false,
+      auto_open = false,
+      auto_preview = true,
+      auto_refresh = true,
+      focus = false,
+      open_no_results = true, -- 結果がなくてもウィンドウを開く
+      -- ウィンドウ設定（下部に分割表示）
+      win = {
+        type = "split",
+        position = "bottom",
+        size = 10,
+      },
+      -- 各モードごとの設定（明示的に設定）
+      modes = {
+        diagnostics = {
+          win = {
+            type = "split",
+            position = "bottom",
+            size = 10,
+          },
+          -- 診断結果を確実に表示するための設定
+          filter = {},
+          -- すべての重要度の診断を表示
+          severity = nil, -- nil = すべて表示
         },
-      })
-    end,
+      },
+    },
+    keys = {
+      { "<leader>xx", "<cmd>Trouble diagnostics toggle filter.buf=0 win.type=split win.position=bottom<cr>", desc = "Buffer Diagnostics (Trouble)" },
+      { "<leader>xw", "<cmd>Trouble diagnostics toggle win.type=split win.position=bottom<cr>", desc = "Workspace Diagnostics (Trouble)" },
+      { "<leader>xq", "<cmd>Trouble qflist toggle win.type=split win.position=bottom<cr>", desc = "Quickfix List (Trouble)" },
+      { "<leader>xl", "<cmd>Trouble loclist toggle win.type=split win.position=bottom<cr>", desc = "Location List (Trouble)" },
+    },
   },
 
   ---------------------------------------------------------------------------
@@ -236,7 +252,15 @@ return {
           spacing = 4,
           prefix = "●",
         },
-        signs = true, -- 左側に診断アイコンを表示
+        -- 診断アイコンの設定（新しい方法）
+        signs = {
+          text = {
+            [vim.diagnostic.severity.ERROR] = "󰅚",
+            [vim.diagnostic.severity.WARN] = "󰀪",
+            [vim.diagnostic.severity.HINT] = "󰌶",
+            [vim.diagnostic.severity.INFO] = "󰋼",
+          },
+        },
         underline = true, -- 波線を表示
         update_in_insert = false,
         severity_sort = true,
@@ -247,21 +271,6 @@ return {
           prefix = "",
         },
       })
-
-      -- 診断アイコンの設定
-      local signs = {
-        { name = "DiagnosticSignError", text = "󰅚" },
-        { name = "DiagnosticSignWarn", text = "󰀪" },
-        { name = "DiagnosticSignHint", text = "󰌶" },
-        { name = "DiagnosticSignInfo", text = "󰋼" },
-      }
-      for _, sign in ipairs(signs) do
-        vim.fn.sign_define(sign.name, {
-          texthl = sign.name,
-          text = sign.text,
-          numhl = "",
-        })
-      end
 
     end,
   },

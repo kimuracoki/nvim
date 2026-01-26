@@ -9,12 +9,20 @@ function M.setup_layout()
       vim.cmd("wincmd l") -- 右に移動（エディタエリアへ）
     end
     
-    -- 右側に問題パネルを開く（VSCodeのProblemsパネル風）
+    -- 下部に問題パネルを開く（VSCodeのProblemsパネル風）
     vim.defer_fn(function()
-      if vim.fn.exists(":TroubleToggle") == 2 then
-        require("trouble").open("workspace_diagnostics")
+      local ok, trouble = pcall(require, "trouble")
+      if ok then
+        trouble.open({
+          mode = "diagnostics",
+          win = {
+            type = "split",
+            position = "bottom",
+            size = 10,
+          },
+        })
       end
-    end, 200)
+    end, 500)
   end, 100)
 end
 
