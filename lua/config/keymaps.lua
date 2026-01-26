@@ -8,12 +8,15 @@ map("n", "<D-s>", ":w<CR>")
 map("i", "<D-s>", "<Esc>:w<CR>a")
 
 -- バッファ移動
-map("n", "<leader>bn", ":bnext<CR>")
-map("n", "<leader>bp", ":bprevious<CR>")
+map("n", "<leader>bn", ":bnext<CR>", { desc = "Next buffer" })
+map("n", "<leader>bp", ":bprevious<CR>", { desc = "Previous buffer" })
 -- bufferline.nvimのタブ操作
 map("n", "<S-h>", ":BufferLineCyclePrev<CR>", { desc = "Previous buffer" })
 map("n", "<S-l>", ":BufferLineCycleNext<CR>", { desc = "Next buffer" })
 map("n", "<leader>bc", ":bdelete<CR>", { desc = "Close buffer" })
+-- バッファ一覧表示（VSCodeのCmd+Shift+E相当）
+map("n", "<leader>bb", ":Telescope buffers<CR>", { desc = "List buffers" })
+map("n", "<D-S-e>", ":Telescope buffers<CR>", { desc = "List buffers (Cmd+Shift+E)" })
 
 -- ウィンドウ移動（VSCode ぽく）
 map("n", "<C-h>", "<C-w>h")
@@ -204,4 +207,20 @@ end, { desc = "Go to definition" })
 map("n", "gr", function()
   require("lspsaga.references"):peek_references()
 end, { desc = "Peek references" })
+
+-- デバッグ・エラー確認用キーマップ
+map("n", "<leader>el", ":messages<CR>", { desc = "Show error messages" })
+map("n", "<leader>ec", function()
+  vim.cmd("checkhealth")
+end, { desc = "Check health" })
+map("n", "<leader>er", function()
+  local log_file = vim.fn.stdpath("log") .. "/nvim.log"
+  vim.cmd("edit " .. log_file)
+end, { desc = "Open Neovim log file" })
+map("n", "<leader>ed", function()
+  vim.cmd("Lazy debug")
+end, { desc = "Lazy.nvim debug" })
+map("n", "<leader>es", function()
+  vim.cmd("Lazy show")
+end, { desc = "Show Lazy.nvim status" })
 

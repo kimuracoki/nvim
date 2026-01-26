@@ -112,7 +112,7 @@ return {
     config = function()
       require("bufferline").setup({
         options = {
-          mode = "tabs",
+          mode = "buffers", -- "buffers"に変更（タブではなくバッファとして表示）
           separator_style = "thin",
           always_show_bufferline = true,
           show_buffer_close_icons = true,
@@ -136,6 +136,16 @@ return {
               text = "File Explorer",
               text_align = "left",
             },
+            {
+              filetype = "Trouble",
+              text = "Problems",
+              text_align = "left",
+            },
+            {
+              filetype = "aerial",
+              text = "Outline",
+              text_align = "left",
+            },
           },
           color_icons = true,
           show_buffer_icons = true,
@@ -143,6 +153,12 @@ return {
           persist_buffer_sort = true,
           enforce_regular_tabs = false,
           sort_by = "insert_after_current",
+          -- マウス操作を有効化
+          hover = {
+            enabled = true,
+            delay = 200,
+            reveal = { "close" },
+          },
         },
         highlights = {
           buffer_selected = {
@@ -191,8 +207,9 @@ return {
       local builtin = require("telescope.builtin")
       local map = vim.keymap.set
       
-      -- ファイル検索
+      -- ファイル検索（VSCodeのCmd+P相当）
       map("n", "<leader>p", builtin.find_files, { desc = "Find files" })
+      map("n", "<D-p>", builtin.find_files, { desc = "Find files (Cmd+P)" })
       -- グローバル検索
       map("n", "<leader>sg", builtin.live_grep, { desc = "Live grep" })
       -- コマンドパレット（VSCodeのCmd+Shift+P相当）
@@ -207,6 +224,9 @@ return {
       -- シンボル検索（VSCodeのCmd+Shift+O相当）
       map("n", "<leader>so", builtin.lsp_document_symbols, { desc = "Document symbols" })
       map("n", "<D-S-o>", builtin.lsp_document_symbols, { desc = "Document symbols (Cmd+Shift+O)" })
+      -- バッファ一覧
+      map("n", "<leader>bb", builtin.buffers, { desc = "List buffers" })
+      map("n", "<D-S-e>", builtin.buffers, { desc = "List buffers (Cmd+Shift+E)" })
     end,
   },
 

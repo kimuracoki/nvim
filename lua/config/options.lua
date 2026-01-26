@@ -19,4 +19,5 @@ opt.cursorcolumn = true
 opt.splitright = true  -- 右側に分割
 opt.splitbelow = true  -- 下側に分割
 opt.clipboard = "unnamedplus"  -- システムクリップボードを使用
+opt.hidden = true  -- バッファを切り替えてもファイルを閉じない（複数ファイルを開くため）
 
