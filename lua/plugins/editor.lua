@@ -149,7 +149,10 @@ return {
     dependencies = {
       "nvim-treesitter/nvim-treesitter",
       "MunifTanjim/nui.nvim",
-      "nvim-neotest/nvim-nio",
+      {
+        "kevinhwang91/promise-async",
+        version = "^1.0.0",
+      },
     },
     config = function()
       require("ufo").setup({
