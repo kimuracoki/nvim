@@ -92,6 +92,9 @@ return {
         auto_preview = true,
         auto_fold = false,
         auto_jump = { "lsp_definitions" },
+        position = "right", -- 右側に表示（VSCodeのProblemsパネル風）
+        height = 10,
+        width = 50,
         signs = {
           error = "󰅚",
           warning = "󰀪",
@@ -260,6 +263,78 @@ return {
         })
       end
 
+    end,
+  },
+
+  ---------------------------------------------------------------------------
+  -- デバッガー統合（VSCodeのデバッガー相当）
+  ---------------------------------------------------------------------------
+  {
+    "mfussenegger/nvim-dap",
+    config = function()
+      local dap = require("dap")
+      -- Python用のデバッグ設定
+      dap.adapters.python = {
+        type = "executable",
+        command = "python",
+        args = { "-m", "debugpy.adapter" },
+      }
+      dap.configurations.python = {
+        {
+          type = "python",
+          request = "launch",
+          name = "Launch file",
+          program = "${file}",
+          pythonPath = function()
+            return "/usr/bin/python3"
+          end,
+        },
+      }
+      -- Node.js用のデバッグ設定
+      dap.adapters.node = {
+        type = "executable",
+        command = "node",
+        args = { vim.fn.stdpath("data") .. "/mason/packages/js-debug-adapter/js-debug/src/dapDebugServer.js" },
+      }
+      dap.configurations.javascript = {
+        {
+          type = "node",
+          request = "launch",
+          name = "Launch file",
+          program = "${file}",
+          cwd = vim.fn.getcwd(),
+          sourceMaps = true,
+          console = "integratedTerminal",
+        },
+      }
+      dap.configurations.typescript = dap.configurations.javascript
+    end,
+  },
+  {
+    "rcarriga/nvim-dap-ui",
+    dependencies = { "mfussenegger/nvim-dap" },
+    config = function()
+      require("dapui").setup()
+      local dap = require("dap")
+      local dapui = require("dapui")
+      dap.listeners.after.event_initialized["dapui_config"] = function()
+        dapui.open()
+      end
+      dap.listeners.before.event_terminated["dapui_config"] = function()
+        dapui.close()
+      end
+      dap.listeners.before.event_exited["dapui_config"] = function()
+        dapui.close()
+      end
+      -- デバッガーのキーマップ
+      vim.keymap.set("n", "<F5>", dap.continue, { desc = "Debug: Start/Continue" })
+      vim.keymap.set("n", "<F1>", dap.step_into, { desc = "Debug: Step Into" })
+      vim.keymap.set("n", "<F2>", dap.step_over, { desc = "Debug: Step Over" })
+      vim.keymap.set("n", "<F3>", dap.step_out, { desc = "Debug: Step Out" })
+      vim.keymap.set("n", "<leader>b", dap.toggle_breakpoint, { desc = "Debug: Toggle Breakpoint" })
+      vim.keymap.set("n", "<leader>B", function()
+        dap.set_breakpoint(vim.fn.input("Breakpoint condition: "))
+      end, { desc = "Debug: Set Breakpoint" })
     end,
   },
 }

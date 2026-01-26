@@ -17,3 +17,14 @@ vim.api.nvim_create_autocmd("VimEnter", {
     startup.setup_layout()
   end,
 })
+
+-- 自動保存（フォーカスが外れたときに自動保存）
+local autosave_group = vim.api.nvim_create_augroup("AutoSave", { clear = true })
+vim.api.nvim_create_autocmd("FocusLost", {
+  group = autosave_group,
+  callback = function()
+    if vim.bo.modified and not vim.bo.readonly and vim.fn.expand("%") ~= "" then
+      vim.cmd("silent! write")
+    end
+  end,
+})

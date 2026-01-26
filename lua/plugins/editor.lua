@@ -50,6 +50,12 @@ return {
             node_decremental = "grm",
           },
         },
+        -- ブラケットペアのハイライト（rainbow2と連携）
+        rainbow = {
+          enable = true,
+          extended_mode = true,
+          max_file_lines = nil,
+        },
       })
     end,
   },
@@ -81,4 +87,78 @@ return {
       })
     end,
   },
+
+  -- インデントガイドの視覚化
+  {
+    "lukas-reineke/indent-blankline.nvim",
+    main = "ibl",
+    config = function()
+      require("ibl").setup({
+        indent = {
+          char = "│",
+        },
+        scope = {
+          enabled = true,
+          show_start = true,
+        },
+      })
+    end,
+  },
+
+  -- ブラケットペアのハイライト
+  {
+    "HiPhish/nvim-ts-rainbow2",
+    dependencies = { "nvim-treesitter/nvim-treesitter" },
+    config = function()
+      require("nvim-ts-rainbow").setup({})
+    end,
+  },
+
+  -- フォーマッター統合
+  {
+    "stevearc/conform.nvim",
+    config = function()
+      require("conform").setup({
+        formatters_by_ft = {
+          lua = { "stylua" },
+          javascript = { "prettier" },
+          typescript = { "prettier" },
+          javascriptreact = { "prettier" },
+          typescriptreact = { "prettier" },
+          json = { "prettier" },
+          yaml = { "prettier" },
+          markdown = { "prettier" },
+          html = { "prettier" },
+          css = { "prettier" },
+          scss = { "prettier" },
+          python = { "black", "isort" },
+          rust = { "rustfmt" },
+          go = { "gofmt", "goimports" },
+        },
+        format_on_save = {
+          timeout_ms = 500,
+          lsp_fallback = true,
+        },
+      })
+    end,
+  },
+
+  -- コード折りたたみ
+  {
+    "kevinhwang91/nvim-ufo",
+    dependencies = {
+      "nvim-treesitter/nvim-treesitter",
+      "MunifTanjim/nui.nvim",
+    },
+    config = function()
+      require("ufo").setup({
+        provider_selector = function(bufnr, filetype, buftype)
+          return { "treesitter", "indent" }
+        end,
+      })
+      vim.keymap.set("n", "zR", require("ufo").openAllFolds)
+      vim.keymap.set("n", "zM", require("ufo").closeAllFolds)
+    end,
+  },
+
 }

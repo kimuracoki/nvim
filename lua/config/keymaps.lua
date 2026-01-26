@@ -1,12 +1,19 @@
 local map = vim.keymap.set
 
--- 保存
+-- 保存（Ctrl+SとCmd+Sの両方に対応）
 map("n", "<C-s>", ":w<CR>")
 map("i", "<C-s>", "<Esc>:w<CR>a")
+-- macOSのCmd+Sで保存
+map("n", "<D-s>", ":w<CR>")
+map("i", "<D-s>", "<Esc>:w<CR>a")
 
 -- バッファ移動
 map("n", "<leader>bn", ":bnext<CR>")
 map("n", "<leader>bp", ":bprevious<CR>")
+-- bufferline.nvimのタブ操作
+map("n", "<S-h>", ":BufferLineCyclePrev<CR>", { desc = "Previous buffer" })
+map("n", "<S-l>", ":BufferLineCycleNext<CR>", { desc = "Next buffer" })
+map("n", "<leader>bc", ":bdelete<CR>", { desc = "Close buffer" })
 
 -- ウィンドウ移動（VSCode ぽく）
 map("n", "<C-h>", "<C-w>h")
@@ -39,9 +46,28 @@ end
 
 -- Leader+A: 全選択
 map({ "n", "v" }, "<leader>a", select_all, { desc = "Select all" })
+-- macOSのCmd+Aで全選択
+map({ "n", "v", "i" }, "<D-a>", select_all, { desc = "Select all (Cmd+A)" })
 
 -- Leader+C: クリップボードにコピー
 map({ "n", "v" }, "<leader>c", copy_to_clipboard, { desc = "Copy to clipboard" })
+-- macOSのCmd+Cでコピー
+map({ "n", "v" }, "<D-c>", '"+y', { desc = "Copy to clipboard (Cmd+C)" })
+map("i", "<D-c>", "<Esc>\"+y", { desc = "Copy to clipboard (Cmd+C)" })
+
+-- macOSのCmd+Vでペースト
+map({ "n", "i" }, "<D-v>", '"+p', { desc = "Paste from clipboard (Cmd+V)" })
+map("v", "<D-v>", '"+p', { desc = "Paste from clipboard (Cmd+V)" })
+
+-- macOSのCmd+Xでカット
+map({ "n", "v" }, "<D-x>", '"+x', { desc = "Cut to clipboard (Cmd+X)" })
+map("i", "<D-x>", "<Esc>\"+x", { desc = "Cut to clipboard (Cmd+X)" })
+
+-- macOSのCmd+Zでアンドゥ
+map({ "n", "i" }, "<D-z>", "u", { desc = "Undo (Cmd+Z)" })
+
+-- macOSのCmd+Shift+Zでリドゥ
+map({ "n", "i" }, "<D-S-z>", "<C-r>", { desc = "Redo (Cmd+Shift+Z)" })
 
 -- ターミナルモード用キーマップ
 map("t", "<Esc>", [[<C-\><C-n>]])
