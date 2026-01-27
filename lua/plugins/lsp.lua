@@ -58,9 +58,9 @@ return {
       },
     },
     keys = {
-      { "<leader>xx", "<cmd>Trouble diagnostics toggle filter.buf=0<cr>", desc = "Buffer Diagnostics" },
-      { "<leader>xw", "<cmd>Trouble diagnostics toggle<cr>", desc = "Workspace Diagnostics" },
-      { "<leader>xq", "<cmd>Trouble qflist toggle<cr>", desc = "Quickfix List" },
+      { "<leader>xx", "<cmd>Trouble diagnostics toggle filter.buf=0<cr>", desc = "Diagnostics: Buffer" },
+      { "<leader>xw", "<cmd>Trouble diagnostics toggle<cr>", desc = "Diagnostics: Workspace" },
+      { "<leader>xq", "<cmd>Trouble qflist toggle<cr>", desc = "Diagnostics: Quickfix list" },
     },
   },
 
@@ -352,7 +352,7 @@ return {
         dapui.close()
       end
       vim.keymap.set("n", "<F5>", dap.continue, { desc = "Debug: Start/Continue" })
-      vim.keymap.set("n", "<leader>b", dap.toggle_breakpoint, { desc = "Debug: Toggle Breakpoint" })
+      vim.keymap.set("n", "<leader>db", dap.toggle_breakpoint, { desc = "Debug: Breakpoint toggle" })
     end,
   },
 

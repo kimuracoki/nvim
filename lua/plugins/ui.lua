@@ -273,7 +273,7 @@ return {
           },
         },
       })
-      vim.keymap.set("n", "<leader>e", ":NvimTreeToggle<CR>")
+      vim.keymap.set("n", "<leader>e", ":NvimTreeToggle<CR>", { desc = "Explorer: Toggle" })
     end,
   },
 
@@ -285,26 +285,26 @@ return {
       local builtin = require("telescope.builtin")
       local map = vim.keymap.set
       
-      -- ファイル検索
-      map("n", "<leader>p", builtin.find_files, { desc = "Find files" })
-      map("n", "<C-p>", builtin.find_files, { desc = "Find files" })
-      -- グローバル検索
-      map("n", "<leader>sg", builtin.live_grep, { desc = "Live grep" })
-      -- コマンドパレット
-      map("n", "<leader>pc", builtin.commands, { desc = "Command palette" })
-      map("n", "<C-S-p>", builtin.commands, { desc = "Command palette" })
-      -- 最近開いたファイル
-      map("n", "<leader>fr", builtin.oldfiles, { desc = "Recent files" })
-      map("n", "<C-t>", builtin.oldfiles, { desc = "Recent files" })
-      -- ファイル内検索
-      map("n", "<leader>f", builtin.current_buffer_fuzzy_find, { desc = "Find in file" })
-      map("n", "<C-f>", builtin.current_buffer_fuzzy_find, { desc = "Find in file" })
-      -- シンボル検索
-      map("n", "<leader>so", builtin.lsp_document_symbols, { desc = "Document symbols" })
-      map("n", "<C-S-o>", builtin.lsp_document_symbols, { desc = "Document symbols" })
-      -- バッファ一覧
-      map("n", "<leader>bb", builtin.buffers, { desc = "List buffers" })
-      map("n", "<C-S-e>", builtin.buffers, { desc = "List buffers" })
+      -- ファイル検索（Picker: files）
+      map("n", "<leader>pf", builtin.find_files, { desc = "Picker: Files" })
+      map("n", "<C-p>", builtin.find_files, { desc = "Picker: Files" })
+      -- グローバル検索（Search: grep）
+      map("n", "<leader>sg", builtin.live_grep, { desc = "Search: Grep (workspace)" })
+      -- コマンドパレット（Picker: commands）
+      map("n", "<leader>pc", builtin.commands, { desc = "Picker: Commands" })
+      map("n", "<C-S-p>", builtin.commands, { desc = "Picker: Commands" })
+      -- 最近開いたファイル（File: recent）
+      map("n", "<leader>fr", builtin.oldfiles, { desc = "File: Recent" })
+      map("n", "<C-t>", builtin.oldfiles, { desc = "File: Recent" })
+      -- ファイル内検索（Find: in file）
+      map("n", "<leader>ff", builtin.current_buffer_fuzzy_find, { desc = "Find: In current file" })
+      map("n", "<C-f>", builtin.current_buffer_fuzzy_find, { desc = "Find: In current file" })
+      -- シンボル検索（Find: Symbols）
+      map("n", "<leader>fs", builtin.lsp_document_symbols, { desc = "Find: Symbols in file" })
+      map("n", "<C-S-o>", builtin.lsp_document_symbols, { desc = "Find: Symbols in file" })
+      -- バッファ一覧（Buffer: list）
+      map("n", "<leader>bl", builtin.buffers, { desc = "Buffer: List" })
+      map("n", "<C-S-e>", builtin.buffers, { desc = "Buffer: List" })
     end,
   },
 
@@ -343,7 +343,7 @@ return {
           min_height = { 8, 0.1 },
         },
       })
-      vim.keymap.set("n", "<leader>o", "<cmd>AerialToggle<CR>", { desc = "Toggle symbol outline" })
+      vim.keymap.set("n", "<leader>o", "<cmd>AerialToggle<CR>", { desc = "Outline: Toggle symbols" })
     end,
   },
 
@@ -549,7 +549,7 @@ return {
         z_index = 1,
         window_border = "single",
       })
-      vim.keymap.set("n", "<leader>mm", codewindow.toggle_minimap, { desc = "Toggle minimap" })
+      vim.keymap.set("n", "<leader>um", codewindow.toggle_minimap, { desc = "UI: Minimap toggle" })
     end,
   },
 

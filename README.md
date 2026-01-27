@@ -2,22 +2,53 @@
 
 このNeovim設定は、VSCodeのような操作感を実現するために最適化されています。
 
+## キーマップの設計思想
+
+キーマップは**覚えやすさ**を重視し、論理的なカテゴリ分けをしています。
+
+| プレフィックス | カテゴリ | 由来 |
+|--------------|---------|------|
+| `<leader>a` | All（全選択） | **A**ll |
+| `<leader>b` | Buffer操作 | **B**uffer |
+| `<leader>c` | Code操作（LSP） | **C**ode |
+| `<leader>d` | Debug操作 | **D**ebug |
+| `<leader>e` | Explorer（ファイルツリー） | **E**xplorer |
+| `<leader>f` | Find/File操作 | **F**ind / **F**ile |
+| `<leader>g` | Git操作 | **G**it |
+| `<leader>h` | Help/Health（診断・ログ） | **H**elp |
+| `<leader>i` | Intelligence/AI（Claude Code） | **I**ntelligence |
+| `<leader>l` | Lazy（プラグイン管理） | **L**azy |
+| `<leader>o` | Outline（シンボル） | **O**utline |
+| `<leader>p` | Picker（検索・選択） | **P**icker (VSCode Ctrl+P) |
+| `<leader>q` | Quit（終了） | **Q**uit |
+| `<leader>r` | Run（コード実行） | **R**un |
+| `<leader>s` | Search（グローバル検索） | **S**earch |
+| `<leader>t` | Terminal | **T**erminal |
+| `<leader>u` | UI（テーマ・外観） | **U**I |
+| `<leader>w` | Window（ウィンドウ操作） | **W**indow |
+| `<leader>x` | Diagnostics（問題・診断） | e**X**amine / fi**X** |
+
 ## 目次
 
 - [基本操作](#基本操作)
-- [macOSのCmdキー対応](#macosのcmdキー対応)
-- [ファイル操作](#ファイル操作)
-- [バッファ・タブ操作](#バッファタブ操作)
-- [ウィンドウ操作](#ウィンドウ操作)
-- [テキスト操作](#テキスト操作)
-- [検索・ナビゲーション](#検索ナビゲーション)
-- [LSP機能](#lsp機能)
-- [Git操作](#git操作)
-- [ターミナル](#ターミナル)
-- [コード実行](#コード実行)
-- [デバッグ機能](#デバッグ機能)
-- [エラーデバッグ](#エラーデバッグ)
-- [その他](#その他)
+- [VSCodeショートカット](#vscodeショートカット)
+- [Buffer操作](#buffer操作-leaderb)
+- [Explorer](#explorer-leadere)
+- [Find/File操作](#findfile操作-leaderf)
+- [Picker](#picker-leaderp)
+- [Search](#search-leaders)
+- [Outline](#outline-leadero)
+- [Code操作](#code操作-leaderc)
+- [Diagnostics](#diagnostics-leaderx)
+- [Git操作](#git操作-leaderg)
+- [Terminal](#terminal-leadert)
+- [Run（コード実行）](#run-leaderr)
+- [Debug](#debug-leaderd)
+- [Help/Health](#helphealth-leaderh)
+- [Lazy（プラグイン管理）](#lazy-leaderl)
+- [UI](#ui-leaderu)
+- [AI（Claude Code）](#ai-leaderi)
+- [Window](#window-leaderw)
 
 ## 基本操作
 
@@ -26,234 +57,235 @@
 - 自動保存: フォーカスが外れたときに自動保存
 
 ### 終了
-- `<leader>q`: すべてのウィンドウを閉じて終了
+- `<leader>q`: すべてのウィンドウを閉じて終了（**Q**uit）
 
 ### モード切り替え
 - `jk`: 挿入モードからノーマルモードに戻る（Escの代わり）
 
-## キーボードショートカット
+### 全選択
+- `<leader>a`: 全選択（**A**ll）
+- `<C-a>` (Ctrl+A): 全選択
+
+## VSCodeショートカット
 
 VSCode風のショートカットキー（Ctrlキー）：
 
-- `<C-s>` (Ctrl+S): 保存
-- `<C-a>` (Ctrl+A): 全選択
-- `<C-c>` (Ctrl+C): コピー（ビジュアルモード）
-- `<C-v>` (Ctrl+V): ペースト
-- `<C-z>` (Ctrl+Z): アンドゥ
-- `<C-S-z>` (Ctrl+Shift+Z): リドゥ
-- `<C-p>` (Ctrl+P): ファイル検索
-- `<C-f>` (Ctrl+F): ファイル内検索
-- `<C-t>` (Ctrl+T): 最近開いたファイル
-- `<C-S-p>` (Ctrl+Shift+P): コマンドパレット
-- `<C-S-o>` (Ctrl+Shift+O): シンボル検索
-- `<C-S-e>` (Ctrl+Shift+E): バッファ一覧
+| キー | 機能 |
+|------|------|
+| `<C-s>` | 保存 |
+| `<C-a>` | 全選択 |
+| `<C-c>` | コピー（ビジュアルモード） |
+| `<C-v>` | ペースト |
+| `<C-z>` | アンドゥ |
+| `<C-S-z>` | リドゥ |
+| `<C-p>` | ファイル検索 |
+| `<C-f>` | ファイル内検索 |
+| `<C-t>` | 最近開いたファイル |
+| `<C-S-p>` | コマンドパレット |
+| `<C-S-o>` | シンボル検索 |
+| `<C-S-e>` | バッファ一覧 |
+| `<C-h/j/k/l>` | ウィンドウ移動 |
 
-## ファイル操作
+## Buffer操作 (`<leader>b`)
 
-### ファイル検索・開く
-- `<leader>p` または `<C-p>` (Ctrl+P): ファイル検索（Telescope）
-- `<leader>fr` または `<C-t>` (Ctrl+T): 最近開いたファイル
-- `<leader>e`: ファイルエクスプローラー（nvim-tree）をトグル
+Buffer = バッファ（開いているファイル）
 
-### ファイル内検索
-- `<leader>f` または `<C-f>` (Ctrl+F): ファイル内検索（Telescope）
+| キー | 機能 | 由来 |
+|------|------|------|
+| `<S-h>` | 前のバッファ | 左（←）|
+| `<S-l>` | 次のバッファ | 右（→）|
+| `<leader>bc` | バッファを閉じる | Buffer **C**lose |
+| `<leader>bl` | バッファ一覧 | Buffer **L**ist |
 
-### グローバル検索
-- `<leader>sg`: ワークスペース全体を検索（Telescope live_grep）
+## Explorer (`<leader>e`)
 
-## バッファ・タブ操作
+Explorer = ファイルエクスプローラー
 
-### バッファ切り替え
-- `<S-h>`: 前のバッファに移動（Shift+H）
-- `<S-l>`: 次のバッファに移動（Shift+L）
-- `<leader>bn`: 次のバッファに移動
-- `<leader>bp`: 前のバッファに移動
-- `<leader>bb` または `<C-S-e>` (Ctrl+Shift+E): バッファ一覧を表示
-- `<leader>bc`: 現在のバッファを閉じる
+| キー | 機能 | 由来 |
+|------|------|------|
+| `<leader>e` | ファイルツリーをトグル | **E**xplorer |
 
-### タブ表示
-- ファイルタブは上部に表示されます（bufferline.nvim）
-- 未保存のファイルには●マークが表示されます
-- タブをクリックしてバッファを切り替え可能
+## Find/File操作 (`<leader>f`)
 
-## ウィンドウ操作
+Find = 検索、File = ファイル
 
-VSCode風のウィンドウ移動（ノーマルモード）:
-- `<C-h>`: 左のウィンドウに移動
-- `<C-j>`: 下のウィンドウに移動
-- `<C-k>`: 上のウィンドウに移動
-- `<C-l>`: 右のウィンドウに移動
+| キー | 機能 | 由来 |
+|------|------|------|
+| `<leader>ff` | ファイル内検索 | **F**ind in **F**ile |
+| `<leader>fr` | 最近開いたファイル | **F**ile **R**ecent |
+| `<leader>fs` | シンボル検索 | **F**ind **S**ymbols |
 
-### レイアウト
-- `<leader>ww`: すべての分割画面を開く（手動レイアウト設定）
+## Picker (`<leader>p`)
 
-## テキスト操作
+Picker = 選択UI（VSCodeのCtrl+Pに相当）
 
-### 選択・コピー・ペースト
-- `<leader>a` または `<C-a>` (Ctrl+A): 全選択
-- `<leader>c` または `<C-c>` (Ctrl+C, ビジュアルモード): クリップボードにコピー
-  - ビジュアルモード: 選択範囲をコピー
-  - ノーマル/挿入モード: 現在の行をコピー
-- `<C-v>` (Ctrl+V): クリップボードからペースト
+| キー | 機能 | 由来 |
+|------|------|------|
+| `<leader>pf` | ファイル検索 | **P**icker: **F**iles |
+| `<leader>pc` | コマンドパレット | **P**icker: **C**ommands |
 
-### アンドゥ・リドゥ
-- `<C-z>` (Ctrl+Z): アンドゥ
-- `<C-S-z>` (Ctrl+Shift+Z): リドゥ
+## Search (`<leader>s`)
 
-### コメント
-- `gcc`: 行コメントをトグル
-- `gbc`: ブロックコメントをトグル
+Search = 検索
 
-## 検索・ナビゲーション
+| キー | 機能 | 由来 |
+|------|------|------|
+| `<leader>sg` | ワークスペース全体を検索 | **S**earch: **G**rep |
 
-### コマンドパレット
-- `<leader>pc` または `<C-S-p>` (Ctrl+Shift+P): コマンドパレットを開く
+## Outline (`<leader>o`)
 
-### シンボル検索・アウトライン
-- `<leader>so` または `<C-S-o>` (Ctrl+Shift+O): ファイル内のシンボルを検索
-- `<leader>o`: シンボルアウトラインを表示/非表示（aerial.nvim）
+Outline = シンボルアウトライン
 
-### コード折りたたみ
-- `zR`: すべての折りたたみを開く
-- `zM`: すべての折りたたみを閉じる
+| キー | 機能 | 由来 |
+|------|------|------|
+| `<leader>o` | シンボルアウトラインをトグル | **O**utline |
 
-## LSP機能
+## Code操作 (`<leader>c`)
 
-### ドキュメント表示
-- `K`: ホバーでツールチップ表示（VSCode風）
+Code = コード（LSP機能）
 
-### 診断（Diagnostics）
-- `<leader>xx`: 現在のファイルの診断を表示/非表示
-- `<leader>xw`: ワークスペース全体の診断を表示/非表示（起動時に自動表示）
-- `<leader>xq`: クイックフィックスリストを表示/非表示
-- `<leader>xd`: カーソル位置の診断を表示
-- `[d`: 前のエラーにジャンプ
-- `]d`: 次のエラーにジャンプ
+| キー | 機能 | 由来 |
+|------|------|------|
+| `<leader>ca` | コードアクション | **C**ode **A**ction |
+| `gd` | 定義へジャンプ | **g**o to **d**efinition |
+| `gr` | 参照を検索 | **g**o to **r**eferences |
+| `K` | ホバードキュメント | Vimの慣例 |
 
-### コードナビゲーション
-- `gd`: 定義をプレビュー（Peek Definition）
-- `gD`: 定義にジャンプ
-- `gr`: 参照をプレビュー（Peek References）
+## Diagnostics (`<leader>x`)
 
-### コードアクション
-- `<leader>ca`: コードアクションを実行（クイックフィックス）
+Diagnostics = 診断・問題（eXamine = 検査、fiX = 修正）
 
-### フォーマッター
-- 保存時に自動フォーマット（conform.nvim）
-- 対応言語: Lua, JavaScript, TypeScript, Python, Rust, Go, HTML, CSS, JSON, YAML, Markdown など
+| キー | 機能 | 由来 |
+|------|------|------|
+| `<leader>xx` | バッファの診断 | e**X**amine e**X**amine |
+| `<leader>xw` | ワークスペースの診断 | e**X**amine **W**orkspace |
+| `<leader>xq` | クイックフィックスリスト | e**X**amine **Q**uickfix |
+| `<leader>xd` | カーソル位置の診断 | e**X**amine **D**iagnostic |
+| `[d` | 前の診断へ | previous **d**iagnostic |
+| `]d` | 次の診断へ | next **d**iagnostic |
 
-## Git操作
+## Git操作 (`<leader>g`)
 
-### Git管理
-- `<leader>gL`: Lazygit（右側に開く）
-- `<leader>gg`: Neogit（コミット/ブランチ管理）
-- `<leader>gd`: Diffviewを開く
-- `<leader>gD`: Diffviewを閉じる
-- `<leader>gh`: ファイル履歴を表示
+Git = Git操作
 
-### Git差分
-- `<leader>gs`: ハンクをステージング
-- `<leader>gr`: ハンクをリセット
-- `<leader>gb`: 行のblame表示
-- `<leader>gp`: ハンクのプレビュー
+| キー | 機能 | 由来 |
+|------|------|------|
+| `<leader>gg` | Neogit（ステータス） | **G**it: Neo**g**it |
+| `<leader>gL` | Lazygit | **G**it: **L**azygit |
+| `<leader>gl` | Gitグラフ | **G**it: **l**og graph |
+| `<leader>gH` | 履歴グラフ（Flog） | **G**it: **H**istory |
+| `<leader>gh` | ファイル履歴 | **G**it: **h**istory (file) |
+| `<leader>gd` | Diff表示 | **G**it: **d**iff |
+| `<leader>gD` | Diff閉じる | **G**it: **D**iff close |
+| `<leader>gs` | ハンクをステージ | **G**it: **s**tage |
+| `<leader>gr` | ハンクをリセット | **G**it: **r**eset |
+| `<leader>gb` | 行のblame | **G**it: **b**lame |
+| `<leader>gp` | ハンクをプレビュー | **G**it: **p**review |
 
-### Gitグラフ
-- `<leader>gl`: Gitグラフを表示
-- `<leader>gH`: Flog（コミット履歴グラフ）
+## Terminal (`<leader>t`)
 
-## ターミナル
+Terminal = ターミナル
 
-### ターミナルモードから抜ける
-- `<Esc>`: ターミナルモードを終了
-- `jk`: ターミナルモードを終了
+| キー | 機能 | 由来 |
+|------|------|------|
+| `<leader>tt` | ターミナルをトグル | **T**erminal **T**oggle |
+| `<C-\>` | ターミナルをトグル | ToggleTermデフォルト |
+| `<Esc>` / `jk` | ターミナルモードを終了 | - |
 
-### ターミナルを開く
-- `<C-\>`: ターミナルをトグル（ToggleTermのデフォルト）
-- `<leader>tt`: ターミナルをトグル
-- `<leader>tv`: 右側に縦分割でターミナルを開く（幅40）
+## Run (`<leader>r`)
 
-## コード実行
+Run = コード実行
 
-### 基本的な実行
-- `<leader>r`: 現在のファイルを実行（フローティングウィンドウで表示）
-- `<leader>rf`: ファイルを実行（明示的）
-- `<leader>rp`: プロジェクトを実行
-- `<leader>rc`: 実行ウィンドウを閉じる
-
-### 実行モード
-- **フローティングウィンドウ**: 実行結果が中央のフローティングウィンドウに表示されます
-- **自動フォーカス**: 実行時に自動的にフローティングウィンドウにフォーカスが移動します
-- **入力対応**: 標準入力（`input()`など）を受け付けるプログラムも実行可能です
-- **自動保存**: 実行前に自動的にファイルが保存されます
+| キー | 機能 | 由来 |
+|------|------|------|
+| `<leader>rr` | コードを実行 | **R**un: **R**un |
+| `<leader>rf` | ファイルを実行 | **R**un: **F**ile |
+| `<leader>rp` | プロジェクトを実行 | **R**un: **P**roject |
+| `<leader>rc` | 実行ウィンドウを閉じる | **R**un: **C**lose |
 
 ### 対応言語
-- **Python**: `python3 -u`
-- **Java**: コンパイルして実行
-- **C/C++**: コンパイルして実行
-- **Rust**: コンパイルして実行
-- **Go**: `go run`
-- **JavaScript**: `node`
-- **TypeScript**: `ts-node`
-- **HTML**: ブラウザで開く
-- **Bash/Shell**: `bash`
-- **Lua**: `lua`
-- **Ruby**: `ruby`
-- **PHP**: `php`
-- **Haskell**: `runhaskell`
+- Python, Java, C/C++, Rust, Go, JavaScript, TypeScript, HTML, Bash, Lua, Ruby, PHP, Haskell
+
+## Debug (`<leader>d`)
+
+Debug = デバッグ
+
+| キー | 機能 | 由来 |
+|------|------|------|
+| `<leader>db` | ブレークポイントをトグル | **D**ebug: **B**reakpoint |
+| `<F5>` | デバッグ開始/続行 | VSCode準拠 |
+| `<F1>` | ステップイン | - |
+| `<F2>` | ステップオーバー | - |
+| `<F3>` | ステップアウト | - |
+
+## Help/Health (`<leader>h`)
+
+Help = ヘルプ、Health = ヘルスチェック
+
+| キー | 機能 | 由来 |
+|------|------|------|
+| `<leader>hm` | メッセージログ | **H**elp: **M**essages |
+| `<leader>hc` | ヘルスチェック | **H**elp: **C**heckhealth |
+
+## Lazy (`<leader>l`)
+
+Lazy = Lazy.nvim（プラグイン管理）
+
+| キー | 機能 | 由来 |
+|------|------|------|
+| `<leader>ll` | Lazy.nvimを開く | **L**azy: **L**azy |
+| `<leader>ls` | プラグインを同期 | **L**azy: **S**ync |
+
+## UI (`<leader>u`)
+
+UI = ユーザーインターフェース（外観）
+
+| キー | 機能 | 由来 |
+|------|------|------|
+| `<leader>ut` | カラースキームを切り替え | **U**I: **T**heme |
+| `<leader>um` | ミニマップをトグル | **U**I: **M**inimap |
+
+## AI (`<leader>i`)
+
+Intelligence = AI（Claude Code）
+
+Claude Codeは、CursorのようなAIアシスタント体験をNeovimで実現します。
+
+| キー | 機能 | 由来 |
+|------|------|------|
+| `<leader>ii` | Claude Codeを開く | **I**ntelligence: **I**ntelligence |
+| `<leader>if` | フォーカス切り替え | **I**ntelligence: **F**ocus |
+| `<leader>is` | 選択範囲を送信（ビジュアル） | **I**ntelligence: **S**end |
+| `<leader>im` | モデルを選択 | **I**ntelligence: **M**odel |
+| `<C-k>` | Claude Codeを開く（挿入モード） | Cursor準拠 |
+
+### 表示設定
+- **右側スプリット表示**: コードエディタの右側（30%幅）に表示されます（Cursor風）
+- **自動コンテキスト追跡**: 現在のファイルと選択範囲が自動的にClaude Codeに共有されます
 
 ### 使い方の例
-1. Pythonファイル（例: `test.py`）を開く
-2. `<leader>r`を押す
-3. フローティングウィンドウが開き、コードが実行されます
-4. 対話的な入力が必要な場合は、自動的にターミナルモードに入ります
-5. 入力後は`Esc`または`jk`でターミナルモードから抜けられます
+1. `<leader>ii`でClaude Codeを開く
+2. コードを選択して`<leader>is`で送信
+3. Claude Codeが提案や説明を提供
+4. 提案された変更はdiff形式で確認・適用可能
 
-## デバッグ機能
+### 注意事項
+- Claude Code CLI（v2.0.73以上）が必要です
+- 初回起動時は認証が必要な場合があります
 
-### デバッガー操作
-- `<F5>`: デバッグを開始/続行
-- `<F1>`: ステップイン
-- `<F2>`: ステップオーバー
-- `<F3>`: ステップアウト
-- `<leader>b`: ブレークポイントをトグル
-- `<leader>B`: 条件付きブレークポイントを設定
+## Window (`<leader>w`)
 
-### 対応言語
-- Python
-- JavaScript/TypeScript
-- Rust（設定可能）
-- その他（設定により追加可能）
+Window = ウィンドウ操作
 
-## エラーデバッグ
-
-### エラー確認
-- `<leader>el`: エラーメッセージを表示（`:messages`）
-- `<leader>ec`: ヘルスチェック（`:checkhealth`）
-- `<leader>er`: Neovimのログファイルを開く
-- `<leader>ed`: Lazy.nvimのデバッグ情報を表示
-- `<leader>es`: Lazy.nvimのステータスを表示
-
-## その他
-
-### カラースキーム
-- `<leader>cs`: カラースキームを切り替え
-  - 利用可能なスキーム: tokyonight, catppuccin, kanagawa, onedark, gruvbox-material, gruvbox, habamax
-
-### ミニマップ
-- `<leader>mm`: ミニマップを表示/非表示（codewindow.nvim）
-
-### ブックマーク
-- ブックマーク機能が利用可能（vim-bookmarks）
-
-### AI機能（Claude Code）
-- `<leader>ai`: Claude Codeを開く（ノーマルモード）
-- `<C-k>`: Claude Codeを開く（挿入モード）
+| キー | 機能 | 由来 |
+|------|------|------|
+| `<leader>ww` | レイアウトを設定 | **W**indow: setup **W**indow |
+| `<C-h/j/k/l>` | ウィンドウ移動 | Vim慣例 |
 
 ## 視覚的機能
 
 ### インデントガイド
 - インデントレベルが視覚的に表示されます（indent-blankline.nvim）
-
 
 ### 保存状態の表示
 - 未保存のファイルはタブに●マークが表示されます
@@ -267,8 +299,6 @@ VSCode風のウィンドウ移動（ノーマルモード）:
 - `<leader>` キーはデフォルトでスペースキー（` `）です
 - 複数ファイルを同時に開くことができます（`hidden`オプション有効）
 - 起動時に自動的にファイルツリーと問題パネルが開きます
-- ターミナル関連の機能は `toggleterm.nvim` プラグインを使用しています
-- LSP関連の機能は `lspsaga.nvim` と `trouble.nvim` プラグインを使用しています
 
 ## プラグイン一覧
 
@@ -306,6 +336,10 @@ VSCode風のウィンドウ移動（ノーマルモード）:
 - `diffview.nvim` - 差分表示
 - `lazygit` - Git TUI
 
+### AI機能
+- `claudecode.nvim` - Claude Code統合（AIアシスタント）
+- `snacks.nvim` - ターミナル統合（Claude Code用）
+
 ### その他
 - `vim-bookmarks` - ブックマーク
 - `toggleterm.nvim` - ターミナル管理
@@ -314,18 +348,17 @@ VSCode風のウィンドウ移動（ノーマルモード）:
 ## トラブルシューティング
 
 ### プラグインが読み込まれない
-1. `:Lazy sync` を実行してプラグインをインストール
+1. `<leader>ls` を実行してプラグインを同期
 2. Neovimを再起動
-3. `<leader>ed` でLazy.nvimのデバッグ情報を確認
+3. `<leader>ll` でLazy.nvimを確認
 
 ### エラーが発生する
-1. `<leader>el` でエラーメッセージを確認
-2. `<leader>er` でログファイルを確認
-3. `<leader>ec` でヘルスチェックを実行
+1. `<leader>hm` でエラーメッセージを確認
+2. `<leader>hc` でヘルスチェックを実行
 
 ### 複数ファイルが開けない
 - `hidden`オプションが有効になっていることを確認
-- バッファ一覧は `<leader>bb` で確認可能
+- バッファ一覧は `<leader>bl` で確認可能
 
 ## 設定ファイル構成
 
@@ -341,9 +374,9 @@ VSCode風のウィンドウ移動（ノーマルモード）:
 │   │   └── startup.lua      # 起動時設定
 │   └── plugins/
 │       ├── ui.lua           # UI関連プラグイン
-│       ├── editor.lua        # エディタ機能プラグイン
-│       ├── lsp.lua           # LSP・補完プラグイン
-│       ├── git.lua           # Git関連プラグイン
-│       └── ai.lua            # AI機能プラグイン
-└── README.md                 # このファイル
+│       ├── editor.lua       # エディタ機能プラグイン
+│       ├── lsp.lua          # LSP・補完プラグイン
+│       ├── git.lua          # Git関連プラグイン
+│       └── ai.lua           # AI機能プラグイン
+└── README.md                # このファイル
 ```

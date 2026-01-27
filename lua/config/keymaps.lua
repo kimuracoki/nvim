@@ -4,11 +4,10 @@ local map = vim.keymap.set
 map("n", "<C-s>", ":w<CR>", { desc = "Save" })
 map("i", "<C-s>", "<Esc>:w<CR>a", { desc = "Save" })
 
--- バッファ移動
-map("n", "<S-h>", ":BufferLineCyclePrev<CR>", { desc = "Previous buffer" })
-map("n", "<S-l>", ":BufferLineCycleNext<CR>", { desc = "Next buffer" })
-map("n", "<leader>bc", ":bdelete<CR>", { desc = "Close buffer" })
-map("n", "<leader>bb", ":Telescope buffers<CR>", { desc = "List buffers" })
+-- バッファ移動（Buffer操作）
+map("n", "<S-h>", ":BufferLineCyclePrev<CR>", { desc = "Buffer: Previous" })
+map("n", "<S-l>", ":BufferLineCycleNext<CR>", { desc = "Buffer: Next" })
+map("n", "<leader>bc", ":bdelete<CR>", { desc = "Buffer: Close" })
 
 -- ウィンドウ移動
 map("n", "<C-h>", "<C-w>h", { desc = "Move to left window" })
@@ -19,9 +18,9 @@ map("n", "<C-l>", "<C-w>l", { desc = "Move to right window" })
 -- jkでノーマルモードに戻る
 map("i", "jk", "<Esc>", { noremap = true })
 
--- 全選択
-map("n", "<leader>a", "ggVG", { desc = "Select all" })
-map("n", "<C-a>", "ggVG", { desc = "Select all" })
+-- 全選択（All）
+map("n", "<leader>a", "ggVG", { desc = "All: Select all" })
+map("n", "<C-a>", "ggVG", { desc = "All: Select all" })
 
 -- コピー・ペースト
 map("v", "<C-c>", '"+y', { desc = "Copy" })
@@ -31,20 +30,20 @@ map({ "n", "i" }, "<C-v>", '"+p', { desc = "Paste" })
 map("n", "<C-z>", "u", { desc = "Undo" })
 map("n", "<C-S-z>", "<C-r>", { desc = "Redo" })
 
--- ターミナル
-map("t", "<Esc>", [[<C-\><C-n>]], { desc = "Exit terminal mode" })
-map("t", "jk", [[<C-\><C-n>]], { desc = "Exit terminal mode" })
+-- ターミナル（Terminal）
+map("t", "<Esc>", [[<C-\><C-n>]], { desc = "Terminal: Exit to normal mode" })
+map("t", "jk", [[<C-\><C-n>]], { desc = "Terminal: Exit to normal mode" })
 map("n", "<leader>tt", function()
   require("toggleterm").toggle(1)
-end, { desc = "Toggle terminal" })
+end, { desc = "Terminal: Toggle" })
 
--- レイアウト
+-- ウィンドウ（Window）
 map("n", "<leader>ww", function()
   require("config.startup").setup_layout()
-end, { desc = "Setup layout" })
+end, { desc = "Window: Setup layout" })
 
--- 終了
-map("n", "<leader>q", ":qa<CR>", { desc = "Quit all" })
+-- 終了（Quit）
+map("n", "<leader>q", ":qa<CR>", { desc = "Quit: All" })
 
 -- LSP関連
 map("n", "K", function()
@@ -62,12 +61,12 @@ end, { desc = "Find references" })
 
 map("n", "<leader>ca", function()
   vim.lsp.buf.code_action()
-end, { desc = "Code action" })
+end, { desc = "Code: Action" })
 
--- 診断
+-- 診断（eXamine/Diagnostics）
 map("n", "<leader>xd", function()
   vim.diagnostic.open_float()
-end, { desc = "Show diagnostics" })
+end, { desc = "Diagnostics: Show at cursor" })
 
 map("n", "[d", function()
   vim.diagnostic.goto_prev()
@@ -77,8 +76,8 @@ map("n", "]d", function()
   vim.diagnostic.goto_next()
 end, { desc = "Next diagnostic" })
 
--- カラースキーム切り替え
-map("n", "<leader>cs", function()
+-- カラースキーム切り替え（UI Theme）
+map("n", "<leader>ut", function()
   local colorschemes = {
     "tokyonight",
     "catppuccin",
@@ -153,7 +152,7 @@ map("n", "<leader>cs", function()
       vim.notify("Failed: " .. next_cs .. " - " .. tostring(err), vim.log.levels.ERROR)
     end
   end
-end, { desc = "Switch colorscheme" })
+end, { desc = "UI: Theme switch" })
 
 -- コード実行（フローティングウィンドウにフォーカスを移動）
 local function focus_floating_window()
@@ -174,21 +173,24 @@ local function focus_floating_window()
   end, 150)
 end
 
-map("n", "<leader>r", function()
+map("n", "<leader>rr", function()
   vim.cmd("RunCode")
   focus_floating_window()
-end, { desc = "Run code" })
+end, { desc = "Run: Code" })
 map("n", "<leader>rf", function()
   vim.cmd("RunFile")
   focus_floating_window()
-end, { desc = "Run file" })
+end, { desc = "Run: File" })
 map("n", "<leader>rp", function()
   vim.cmd("RunProject")
   focus_floating_window()
-end, { desc = "Run project" })
-map("n", "<leader>rc", ":RunClose<CR>", { desc = "Close runner" })
+end, { desc = "Run: Project" })
+map("n", "<leader>rc", ":RunClose<CR>", { desc = "Run: Close" })
 
--- デバッグ用
-map("n", "<leader>el", ":messages<CR>", { desc = "Show messages" })
-map("n", "<leader>ec", ":checkhealth<CR>", { desc = "Check health" })
-map("n", "<leader>es", ":Lazy<CR>", { desc = "Lazy status" })
+-- Help/Health関連（診断・ログ）
+map("n", "<leader>hm", ":messages<CR>", { desc = "Help: Messages log" })
+map("n", "<leader>hc", ":checkhealth<CR>", { desc = "Help: Checkhealth" })
+
+-- Lazy（プラグイン管理）
+map("n", "<leader>ll", ":Lazy<CR>", { desc = "Lazy: Status" })
+map("n", "<leader>ls", ":Lazy sync<CR>", { desc = "Lazy: Sync" })
