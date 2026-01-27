@@ -531,7 +531,7 @@ return {
         use_treesitter = true,
         width_multiplier = 4,
         z_index = 1,
-        window_border = "single",
+        window_border = "none",
       })
       vim.keymap.set("n", "<leader>um", codewindow.toggle_minimap, { desc = "UI: Minimap toggle" })
     end,
