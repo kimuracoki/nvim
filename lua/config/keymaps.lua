@@ -48,6 +48,7 @@ map("n", "<leader>q", ":qa<CR>", { desc = "Quit all" })
 
 -- LSP関連
 map("n", "K", function()
+  -- lspsagaのhoverを使用（ボーダー付きフローティングウィンドウ）
   vim.lsp.buf.hover()
 end, { desc = "Hover documentation" })
 

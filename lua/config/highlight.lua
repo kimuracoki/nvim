@@ -25,6 +25,15 @@ function M.setup()
     fg = "#808080",  -- グレーのボーダーで囲む
     bold = true,
   })
+  -- lspsagaのボーダーも設定
+  vim.api.nvim_set_hl(0, "SagaBorder", { 
+    bg = "none", 
+    fg = "#808080",  -- グレーのボーダーで囲む
+    bold = true,
+  })
+  vim.api.nvim_set_hl(0, "SagaNormal", { 
+    bg = "none",
+  })
   
   -- その他の透過設定
   vim.api.nvim_set_hl(0, "StatusLine",   { bg = "none" })

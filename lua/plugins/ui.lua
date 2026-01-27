@@ -304,13 +304,19 @@ return {
         },
         layout = {
           height = { min = 4, max = 25 },
-          width = { min = 20, max = 50 },
+          width = { min = 20, max = 60 },
           spacing = 3,
           align = "left",
+        },
+        icons = {
+          breadcrumb = "»", -- パンくずリストのアイコン
+          separator = "➜", -- セパレーター
+          group = "+", -- グループのアイコン
         },
         ignore_missing = true,
         hidden = { "<silent>", "<cmd>", "<Cmd>", "<CR>", "call", "lua", "^:", "^ " },
         show_help = true,
+        show_keys = true, -- キーを表示
         triggers = "auto",
         plugins = {
           marks = false,
@@ -327,6 +333,20 @@ return {
             z = false,
             g = false,
           },
+        },
+        -- グループ名を日本語で表示
+        groups = {
+          mode = "モード",
+          navigation = "ナビゲーション",
+          text = "テキスト",
+          git = "Git",
+          lsp = "LSP",
+          telescope = "Telescope",
+          buffer = "バッファ",
+          window = "ウィンドウ",
+          terminal = "ターミナル",
+          colorscheme = "カラースキーム",
+          debug = "デバッグ",
         },
       })
     end,
