@@ -20,6 +20,7 @@ opt.splitright = true  -- 右側に分割
 opt.splitbelow = true  -- 下側に分割
 opt.clipboard = "unnamedplus"  -- システムクリップボードを使用
 opt.hidden = true  -- バッファを切り替えてもファイルを閉じない（複数ファイルを開くため）
+opt.cmdheight = 0  -- コマンドラインの高さを0にして、noice.nvimのフローティングウィンドウを使用
 
 -- 折りたたみ設定（UFOが有効な場合は自動的に設定されるが、デフォルト値を設定）
 opt.foldenable = true  -- 折りたたみを有効化

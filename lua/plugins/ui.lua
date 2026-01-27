@@ -288,6 +288,151 @@ return {
     end,
   },
 
+  -- リーダーキーの表示（スペースキーを打ったときに利用可能なキーマップを表示）
+  {
+    "folke/which-key.nvim",
+    event = "VeryLazy",
+    config = function()
+      require("which-key").setup({
+        window = {
+          border = "rounded",
+          position = "bottom",
+          winblend = 0,
+          relative = "editor",
+          row = "50%",
+          col = "50%",
+        },
+        layout = {
+          height = { min = 4, max = 25 },
+          width = { min = 20, max = 50 },
+          spacing = 3,
+          align = "left",
+        },
+        ignore_missing = true,
+        hidden = { "<silent>", "<cmd>", "<Cmd>", "<CR>", "call", "lua", "^:", "^ " },
+        show_help = true,
+        triggers = "auto",
+        plugins = {
+          marks = false,
+          registers = false,
+          spelling = {
+            enabled = false,
+          },
+          presets = {
+            operators = false,
+            motions = false,
+            text_objects = false,
+            windows = false,
+            nav = false,
+            z = false,
+            g = false,
+          },
+        },
+      })
+    end,
+  },
+
+  -- コマンドラインをフローティングウィンドウで表示（中央に表示）
+  {
+    "folke/noice.nvim",
+    event = "VeryLazy",
+    dependencies = {
+      "MunifTanjim/nui.nvim",
+      "rcarriga/nvim-notify",
+    },
+    config = function()
+      require("noice").setup({
+        lsp = {
+          override = {
+            ["vim.lsp.util.convert_input_to_markdown_lines"] = true,
+            ["vim.lsp.util.stylize_markdown"] = true,
+            ["cmp.entry.get_documentation"] = true,
+          },
+        },
+        presets = {
+          bottom_search = true,
+          command_palette = true,
+          long_message_to_split = true,
+          inc_rename = false,
+          lsp_doc_border = false,
+        },
+        cmdline = {
+          enabled = true,
+          view = "cmdline_popup", -- フローティングウィンドウで表示
+          format = {
+            -- コマンドラインのフォーマット設定
+            cmdline = { pattern = "^:", icon = ":", lang = "vim" },
+            search_down = { kind = "search", pattern = "^/", icon = "🔍", lang = "regex" },
+            search_up = { kind = "search", pattern = "^%?", icon = "🔍", lang = "regex" },
+            filter = { pattern = "^:%s*!", icon = "$", lang = "bash" },
+            lua = { pattern = "^:%s*lua%s+", icon = "☾", lang = "lua" },
+            help = { pattern = "^:%s*he?l?p?%s+", icon = "󰋼" },
+          },
+        },
+        views = {
+          cmdline_popup = {
+            relative = "editor",
+            position = {
+              row = "50%",
+              col = "50%",
+            },
+            size = {
+              width = 60,
+              height = "auto",
+            },
+            border = {
+              style = "rounded",
+              padding = { 0, 1 },
+            },
+            win_options = {
+              winhighlight = { Normal = "NormalFloat", FloatBorder = "FloatBorder" },
+            },
+          },
+          popupmenu = {
+            relative = "editor",
+            position = {
+              row = "50%",
+              col = "50%",
+            },
+            size = {
+              width = 60,
+              height = "auto",
+            },
+            border = {
+              style = "rounded",
+              padding = { 0, 1 },
+            },
+            win_options = {
+              winhighlight = { Normal = "NormalFloat", FloatBorder = "FloatBorder" },
+            },
+          },
+        },
+        messages = {
+          enabled = true,
+          view = "notify",
+          view_error = "notify",
+          view_warn = "notify",
+          view_history = "messages",
+          view_search = "virtualtext",
+        },
+        popupmenu = {
+          enabled = true,
+          backend = "nui",
+        },
+        routes = {
+          {
+            filter = {
+              event = "msg_show",
+              kind = "",
+              find = "written",
+            },
+            opts = { skip = true },
+          },
+        },
+      })
+    end,
+  },
+
   -- ミニマップ（VSCodeの右側コードマップ）
   {
     "gorbit99/codewindow.nvim",
