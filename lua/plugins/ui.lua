@@ -207,26 +207,26 @@ return {
       local builtin = require("telescope.builtin")
       local map = vim.keymap.set
       
-      -- ファイル検索（VSCodeのCmd+P相当）
+      -- ファイル検索
       map("n", "<leader>p", builtin.find_files, { desc = "Find files" })
-      map("n", "<D-p>", builtin.find_files, { desc = "Find files (Cmd+P)" })
+      map("n", "<C-p>", builtin.find_files, { desc = "Find files" })
       -- グローバル検索
       map("n", "<leader>sg", builtin.live_grep, { desc = "Live grep" })
-      -- コマンドパレット（VSCodeのCmd+Shift+P相当）
+      -- コマンドパレット
       map("n", "<leader>pc", builtin.commands, { desc = "Command palette" })
-      map("n", "<D-S-p>", builtin.commands, { desc = "Command palette (Cmd+Shift+P)" })
-      -- 最近開いたファイル（VSCodeのCmd+R相当）
+      map("n", "<C-S-p>", builtin.commands, { desc = "Command palette" })
+      -- 最近開いたファイル
       map("n", "<leader>fr", builtin.oldfiles, { desc = "Recent files" })
-      map("n", "<D-r>", builtin.oldfiles, { desc = "Recent files (Cmd+R)" })
-      -- ファイル内検索（VSCodeのCmd+F相当）
+      map("n", "<C-t>", builtin.oldfiles, { desc = "Recent files" })
+      -- ファイル内検索
       map("n", "<leader>f", builtin.current_buffer_fuzzy_find, { desc = "Find in file" })
-      map("n", "<D-f>", builtin.current_buffer_fuzzy_find, { desc = "Find in file (Cmd+F)" })
-      -- シンボル検索（VSCodeのCmd+Shift+O相当）
+      map("n", "<C-f>", builtin.current_buffer_fuzzy_find, { desc = "Find in file" })
+      -- シンボル検索
       map("n", "<leader>so", builtin.lsp_document_symbols, { desc = "Document symbols" })
-      map("n", "<D-S-o>", builtin.lsp_document_symbols, { desc = "Document symbols (Cmd+Shift+O)" })
+      map("n", "<C-S-o>", builtin.lsp_document_symbols, { desc = "Document symbols" })
       -- バッファ一覧
       map("n", "<leader>bb", builtin.buffers, { desc = "List buffers" })
-      map("n", "<D-S-e>", builtin.buffers, { desc = "List buffers (Cmd+Shift+E)" })
+      map("n", "<C-S-e>", builtin.buffers, { desc = "List buffers" })
     end,
   },
 

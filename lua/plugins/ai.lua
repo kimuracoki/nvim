@@ -10,7 +10,7 @@ return {
         -- デフォルト設定でOK。必要に応じてカスタマイズ可能
       })
       
-      -- キーマップ設定（CursorのCmd+K/Ctrl+Kに相当）
+      -- キーマップ設定（CursorのCtrl+Kに相当）
       vim.keymap.set("n", "<leader>ai", ":ClaudeCode<CR>", { desc = "Claude Code AI" })
       vim.keymap.set("i", "<C-k>", "<Esc>:ClaudeCode<CR>", { desc = "Claude Code AI (insert mode)" })
     end,

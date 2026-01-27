@@ -21,7 +21,7 @@
 ## 基本操作
 
 ### 保存
-- `<C-s>` または `<D-s>` (Cmd+S): ファイルを保存（ノーマル/挿入モード）
+- `<C-s>` (Ctrl+S): ファイルを保存（ノーマル/挿入モード）
 - 自動保存: フォーカスが外れたときに自動保存
 
 ### 終了
@@ -30,33 +30,32 @@
 ### モード切り替え
 - `jk`: 挿入モードからノーマルモードに戻る（Escの代わり）
 
-## macOSのCmdキー対応
+## キーボードショートカット
 
-VSCode風のショートカットキー：
+VSCode風のショートカットキー（Ctrlキー）：
 
-- `<D-s>` (Cmd+S): 保存
-- `<D-a>` (Cmd+A): 全選択
-- `<D-c>` (Cmd+C): コピー
-- `<D-v>` (Cmd+V): ペースト
-- `<D-x>` (Cmd+X): カット
-- `<D-z>` (Cmd+Z): アンドゥ
-- `<D-S-z>` (Cmd+Shift+Z): リドゥ
-- `<D-p>` (Cmd+P): ファイル検索
-- `<D-f>` (Cmd+F): ファイル内検索
-- `<D-r>` (Cmd+R): 最近開いたファイル
-- `<D-S-p>` (Cmd+Shift+P): コマンドパレット
-- `<D-S-o>` (Cmd+Shift+O): シンボル検索
-- `<D-S-e>` (Cmd+Shift+E): バッファ一覧
+- `<C-s>` (Ctrl+S): 保存
+- `<C-a>` (Ctrl+A): 全選択
+- `<C-c>` (Ctrl+C): コピー（ビジュアルモード）
+- `<C-v>` (Ctrl+V): ペースト
+- `<C-z>` (Ctrl+Z): アンドゥ
+- `<C-S-z>` (Ctrl+Shift+Z): リドゥ
+- `<C-p>` (Ctrl+P): ファイル検索
+- `<C-f>` (Ctrl+F): ファイル内検索
+- `<C-t>` (Ctrl+T): 最近開いたファイル
+- `<C-S-p>` (Ctrl+Shift+P): コマンドパレット
+- `<C-S-o>` (Ctrl+Shift+O): シンボル検索
+- `<C-S-e>` (Ctrl+Shift+E): バッファ一覧
 
 ## ファイル操作
 
 ### ファイル検索・開く
-- `<leader>p` または `<D-p>` (Cmd+P): ファイル検索（Telescope）
-- `<leader>fr` または `<D-r>` (Cmd+R): 最近開いたファイル
+- `<leader>p` または `<C-p>` (Ctrl+P): ファイル検索（Telescope）
+- `<leader>fr` または `<C-t>` (Ctrl+T): 最近開いたファイル
 - `<leader>e`: ファイルエクスプローラー（nvim-tree）をトグル
 
 ### ファイル内検索
-- `<leader>f` または `<D-f>` (Cmd+F): ファイル内検索（Telescope）
+- `<leader>f` または `<C-f>` (Ctrl+F): ファイル内検索（Telescope）
 
 ### グローバル検索
 - `<leader>sg`: ワークスペース全体を検索（Telescope live_grep）
@@ -68,7 +67,7 @@ VSCode風のショートカットキー：
 - `<S-l>`: 次のバッファに移動（Shift+L）
 - `<leader>bn`: 次のバッファに移動
 - `<leader>bp`: 前のバッファに移動
-- `<leader>bb` または `<D-S-e>` (Cmd+Shift+E): バッファ一覧を表示
+- `<leader>bb` または `<C-S-e>` (Ctrl+Shift+E): バッファ一覧を表示
 - `<leader>bc`: 現在のバッファを閉じる
 
 ### タブ表示
@@ -90,16 +89,15 @@ VSCode風のウィンドウ移動（ノーマルモード）:
 ## テキスト操作
 
 ### 選択・コピー・ペースト
-- `<leader>a` または `<D-a>` (Cmd+A): 全選択
-- `<leader>c` または `<D-c>` (Cmd+C): クリップボードにコピー
+- `<leader>a` または `<C-a>` (Ctrl+A): 全選択
+- `<leader>c` または `<C-c>` (Ctrl+C, ビジュアルモード): クリップボードにコピー
   - ビジュアルモード: 選択範囲をコピー
   - ノーマル/挿入モード: 現在の行をコピー
-- `<D-v>` (Cmd+V): クリップボードからペースト
-- `<D-x>` (Cmd+X): クリップボードにカット
+- `<C-v>` (Ctrl+V): クリップボードからペースト
 
 ### アンドゥ・リドゥ
-- `<D-z>` (Cmd+Z): アンドゥ
-- `<D-S-z>` (Cmd+Shift+Z): リドゥ
+- `<C-z>` (Ctrl+Z): アンドゥ
+- `<C-S-z>` (Ctrl+Shift+Z): リドゥ
 
 ### コメント
 - `gcc`: 行コメントをトグル
@@ -108,10 +106,10 @@ VSCode風のウィンドウ移動（ノーマルモード）:
 ## 検索・ナビゲーション
 
 ### コマンドパレット
-- `<leader>pc` または `<D-S-p>` (Cmd+Shift+P): コマンドパレットを開く
+- `<leader>pc` または `<C-S-p>` (Ctrl+Shift+P): コマンドパレットを開く
 
 ### シンボル検索・アウトライン
-- `<leader>so` または `<D-S-o>` (Cmd+Shift+O): ファイル内のシンボルを検索
+- `<leader>so` または `<C-S-o>` (Ctrl+Shift+O): ファイル内のシンボルを検索
 - `<leader>o`: シンボルアウトラインを表示/非表示（aerial.nvim）
 
 ### コード折りたたみ

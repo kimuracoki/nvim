@@ -3,8 +3,6 @@ local map = vim.keymap.set
 -- 保存
 map("n", "<C-s>", ":w<CR>", { desc = "Save" })
 map("i", "<C-s>", "<Esc>:w<CR>a", { desc = "Save" })
-map("n", "<D-s>", ":w<CR>", { desc = "Save (Cmd+S)" })
-map("i", "<D-s>", "<Esc>:w<CR>a", { desc = "Save (Cmd+S)" })
 
 -- バッファ移動
 map("n", "<S-h>", ":BufferLineCyclePrev<CR>", { desc = "Previous buffer" })
@@ -23,15 +21,15 @@ map("i", "jk", "<Esc>", { noremap = true })
 
 -- 全選択
 map("n", "<leader>a", "ggVG", { desc = "Select all" })
-map("n", "<D-a>", "ggVG", { desc = "Select all (Cmd+A)" })
+map("n", "<C-a>", "ggVG", { desc = "Select all" })
 
 -- コピー・ペースト
-map("v", "<D-c>", '"+y', { desc = "Copy (Cmd+C)" })
-map({ "n", "i" }, "<D-v>", '"+p', { desc = "Paste (Cmd+V)" })
+map("v", "<C-c>", '"+y', { desc = "Copy" })
+map({ "n", "i" }, "<C-v>", '"+p', { desc = "Paste" })
 
 -- アンドゥ・リドゥ
-map("n", "<D-z>", "u", { desc = "Undo (Cmd+Z)" })
-map("n", "<D-S-z>", "<C-r>", { desc = "Redo (Cmd+Shift+Z)" })
+map("n", "<C-z>", "u", { desc = "Undo" })
+map("n", "<C-S-z>", "<C-r>", { desc = "Redo" })
 
 -- ターミナル
 map("t", "<Esc>", [[<C-\><C-n>]], { desc = "Exit terminal mode" })
