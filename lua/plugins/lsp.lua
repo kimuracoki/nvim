@@ -101,6 +101,12 @@ return {
           "bashls",
           "dockerls",
           "marksman",
+          "jdtls",      -- Java
+          "gopls",      -- Go
+          "clangd",     -- C/C++
+          "intelephense", -- PHP
+          "ruby_lsp",   -- Ruby (Ruby LSP)
+          "hls",        -- Haskell
         },
         -- automatic_enable = true（デフォルト）
       })
@@ -117,6 +123,32 @@ return {
           Lua = {
             diagnostics = { globals = { "vim" } },
             workspace = { checkThirdParty = false },
+          },
+        },
+      })
+
+      -- Java用の設定
+      vim.lsp.config("jdtls", {
+        settings = {
+          java = {
+            configuration = {
+              runtimes = {},
+            },
+            eclipse = {
+              downloadSources = true,
+            },
+            maven = {
+              downloadSources = true,
+            },
+            implementationsCodeLens = {
+              enabled = true,
+            },
+            referencesCodeLens = {
+              enabled = true,
+            },
+            references = {
+              includeDecompiledSources = true,
+            },
           },
         },
       })
