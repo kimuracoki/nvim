@@ -118,6 +118,39 @@ vim.api.nvim_create_autocmd("ColorScheme", {
   end,
 })
 
+-- コード実行（フローティングウィンドウにフォーカスを移動）
+local function focus_floating_window()
+  vim.defer_fn(function()
+    local wins = vim.api.nvim_list_wins()
+    for _, win in ipairs(wins) do
+      local ok, config = pcall(vim.api.nvim_win_get_config, win)
+      if ok and config and config.relative and config.relative ~= "" then
+        pcall(vim.api.nvim_set_current_win, win)
+        -- ターミナルモードに入る（入力を受け付けるため）
+        local buf = vim.api.nvim_win_get_buf(win)
+        if vim.bo[buf].buftype == "terminal" then
+          vim.cmd("startinsert")
+        end
+        break
+      end
+    end
+  end, 150)
+end
+
+map("n", "<leader>r", function()
+  vim.cmd("RunCode")
+  focus_floating_window()
+end, { desc = "Run code" })
+map("n", "<leader>rf", function()
+  vim.cmd("RunFile")
+  focus_floating_window()
+end, { desc = "Run file" })
+map("n", "<leader>rp", function()
+  vim.cmd("RunProject")
+  focus_floating_window()
+end, { desc = "Run project" })
+map("n", "<leader>rc", ":RunClose<CR>", { desc = "Close runner" })
+
 -- デバッグ用
 map("n", "<leader>el", ":messages<CR>", { desc = "Show messages" })
 map("n", "<leader>ec", ":checkhealth<CR>", { desc = "Check health" })
