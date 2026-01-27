@@ -86,6 +86,13 @@ map("n", "<leader>cs", function()
     "onedark",
     "gruvbox-material",
     "gruvbox",
+    "rose-pine",
+    "nord",
+    "dracula",
+    "nightfox",
+    "everforest",
+    "material",
+    "monokai",
     "habamax",
   }
   
@@ -96,6 +103,13 @@ map("n", "<leader>cs", function()
     onedark = "onedark",
     ["gruvbox-material"] = "gruvbox-material",
     gruvbox = "gruvbox",
+    ["rose-pine"] = "rose-pine",
+    nord = "nord",
+    dracula = "dracula",
+    nightfox = "nightfox",
+    everforest = "everforest",
+    material = "material",
+    monokai = "monokai",
   }
   
   -- 現在のカラースキーム名を取得（グローバル変数で追跡、なければvim.g.colors_nameを使用）

@@ -68,6 +68,84 @@ return {
       vim.g.gruvbox_transparent_bg = 1
     end,
   },
+  {
+    "rose-pine/neovim",
+    name = "rose-pine",
+    lazy = true,
+    config = function()
+      require("rose-pine").setup({
+        variant = "auto", -- auto, main, moon, or dawn
+        dark_variant = "main",
+        transparent_background = true,
+      })
+    end,
+  },
+  {
+    "shaunsingh/nord.nvim",
+    name = "nord",
+    lazy = true,
+  },
+  {
+    "Mofiqul/dracula.nvim",
+    name = "dracula",
+    lazy = true,
+    config = function()
+      require("dracula").setup({
+        transparent_bg = true,
+      })
+    end,
+  },
+  {
+    "EdenEast/nightfox.nvim",
+    name = "nightfox",
+    lazy = true,
+    config = function()
+      require("nightfox").setup({
+        options = {
+          transparent = true,
+        },
+      })
+    end,
+  },
+  {
+    "neanias/everforest-nvim",
+    name = "everforest",
+    lazy = true,
+    config = function()
+      require("everforest").setup({
+        background = "dark",
+        transparent_background_level = 1,
+      })
+    end,
+  },
+  {
+    "marko-cerovac/material.nvim",
+    name = "material",
+    lazy = true,
+    config = function()
+      require("material").setup({
+        styles = {
+          comments = { italic = true },
+          keywords = { italic = true },
+        },
+        plugins = {
+          "gitsigns",
+          "indent-blankline",
+          "nvim-cmp",
+          "nvim-web-devicons",
+          "telescope",
+          "trouble",
+          "which-key",
+        },
+        lualine_style = "stealth",
+      })
+    end,
+  },
+  {
+    "tanvirtin/monokai.nvim",
+    name = "monokai",
+    lazy = true,
+  },
   -- habamaxはNeovimに標準で含まれているため、プラグインとして追加不要
 
   -- ステータスライン
