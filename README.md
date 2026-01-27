@@ -217,8 +217,6 @@ VSCode風のウィンドウ移動（ノーマルモード）:
 ### インデントガイド
 - インデントレベルが視覚的に表示されます（indent-blankline.nvim）
 
-### ブラケットペアのハイライト
-- ネストされたブラケットが色分け表示されます（nvim-ts-rainbow2）
 
 ### 保存状態の表示
 - 未保存のファイルはタブに●マークが表示されます
@@ -250,7 +248,6 @@ VSCode風のウィンドウ移動（ノーマルモード）:
 ### エディタ機能
 - `nvim-treesitter` - 構文ハイライト
 - `indent-blankline.nvim` - インデントガイド
-- `nvim-ts-rainbow2` - ブラケットハイライト
 - `nvim-ufo` - コード折りたたみ
 - `conform.nvim` - フォーマッター
 - `nvim-autopairs` - 自動ペア補完

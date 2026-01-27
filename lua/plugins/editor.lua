@@ -50,12 +50,6 @@ return {
             node_decremental = "grm",
           },
         },
-        -- ブラケットペアのハイライト（rainbow2と連携）
-        rainbow = {
-          enable = true,
-          extended_mode = true,
-          max_file_lines = nil,
-        },
       })
     end,
   },
@@ -102,15 +96,6 @@ return {
           show_start = true,
         },
       })
-    end,
-  },
-
-  -- ブラケットペアのハイライト
-  {
-    "HiPhish/nvim-ts-rainbow2",
-    dependencies = { "nvim-treesitter/nvim-treesitter" },
-    config = function()
-      -- nvim-ts-rainbow2は設定不要（treesitterの設定で有効化済み）
     end,
   },
 
