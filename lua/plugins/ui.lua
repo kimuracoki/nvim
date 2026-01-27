@@ -371,37 +371,12 @@ return {
     "folke/which-key.nvim",
     event = "VeryLazy",
     config = function()
-      require("which-key").setup({
-        window = {
-          border = "rounded",
-          position = "bottom",
-          winblend = 0,
-          relative = "editor",
-          row = "50%",
-          col = "50%",
-        },
-        layout = {
-          height = { min = 4, max = 25 },
-          width = { min = 20, max = 60 },
-          spacing = 3,
-          align = "left",
-        },
-        icons = {
-          breadcrumb = "»", -- パンくずリストのアイコン
-          separator = "➜", -- セパレーター
-          group = "+", -- グループのアイコン
-        },
-        ignore_missing = true,
-        hidden = { "<silent>", "<cmd>", "<Cmd>", "<CR>", "call", "lua", "^:", "^ " },
-        show_help = true,
-        show_keys = true, -- キーを表示
-        triggers = "auto",
+      local wk = require("which-key")
+      wk.setup({
         plugins = {
           marks = false,
           registers = false,
-          spelling = {
-            enabled = false,
-          },
+          spelling = { enabled = false },
           presets = {
             operators = false,
             motions = false,
@@ -412,20 +387,29 @@ return {
             g = false,
           },
         },
-        -- グループ名を日本語で表示
-        groups = {
-          mode = "モード",
-          navigation = "ナビゲーション",
-          text = "テキスト",
-          git = "Git",
-          lsp = "LSP",
-          telescope = "Telescope",
-          buffer = "バッファ",
-          window = "ウィンドウ",
-          terminal = "ターミナル",
-          colorscheme = "カラースキーム",
-          debug = "デバッグ",
-        },
+      })
+      
+      -- グループ名を登録（<leader>プレフィックスの説明）
+      wk.add({
+        { "<leader>a", desc = "All (全選択)" },
+        { "<leader>b", group = "Buffer (バッファ)" },
+        { "<leader>c", group = "Code (コード)" },
+        { "<leader>d", group = "Debug (デバッグ)" },
+        { "<leader>e", desc = "Explorer (ファイルツリー)" },
+        { "<leader>f", group = "Find/File (検索/ファイル)" },
+        { "<leader>g", group = "Git" },
+        { "<leader>h", group = "Help/Health (ヘルプ)" },
+        { "<leader>i", group = "Intelligence/AI (Claude Code)" },
+        { "<leader>l", group = "Lazy (プラグイン)" },
+        { "<leader>o", desc = "Outline (シンボル)" },
+        { "<leader>p", group = "Picker (選択)" },
+        { "<leader>q", desc = "Quit (終了)" },
+        { "<leader>r", group = "Run (実行)" },
+        { "<leader>s", group = "Search (検索)" },
+        { "<leader>t", group = "Terminal (ターミナル)" },
+        { "<leader>u", group = "UI (外観)" },
+        { "<leader>w", group = "Window (ウィンドウ)" },
+        { "<leader>x", group = "Diagnostics (診断)" },
       })
     end,
   },
