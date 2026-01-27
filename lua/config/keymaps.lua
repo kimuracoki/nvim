@@ -78,45 +78,68 @@ map("n", "]d", function()
 end, { desc = "Next diagnostic" })
 
 -- カラースキーム切り替え
-local colorschemes = {
-  "tokyonight",
-  "catppuccin",
-  "kanagawa",
-  "onedark",
-  "gruvbox-material",
-  "gruvbox",
-  "habamax",
-}
-
--- 現在のカラースキームのインデックスを取得
-local function get_current_colorscheme_index()
-  local current = vim.g.colors_name or "tokyonight"
-  for i, scheme in ipairs(colorschemes) do
-    if scheme == current then
-      return i
+map("n", "<leader>cs", function()
+  local colorschemes = {
+    "tokyonight",
+    "catppuccin",
+    "kanagawa",
+    "onedark",
+    "gruvbox-material",
+    "gruvbox",
+    "habamax",
+  }
+  
+  -- lazyプラグイン名のマッピング
+  local plugin_map = {
+    catppuccin = "catppuccin",
+    kanagawa = "kanagawa",
+    onedark = "onedark",
+    ["gruvbox-material"] = "gruvbox-material",
+    gruvbox = "gruvbox",
+  }
+  
+  -- 現在のカラースキーム名を取得（グローバル変数で追跡、なければvim.g.colors_nameを使用）
+  local current = vim.g.current_colorscheme or vim.g.colors_name or "tokyonight"
+  local current_idx = 1
+  for i, cs in ipairs(colorschemes) do
+    if cs == current then
+      current_idx = i
+      break
     end
   end
-  return 1  -- デフォルト
-end
-
-local current_colorscheme_index = get_current_colorscheme_index()
-
-map("n", "<leader>cs", function()
-  current_colorscheme_index = current_colorscheme_index + 1
-  if current_colorscheme_index > #colorschemes then
-    current_colorscheme_index = 1
+  local next_idx = (current_idx % #colorschemes) + 1
+  local next_cs = colorschemes[next_idx]
+  
+  -- lazyプラグインをロード（必要に応じて）
+  if plugin_map[next_cs] then
+    pcall(function()
+      require("lazy").load({ plugins = { plugin_map[next_cs] } })
+    end)
+    -- 少し待ってからカラースキームを適用
+    vim.defer_fn(function()
+      local success, err = pcall(vim.cmd.colorscheme, next_cs)
+      if success then
+        vim.g.current_colorscheme = next_cs
+        -- 透過設定を再適用
+        require("config.highlight").setup()
+        vim.notify("Colorscheme: " .. next_cs, vim.log.levels.INFO)
+      else
+        vim.notify("Failed: " .. next_cs .. " - " .. tostring(err), vim.log.levels.ERROR)
+      end
+    end, 100)
+  else
+    -- ビルトインまたは既にロード済みのカラースキーム
+    local success, err = pcall(vim.cmd.colorscheme, next_cs)
+    if success then
+      vim.g.current_colorscheme = next_cs
+      -- 透過設定を再適用
+      require("config.highlight").setup()
+      vim.notify("Colorscheme: " .. next_cs, vim.log.levels.INFO)
+    else
+      vim.notify("Failed: " .. next_cs .. " - " .. tostring(err), vim.log.levels.ERROR)
+    end
   end
-  local scheme = colorschemes[current_colorscheme_index]
-  vim.cmd.colorscheme(scheme)
-  vim.notify("Colorscheme: " .. scheme, vim.log.levels.INFO)
-end, { desc = "Cycle colorscheme" })
-
--- カラースキーム変更時にインデックスを更新
-vim.api.nvim_create_autocmd("ColorScheme", {
-  callback = function()
-    current_colorscheme_index = get_current_colorscheme_index()
-  end,
-})
+end, { desc = "Switch colorscheme" })
 
 -- コード実行（フローティングウィンドウにフォーカスを移動）
 local function focus_floating_window()
