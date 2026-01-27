@@ -21,10 +21,19 @@ return {
     "nvimdev/lspsaga.nvim",
     event = "LspAttach",
     dependencies = { "nvim-tree/nvim-web-devicons" },
-    opts = {
-      symbol_in_winbar = { enable = false },
-      lightbulb = { enable = false },
-    },
+    config = function()
+      require("lspsaga").setup({
+        -- ホバー表示の設定（ボーダーを追加）
+        hover = {
+          max_width = 0.9,
+          max_height = 0.8,
+          open_link = "gx",
+          open_browser = "silent !open",
+        },
+        symbol_in_winbar = { enable = false },
+        lightbulb = { enable = false },
+      })
+    end,
   },
 
   ---------------------------------------------------------------------------
@@ -111,6 +120,41 @@ return {
           },
         },
       })
+      
+      -----------------------------------------------------------------------
+      -- LSPのホバーウィンドウにボーダーを追加（透過のままでも見やすく）
+      -----------------------------------------------------------------------
+      -- vim.lsp.util.open_floating_previewのデフォルトオプションを設定
+      local original_open_floating_preview = vim.lsp.util.open_floating_preview
+      vim.lsp.util.open_floating_preview = function(contents, syntax, opts)
+        opts = opts or {}
+        -- ボーダーを設定（透過のままでも見やすくするため）
+        opts.border = opts.border or "rounded"  -- "single", "double", "rounded", "solid", "shadow" など
+        return original_open_floating_preview(contents, syntax, opts)
+      end
+      
+      -- カラースキーム変更時にFloatBorderの色を再設定
+      vim.api.nvim_create_autocmd("ColorScheme", {
+        callback = function()
+          vim.defer_fn(function()
+            -- ボーダーを目立たせる（透過のままでも見やすく）
+            vim.api.nvim_set_hl(0, "FloatBorder", { 
+              bg = "none", 
+              fg = "#808080",  -- グレーのボーダー
+              bold = true,
+            })
+          end, 50)
+        end,
+      })
+      
+      -- 初回設定
+      vim.defer_fn(function()
+        vim.api.nvim_set_hl(0, "FloatBorder", { 
+          bg = "none", 
+          fg = "#808080",
+          bold = true,
+        })
+      end, 100)
     end,
   },
 

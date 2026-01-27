@@ -19,7 +19,12 @@ function M.setup()
   
   -- NormalFloatの透過（フローティングウィンドウ）
   vim.api.nvim_set_hl(0, "NormalFloat", { bg = "none" })
-  vim.api.nvim_set_hl(0, "FloatBorder", { bg = "none" })
+  -- FloatBorderは透過のままでもボーダーを目立たせる（見やすくするため）
+  vim.api.nvim_set_hl(0, "FloatBorder", { 
+    bg = "none", 
+    fg = "#808080",  -- グレーのボーダーで囲む
+    bold = true,
+  })
   
   -- その他の透過設定
   vim.api.nvim_set_hl(0, "StatusLine",   { bg = "none" })
