@@ -152,6 +152,89 @@ return {
           },
         },
       })
+
+      -- TypeScript/JavaScript用の設定（React、Next.js、NestJS対応）
+      vim.lsp.config("ts_ls", {
+        settings = {
+          typescript = {
+            -- モノレポ対応: プロジェクトルートを自動検出
+            preferences = {
+              includePackageJsonAutoImports = "auto",
+            },
+            -- より厳密な型チェック（必要に応じて調整）
+            inlayHints = {
+              parameterNames = { enabled = "all" },
+              variableTypes = { enabled = false },
+              propertyDeclarationTypes = { enabled = true },
+              functionLikeReturnTypes = { enabled = true },
+              enumMemberValues = { enabled = true },
+            },
+          },
+          javascript = {
+            preferences = {
+              includePackageJsonAutoImports = "auto",
+            },
+            inlayHints = {
+              parameterNames = { enabled = "all" },
+              variableTypes = { enabled = false },
+              propertyDeclarationTypes = { enabled = true },
+              functionLikeReturnTypes = { enabled = true },
+              enumMemberValues = { enabled = true },
+            },
+          },
+          -- モノレポ対応: ワークスペースの検出を改善
+          completions = {
+            completeFunctionCalls = true,
+          },
+        },
+        -- ファイルタイプを指定
+        filetypes = {
+          "javascript",
+          "javascriptreact",
+          "typescript",
+          "typescriptreact",
+        },
+      })
+
+      -- ESLint用の設定
+      vim.lsp.config("eslint", {
+        settings = {
+          -- モノレポ対応: VSCode/Cursorと同じ動作（各ファイルの近くの設定ファイルを自動検出）
+          workingDirectories = { mode = "auto" },
+          -- 検証を有効化
+          validate = "on",
+          -- パッケージマネージャーを自動検出
+          packageManager = "auto",
+          -- コードアクションを有効化（手動実行用）
+          codeAction = {
+            disableRuleComment = {
+              enable = true,
+              location = "separateLine",
+            },
+            showDocumentation = {
+              enable = true,
+            },
+          },
+        },
+        -- ファイルタイプを指定
+        filetypes = {
+          "javascript",
+          "javascriptreact",
+          "typescript",
+          "typescriptreact",
+          "vue",
+          "svelte",
+        },
+        -- モノレポ対応: 各ファイルのディレクトリから設定ファイルを探す
+        -- VSCode/Cursorでは自動的に行われるが、Neovimでは明示的に設定が必要
+        root_dir = function(fname)
+          -- .eslintrc.* または package.json があるディレクトリを探す
+          local util = require("lspconfig.util")
+          return util.root_pattern(".eslintrc", ".eslintrc.js", ".eslintrc.json", ".eslintrc.yaml", ".eslintrc.yml", "eslint.config.js", "package.json")(fname)
+            or util.find_git_ancestor(fname)
+            or vim.fn.getcwd()
+        end,
+      })
       
       -----------------------------------------------------------------------
       -- LSPのホバーウィンドウにボーダーを追加（透過のままでも見やすく）
