@@ -30,32 +30,8 @@ return {
           open_link = "gx",
           open_browser = "silent !open",
         },
-        ui = {
-          border = "rounded", -- すべてのフローティングウィンドウにボーダーを追加
-          code_action = "rounded",
-          definition = "rounded",
-          hover = "rounded",
-          rename = "rounded",
-        },
         symbol_in_winbar = { enable = false },
         lightbulb = { enable = false },
-      })
-      
-      -- lspsagaのhoverウィンドウのボーダーを確実に表示するため、ウィンドウオプションを設定
-      vim.api.nvim_create_autocmd("User", {
-        pattern = "LspsagaHover",
-        callback = function()
-          local win = vim.api.nvim_get_current_win()
-          if win ~= 0 then
-            vim.api.nvim_win_set_option(win, "winblend", 0)
-            -- ボーダーのハイライトを設定
-            vim.api.nvim_set_hl(0, "SagaBorder", {
-              bg = "none",
-              fg = "#808080",
-              bold = true,
-            })
-          end
-        end,
       })
     end,
   },
