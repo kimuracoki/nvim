@@ -31,8 +31,30 @@ map("n", "<C-z>", "u", { desc = "Undo" })
 map("n", "<C-S-z>", "<C-r>", { desc = "Redo" })
 
 -- ターミナル（Terminal）
-map("t", "<Esc>", [[<C-\><C-n>]], { desc = "Terminal: Exit to normal mode" })
-map("t", "jk", [[<C-\><C-n>]], { desc = "Terminal: Exit to normal mode" })
+-- Claude Codeのターミナルでは除外（キー競合を避けるため）
+local function is_claude_terminal()
+  local bufname = vim.api.nvim_buf_get_name(0)
+  return bufname:match("claude") or bufname:match("ClaudeCode")
+end
+
+map("t", "<Esc>", function()
+  if is_claude_terminal() then
+    -- Claude Codeではそのまま<Esc>を送信
+    return "<Esc>"
+  else
+    return [[<C-\><C-n>]]
+  end
+end, { expr = true, desc = "Terminal: Exit to normal mode (except Claude)" })
+
+map("t", "jk", function()
+  if is_claude_terminal() then
+    -- Claude Codeではそのままjkを送信
+    return "jk"
+  else
+    return [[<C-\><C-n>]]
+  end
+end, { expr = true, desc = "Terminal: Exit to normal mode (except Claude)" })
+
 map("n", "<leader>tt", function()
   require("toggleterm").toggle(1)
 end, { desc = "Terminal: Toggle" })

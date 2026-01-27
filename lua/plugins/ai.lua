@@ -15,12 +15,27 @@ return {
       { "<leader>im", "<cmd>ClaudeCodeSelectModel<cr>", desc = "AI: Model select" },
     },
     opts = {
-      -- 右側スプリット表示（Cursor風）
+      -- フローティングウィンドウ表示（nvim-treeと競合しない）
       terminal = {
-        split_side = "right",
-        split_width_percentage = 0.30,
-        provider = "auto", -- snacks.nvimを使用
-        auto_close = false, -- ウィンドウを閉じない
+        provider = "snacks",
+        -- フローティングウィンドウの設定
+        snacks_win_opts = {
+          position = "float",
+          width = 0.85,
+          height = 0.85,
+          border = "rounded",
+          -- Claude Codeを隠すキー（<leader>iiで再表示可能）
+          keys = {
+            claude_hide = {
+              "<C-\\>",
+              function(self)
+                self:hide()
+              end,
+              mode = "t",
+              desc = "Hide Claude Code",
+            },
+          },
+        },
       },
       -- 選択範囲の追跡を有効化
       track_selection = true,
