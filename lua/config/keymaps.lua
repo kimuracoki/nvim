@@ -45,15 +45,6 @@ map("t", "<Esc>", function()
   end
 end, { expr = true, desc = "Terminal: Exit to normal mode (except Claude)" })
 
-map("t", "jk", function()
-  if is_claude_terminal() then
-    -- Claude Codeではそのままjkを送信
-    return "jk"
-  else
-    return [[<C-\><C-n>]]
-  end
-end, { expr = true, desc = "Terminal: Exit to normal mode (except Claude)" })
-
 -- ターミナルモードでもウィンドウ移動をノーマルモードと同じキーで行えるようにする
 -- （Claude Codeを含め、どのターミナルでも有効）
 map("t", "<C-h>", [[<C-\><C-n><C-w>h]], { silent = true, desc = "Terminal: Move to left window" })
