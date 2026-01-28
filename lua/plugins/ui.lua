@@ -3,9 +3,22 @@ return {
   -- カラースキーム（複数インストールして切り替え可能）
   ---------------------------------------------------------------------------
   {
-    "folke/tokyonight.nvim",
+    "catppuccin/nvim",
+    name = "catppuccin",
     lazy = false,
     priority = 1000,
+    config = function()
+      require("catppuccin").setup({
+        transparent_background = true,
+      })
+      -- デフォルトカラースキームとして設定
+      vim.cmd.colorscheme("catppuccin")
+    end,
+  },
+  -- その他の人気カラースキーム（必要に応じて切り替え可能）
+  {
+    "folke/tokyonight.nvim",
+    lazy = true,
     config = function()
       require("tokyonight").setup({
         style = "night", -- storm, moon, night, day
@@ -14,19 +27,6 @@ return {
           comments = { italic = true },
           keywords = { italic = true },
         },
-      })
-      -- デフォルトカラースキームとして設定（好みに応じて変更可能）
-      vim.cmd.colorscheme("tokyonight")
-    end,
-  },
-  -- その他の人気カラースキーム（必要に応じて切り替え可能）
-  {
-    "catppuccin/nvim",
-    name = "catppuccin",
-    lazy = true,
-    config = function()
-      require("catppuccin").setup({
-        transparent_background = true,
       })
     end,
   },

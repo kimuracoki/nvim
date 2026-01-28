@@ -101,8 +101,8 @@ end, { desc = "Next diagnostic" })
 -- カラースキーム切り替え（UI Theme）
 map("n", "<leader>ut", function()
   local colorschemes = {
-    "tokyonight",
     "catppuccin",
+    "tokyonight",
     "kanagawa",
     "onedark",
     "gruvbox-material",
@@ -134,7 +134,7 @@ map("n", "<leader>ut", function()
   }
   
   -- 現在のカラースキーム名を取得（グローバル変数で追跡、なければvim.g.colors_nameを使用）
-  local current = vim.g.current_colorscheme or vim.g.colors_name or "tokyonight"
+  local current = vim.g.current_colorscheme or vim.g.colors_name or "catppuccin"
   local current_idx = 1
   for i, cs in ipairs(colorschemes) do
     if cs == current then
