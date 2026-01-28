@@ -4,11 +4,31 @@ return {
     "lewis6991/gitsigns.nvim",
     config = function()
       require("gitsigns").setup()
-      -- よく使うキー（Git操作）
-      vim.keymap.set("n", "<leader>gb", require("gitsigns").blame_line, { desc = "Git: Blame line" })
-      vim.keymap.set("n", "<leader>gp", require("gitsigns").preview_hunk, { desc = "Git: Preview hunk" })
-      vim.keymap.set("n", "<leader>gr", require("gitsigns").reset_hunk, { desc = "Git: Reset hunk" })
-      vim.keymap.set("n", "<leader>gs", require("gitsigns").stage_hunk, { desc = "Git: Stage hunk" })
+      local gs = require("gitsigns")
+
+      -- hunk間のナビゲーション（Claude Codeの変更箇所を移動）
+      vim.keymap.set("n", "]c", function()
+        if vim.wo.diff then return "]c" end
+        vim.schedule(function() gs.next_hunk() end)
+        return "<Ignore>"
+      end, { expr = true, desc = "Git: Next hunk" })
+
+      vim.keymap.set("n", "[c", function()
+        if vim.wo.diff then return "[c" end
+        vim.schedule(function() gs.prev_hunk() end)
+        return "<Ignore>"
+      end, { expr = true, desc = "Git: Prev hunk" })
+
+      -- Accept/Reject操作
+      vim.keymap.set("n", "<leader>gs", gs.stage_hunk, { desc = "Git: Stage hunk (Accept)" })
+      vim.keymap.set("n", "<leader>gr", gs.reset_hunk, { desc = "Git: Reset hunk (Reject)" })
+      vim.keymap.set("v", "<leader>gs", function() gs.stage_hunk({ vim.fn.line("."), vim.fn.line("v") }) end, { desc = "Git: Stage selection" })
+      vim.keymap.set("v", "<leader>gr", function() gs.reset_hunk({ vim.fn.line("."), vim.fn.line("v") }) end, { desc = "Git: Reset selection" })
+
+      -- その他
+      vim.keymap.set("n", "<leader>gp", gs.preview_hunk, { desc = "Git: Preview hunk" })
+      vim.keymap.set("n", "<leader>gb", function() gs.blame_line({ full = true }) end, { desc = "Git: Blame line" })
+      vim.keymap.set("n", "<leader>gu", gs.undo_stage_hunk, { desc = "Git: Undo stage" })
     end,
   },
 

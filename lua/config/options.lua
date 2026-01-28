@@ -22,6 +22,25 @@ opt.clipboard = "unnamedplus"  -- システムクリップボードを使用
 opt.hidden = true  -- バッファを切り替えてもファイルを閉じない（複数ファイルを開くため）
 opt.cmdheight = 0  -- コマンドラインの高さを0にして、noice.nvimのフローティングウィンドウを使用
 
+-- 外部ツール（Claude Code等）による変更を自動反映
+opt.autoread = true  -- ファイルが外部で変更された場合に自動的に読み込む
+
+-- autoreadを確実に動作させるためのautocmd
+vim.api.nvim_create_autocmd({ "FocusGained", "BufEnter", "CursorHold", "CursorHoldI" }, {
+  pattern = "*",
+  command = "if mode() != 'c' | checktime | endif",
+  desc = "Check if file was changed externally",
+})
+
+-- ファイルが変更された場合に通知
+vim.api.nvim_create_autocmd("FileChangedShellPost", {
+  pattern = "*",
+  callback = function()
+    vim.notify("File changed on disk. Buffer reloaded.", vim.log.levels.WARN)
+  end,
+  desc = "Notify when file is reloaded",
+})
+
 -- 折りたたみ設定（UFOが有効な場合は自動的に設定されるが、デフォルト値を設定）
 opt.foldenable = true  -- 折りたたみを有効化
 opt.foldlevel = 99  -- デフォルトで折りたたみを開く（99はほぼすべて開く）

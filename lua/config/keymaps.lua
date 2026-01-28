@@ -30,7 +30,6 @@ map({ "n", "i" }, "<C-v>", '"+p', { desc = "Paste" })
 map("n", "<C-z>", "u", { desc = "Undo" })
 map("n", "<C-S-z>", "<C-r>", { desc = "Redo" })
 
--- ターミナル（Terminal）
 -- Claude Codeのターミナルでは除外（キー競合を避けるため）
 local function is_claude_terminal()
   local bufname = vim.api.nvim_buf_get_name(0)
@@ -54,6 +53,13 @@ map("t", "jk", function()
     return [[<C-\><C-n>]]
   end
 end, { expr = true, desc = "Terminal: Exit to normal mode (except Claude)" })
+
+-- ターミナルモードでもウィンドウ移動をノーマルモードと同じキーで行えるようにする
+-- （Claude Codeを含め、どのターミナルでも有効）
+map("t", "<C-h>", [[<C-\><C-n><C-w>h]], { silent = true, desc = "Terminal: Move to left window" })
+map("t", "<C-j>", [[<C-\><C-n><C-w>j]], { silent = true, desc = "Terminal: Move to bottom window" })
+map("t", "<C-k>", [[<C-\><C-n><C-w>k]], { silent = true, desc = "Terminal: Move to top window" })
+map("t", "<C-l>", [[<C-\><C-n><C-w>l]], { silent = true, desc = "Terminal: Move to right window" })
 
 map("n", "<leader>tt", function()
   require("toggleterm").toggle(1)
