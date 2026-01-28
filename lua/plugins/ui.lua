@@ -253,6 +253,10 @@ return {
     "nvim-tree/nvim-tree.lua",
     config = function()
       require("nvim-tree").setup({
+        view = {
+          width = 30,
+          preserve_window_proportions = true,  -- ウィンドウ比率を維持
+        },
         renderer = {
           highlight_git = true,
           icons = {
@@ -334,6 +338,34 @@ return {
       })
       vim.keymap.set("n", "<leader>o", "<cmd>AerialToggle<CR>", { desc = "Outline: Toggle symbols" })
     end,
+  },
+
+  -- Claude Code（aerialと同じく「現在のウィンドウを右に分割」で表示）
+  {
+    "coder/claudecode.nvim",
+    dependencies = { "folke/snacks.nvim" },
+    keys = {
+      { "<leader>ii", "<cmd>ClaudeCode<cr>", desc = "AI: Claude Code toggle" },
+      { "<C-k>", "<cmd>ClaudeCode<cr>", mode = "i", desc = "AI: Claude Code (insert mode)" },
+      { "<leader>if", "<cmd>ClaudeCodeFocus<cr>", desc = "AI: Focus toggle" },
+      { "<leader>is", "<cmd>ClaudeCodeSend<cr>", mode = "v", desc = "AI: Send selection" },
+      { "<leader>im", "<cmd>ClaudeCodeSelectModel<cr>", desc = "AI: Model select" },
+    },
+    opts = {
+      terminal = {
+        provider = "snacks",
+        snacks_win_opts = {
+          relative = "win",   -- 現在のウィンドウに対して分割（aerialと同じ）
+          position = "right",
+          width = 80,
+          border = "rounded",
+        },
+      },
+      track_selection = true,
+      visual_demotion_delay_ms = 50,
+      focus_after_send = false,
+      log_level = "info",
+    },
   },
 
   -- 通知システムの改善
