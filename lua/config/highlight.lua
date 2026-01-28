@@ -1,38 +1,64 @@
 local M = {}
 
+-- 透過のオン/オフ（true: 透過, false: 不透過）
+M.enabled = M.enabled ~= nil and M.enabled or true
+
+-- 透過設定を適用
 function M.setup()
-  -- 透過（背景だけ消す）
+  if not M.enabled then
+    return
+  end
+
+  -- 背景だけ透過（元のシンプルな挙動）
   vim.api.nvim_set_hl(0, "Normal",     { bg = "none" })
   vim.api.nvim_set_hl(0, "NormalNC",   { bg = "none" })
   vim.api.nvim_set_hl(0, "SignColumn", { bg = "none" })
   vim.api.nvim_set_hl(0, "LineNr",     { bg = "none" })
-  
+
   -- nvim-treeの透過
   vim.api.nvim_set_hl(0, "NvimTreeNormal",       { bg = "none" })
   vim.api.nvim_set_hl(0, "NvimTreeNormalNC",     { bg = "none" })
-  vim.api.nvim_set_hl(0, "NvimTreeEndOfBuffer", { bg = "none" })
+  vim.api.nvim_set_hl(0, "NvimTreeEndOfBuffer",  { bg = "none" })
   vim.api.nvim_set_hl(0, "NvimTreeWinSeparator", { bg = "none", fg = "none" })
-  
-  -- Trouble.nvimの透過
+
+  -- Trouble.nvimの透過（問題タブ）
   vim.api.nvim_set_hl(0, "TroubleNormal",   { bg = "none" })
   vim.api.nvim_set_hl(0, "TroubleNormalNC", { bg = "none" })
-  
+
   -- NormalFloatの透過（フローティングウィンドウ）
   vim.api.nvim_set_hl(0, "NormalFloat", { bg = "none" })
-  -- FloatBorderは透過のままでもボーダーを目立たせる（見やすくするため）
-  vim.api.nvim_set_hl(0, "FloatBorder", { 
-    bg = "none", 
-    fg = "#808080",  -- グレーのボーダーで囲む
+  -- FloatBorderは透過でもボーダーを見やすく
+  vim.api.nvim_set_hl(0, "FloatBorder", {
+    bg = "none",
+    fg = "#808080",
     bold = true,
   })
-  
-  -- その他の透過設定
+
+  -- ステータスラインなど
   vim.api.nvim_set_hl(0, "StatusLine",   { bg = "none" })
   vim.api.nvim_set_hl(0, "StatusLineNC", { bg = "none" })
   vim.api.nvim_set_hl(0, "TabLine",      { bg = "none" })
   vim.api.nvim_set_hl(0, "TabLineFill",  { bg = "none" })
-  vim.api.nvim_set_hl(0, "TabLineSel",    { bg = "none" })
+  vim.api.nvim_set_hl(0, "TabLineSel",   { bg = "none" })
   vim.api.nvim_set_hl(0, "WinSeparator", { bg = "none", fg = "none" })
+end
+
+-- 透過オン/オフをトグル
+function M.toggle_transparency()
+  M.enabled = not M.enabled
+
+  if M.enabled then
+    -- 透過を有効化
+    M.setup()
+  else
+    -- 透過を無効化：カラースキームを再適用してデフォルトに戻す
+    local current_colorscheme = vim.g.current_colorscheme or vim.g.colors_name
+    if current_colorscheme then
+      vim.cmd("colorscheme " .. current_colorscheme)
+    end
+  end
+
+  vim.notify("透過: " .. (M.enabled and "有効" or "無効"), vim.log.levels.INFO)
 end
 
 return M

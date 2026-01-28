@@ -8,9 +8,7 @@ return {
     lazy = false,
     priority = 1000,
     config = function()
-      require("catppuccin").setup({
-        transparent_background = true,
-      })
+      require("catppuccin").setup({})
       -- デフォルトカラースキームとして設定
       vim.cmd.colorscheme("catppuccin")
     end,
@@ -22,7 +20,6 @@ return {
     config = function()
       require("tokyonight").setup({
         style = "night", -- storm, moon, night, day
-        transparent = true,
         styles = {
           comments = { italic = true },
           keywords = { italic = true },
@@ -36,7 +33,6 @@ return {
     lazy = true,
     config = function()
       require("kanagawa").setup({
-        transparent = true,
       })
     end,
   },
@@ -46,7 +42,6 @@ return {
     lazy = true,
     config = function()
       require("onedark").setup({
-        transparent = true,
       })
     end,
   },
@@ -56,7 +51,6 @@ return {
     lazy = true,
     config = function()
       vim.g.gruvbox_material_enable_italic = 1
-      vim.g.gruvbox_material_transparent_background = 1
     end,
   },
   {
@@ -65,7 +59,6 @@ return {
     lazy = true,
     config = function()
       vim.g.gruvbox_italic = 1
-      vim.g.gruvbox_transparent_bg = 1
     end,
   },
   {
@@ -76,7 +69,6 @@ return {
       require("rose-pine").setup({
         variant = "auto", -- auto, main, moon, or dawn
         dark_variant = "main",
-        transparent_background = true,
       })
     end,
   },
@@ -91,7 +83,6 @@ return {
     lazy = true,
     config = function()
       require("dracula").setup({
-        transparent_bg = true,
       })
     end,
   },
@@ -102,7 +93,6 @@ return {
     config = function()
       require("nightfox").setup({
         options = {
-          transparent = true,
         },
       })
     end,
@@ -114,7 +104,6 @@ return {
     config = function()
       require("everforest").setup({
         background = "dark",
-        transparent_background_level = 1,
       })
     end,
   },

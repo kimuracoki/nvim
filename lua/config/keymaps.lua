@@ -176,6 +176,11 @@ map("n", "<leader>ut", function()
   end
 end, { desc = "UI: Theme switch" })
 
+-- 透過度切り替え（UI Transparency）
+map("n", "<leader>uo", function()
+  require("config.highlight").toggle_transparency()
+end, { desc = "UI: Toggle transparency" })
+
 -- コード実行（フローティングウィンドウにフォーカスを移動）
 local function focus_floating_window()
   vim.defer_fn(function()
