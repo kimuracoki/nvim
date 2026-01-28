@@ -22,6 +22,10 @@ opt.clipboard = "unnamedplus"  -- システムクリップボードを使用
 opt.hidden = true  -- バッファを切り替えてもファイルを閉じない（複数ファイルを開くため）
 opt.cmdheight = 0  -- コマンドラインの高さを0にして、noice.nvimのフローティングウィンドウを使用
 
+-- キーシーケンスの待ち時間を0にしてラグを完全になくす
+opt.timeoutlen = 0   -- キーシーケンスの待ち時間なし（jを押した瞬間に反応）
+opt.ttimeoutlen = 0  -- ターミナルモードでも待ち時間なし
+
 -- 外部ツール（Claude Code等）による変更を自動反映
 opt.autoread = true  -- ファイルが外部で変更された場合に自動的に読み込む
 
