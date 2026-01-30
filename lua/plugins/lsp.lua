@@ -6,6 +6,7 @@ return {
   { "hrsh7th/cmp-nvim-lsp" },
   { "hrsh7th/cmp-buffer" },
   { "hrsh7th/cmp-path" },
+  { "f3fora/cmp-spell" },  -- 英単語補完
   { "L3MON4D3/LuaSnip" },
   { "saadparwaiz1/cmp_luasnip" },
 
@@ -300,6 +301,34 @@ return {
           { name = "buffer" },
           { name = "path" },
         }),
+      })
+
+      -- Markdown用: 英単語補完を追加
+      cmp.setup.filetype({ "markdown", "text" }, {
+        sources = cmp.config.sources({
+          {
+            name = "spell",
+            option = {
+              keep_all_entries = true,  -- すべての候補を表示
+              enable_in_context = function()
+                return true  -- 常に有効
+              end,
+            },
+          },
+          { name = "buffer" },
+          { name = "path" },
+        }),
+      })
+
+      -- Markdownファイルでスペルチェックを有効化
+      vim.api.nvim_create_autocmd("FileType", {
+        pattern = { "markdown", "text" },
+        callback = function()
+          vim.opt_local.spell = true
+          vim.opt_local.spelllang = "en"
+          -- spellsuggestの候補数を増やす
+          vim.opt_local.spellsuggest = "best,20"
+        end,
       })
 
       -- 診断の表示設定
