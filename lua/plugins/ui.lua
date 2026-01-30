@@ -531,7 +531,7 @@ return {
           },
         },
         presets = {
-          bottom_search = true,
+          bottom_search = false, -- 検索も中央のフローティングウィンドウで表示
           command_palette = true,
           long_message_to_split = true,
           inc_rename = false,
