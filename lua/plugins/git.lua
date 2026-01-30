@@ -57,8 +57,21 @@ return {
   {
     "isakbm/gitgraph.nvim",
     dependencies = { "sindrets/diffview.nvim" },
-    opts = {
-      symbols = {
+    config = function()
+      -- 透過ターミナル用の高コントラストハイライト
+      vim.api.nvim_set_hl(0, "GitGraphHash", { fg = "#00d7ff", bold = true })
+      vim.api.nvim_set_hl(0, "GitGraphTimestamp", { fg = "#00ff87" })
+      vim.api.nvim_set_hl(0, "GitGraphAuthor", { fg = "#ffff00" })
+      vim.api.nvim_set_hl(0, "GitGraphBranchName", { fg = "#ff87ff", bold = true })
+      vim.api.nvim_set_hl(0, "GitGraphBranchTag", { fg = "#ff5f5f", bold = true })
+      vim.api.nvim_set_hl(0, "GitGraphBranchMsg", { fg = "#ffffff" })
+      -- ブランチカラー（高コントラスト）
+      for i, color in ipairs({ "#ffffff", "#00ffff", "#00ff00", "#ffff00", "#ff8700", "#ff5fff", "#ff5f5f", "#87d7ff" }) do
+        vim.api.nvim_set_hl(0, "GitGraphBranch" .. i, { fg = color })
+      end
+
+      require("gitgraph").setup({
+        symbols = {
         merge_commit = "○",
         commit = "●",
         merge_commit_end = "○",
@@ -101,16 +114,12 @@ return {
           vim.cmd(":DiffviewOpen " .. from.hash .. "~1.." .. to.hash)
         end,
       },
-    },
-    keys = {
-      {
-        "<leader>gl",
-        function()
-          require("gitgraph").draw({}, { all = true, max_count = 5000 })
-        end,
-        desc = "Git: Log graph",
-      },
-    },
+      })
+
+      vim.keymap.set("n", "<leader>gl", function()
+        require("gitgraph").draw({}, { all = true, max_count = 5000 })
+      end, { desc = "Git: Log graph" })
+    end,
   },
 
   -- ToggleTerm（ターミナル管理とlazygit統合）
