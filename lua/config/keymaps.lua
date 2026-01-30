@@ -7,7 +7,20 @@ map("i", "<C-s>", "<Esc>:w<CR>a", { desc = "Save" })
 -- バッファ移動（Buffer操作）
 map("n", "<S-h>", ":BufferLineCyclePrev<CR>", { desc = "Buffer: Previous" })
 map("n", "<S-l>", ":BufferLineCycleNext<CR>", { desc = "Buffer: Next" })
-map("n", "<leader>bc", ":bdelete<CR>", { desc = "Buffer: Close" })
+map("n", "<leader>bc", function()
+  -- 他にバッファがあれば前のバッファに移動してから削除
+  local buf_count = 0
+  for _, buf in ipairs(vim.api.nvim_list_bufs()) do
+    if vim.api.nvim_buf_is_valid(buf) and vim.api.nvim_buf_get_option(buf, "buflisted") then
+      buf_count = buf_count + 1
+    end
+  end
+
+  if buf_count > 1 then
+    vim.cmd("bprevious")
+  end
+  vim.cmd("bdelete #")
+end, { desc = "Buffer: Close" })
 
 -- ウィンドウ移動
 map("n", "<C-h>", "<C-w>h", { desc = "Move to left window" })
