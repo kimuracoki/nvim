@@ -147,20 +147,38 @@ return {
             if vim.api.nvim_buf_is_valid(buf) then
               local name = vim.api.nvim_buf_get_name(buf)
               if name:match("GitGraph") then
-                -- 現在のウィンドウを保存
+                -- 現在のウィンドウ、カーソル位置、ビューを保存
                 local current_win = vim.api.nvim_get_current_win()
+                local cursor_pos = vim.api.nvim_win_get_cursor(win)
+                local view = vim.api.nvim_win_call(win, function()
+                  return vim.fn.winsaveview()
+                end)
+
                 -- gitgraphウィンドウに移動
                 vim.api.nvim_set_current_win(win)
+
                 -- バッファを削除して再描画
                 vim.api.nvim_buf_delete(buf, { force = true })
                 require("gitgraph").draw({}, { all = true, max_count = 5000 })
+
                 vim.schedule(function()
                   vim.bo.buflisted = true
+
+                  -- カーソル位置とビューを復元（エラー防止でpcall使用）
+                  local new_buf = vim.api.nvim_win_get_buf(win)
+                  local line_count = vim.api.nvim_buf_line_count(new_buf)
+                  if cursor_pos[1] <= line_count then
+                    pcall(vim.api.nvim_win_set_cursor, win, cursor_pos)
+                  end
+                  if view then
+                    pcall(vim.fn.winrestview, view)
+                  end
+
+                  -- 元のウィンドウに戻る
+                  if vim.api.nvim_win_is_valid(current_win) then
+                    vim.api.nvim_set_current_win(current_win)
+                  end
                 end)
-                -- 元のウィンドウに戻る
-                if vim.api.nvim_win_is_valid(current_win) then
-                  vim.api.nvim_set_current_win(current_win)
-                end
                 break
               end
             end
