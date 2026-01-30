@@ -119,72 +119,72 @@ return {
       },
       })
 
-      vim.keymap.set("n", "<leader>gl", function()
-        -- 既存のgitgraphバッファを探して削除（最新の状態を取得するため）
+      -- rキーでリロードする関数
+      local function reload_gitgraph_buffer()
+        local current_buf = vim.api.nvim_get_current_buf()
+        local buf_name = vim.api.nvim_buf_get_name(current_buf)
+
+        -- gitgraphバッファかどうか確認
+        if not buf_name:match("GitGraph") then
+          return
+        end
+
+        -- 新しい空のバッファを作成してから古いバッファを削除
+        vim.cmd("enew")
+        pcall(vim.api.nvim_buf_delete, current_buf, { force = true })
+
+        -- 再描画
+        local ok, err = pcall(function()
+          require("gitgraph").draw({}, { all = true, max_count = 5000 })
+        end)
+
+        if not ok then
+          vim.notify("GitGraph reload failed: " .. tostring(err), vim.log.levels.ERROR)
+          return
+        end
+
+        vim.schedule(function()
+          vim.bo.buflisted = true
+          -- rキーマッピングを再設定
+          vim.keymap.set("n", "r", reload_gitgraph_buffer, { buffer = true, desc = "Reload git graph" })
+        end)
+      end
+
+      local function open_gitgraph()
+        -- 既存のgitgraphバッファを探す
+        local gitgraph_buf = nil
         for _, buf in ipairs(vim.api.nvim_list_bufs()) do
           if vim.api.nvim_buf_is_valid(buf) then
             local name = vim.api.nvim_buf_get_name(buf)
             if name:match("GitGraph") then
-              vim.api.nvim_buf_delete(buf, { force = true })
+              gitgraph_buf = buf
+              break
             end
           end
         end
-        -- 常に最新のグラフを描画
-        require("gitgraph").draw({}, { all = true, max_count = 5000 })
-        -- バッファをlistedに設定（タブバーに表示されるように）
-        vim.schedule(function()
-          vim.bo.buflisted = true
-        end)
-      end, { desc = "Git: Log graph" })
 
-      -- gitgraphバッファの自動リロード
-      vim.api.nvim_create_autocmd({ "BufWritePost", "FocusGained" }, {
-        pattern = "*",
-        callback = function()
-          -- gitgraphバッファが開いている場合のみリロード
+        -- 既存のバッファがあればそこに移動
+        if gitgraph_buf then
           for _, win in ipairs(vim.api.nvim_list_wins()) do
-            local buf = vim.api.nvim_win_get_buf(win)
-            if vim.api.nvim_buf_is_valid(buf) then
-              local name = vim.api.nvim_buf_get_name(buf)
-              if name:match("GitGraph") then
-                -- 現在のウィンドウ、カーソル位置、ビューを保存
-                local current_win = vim.api.nvim_get_current_win()
-                local cursor_pos = vim.api.nvim_win_get_cursor(win)
-                local view = vim.api.nvim_win_call(win, function()
-                  return vim.fn.winsaveview()
-                end)
-
-                -- gitgraphウィンドウに移動
-                vim.api.nvim_set_current_win(win)
-
-                -- バッファを削除して再描画
-                vim.api.nvim_buf_delete(buf, { force = true })
-                require("gitgraph").draw({}, { all = true, max_count = 5000 })
-
-                vim.schedule(function()
-                  vim.bo.buflisted = true
-
-                  -- カーソル位置とビューを復元（エラー防止でpcall使用）
-                  local new_buf = vim.api.nvim_win_get_buf(win)
-                  local line_count = vim.api.nvim_buf_line_count(new_buf)
-                  if cursor_pos[1] <= line_count then
-                    pcall(vim.api.nvim_win_set_cursor, win, cursor_pos)
-                  end
-                  if view then
-                    pcall(vim.fn.winrestview, view)
-                  end
-
-                  -- 元のウィンドウに戻る
-                  if vim.api.nvim_win_is_valid(current_win) then
-                    vim.api.nvim_set_current_win(current_win)
-                  end
-                end)
-                break
-              end
+            if vim.api.nvim_win_get_buf(win) == gitgraph_buf then
+              vim.api.nvim_set_current_win(win)
+              return
             end
           end
-        end,
-      })
+          -- ウィンドウが閉じられている場合は新しいウィンドウで開く
+          vim.cmd("buffer " .. gitgraph_buf)
+        else
+          -- 新規作成
+          require("gitgraph").draw({}, { all = true, max_count = 5000 })
+          vim.schedule(function()
+            vim.bo.buflisted = true
+            -- rキーでリロード
+            vim.keymap.set("n", "r", reload_gitgraph_buffer, { buffer = true, desc = "Reload git graph" })
+          end)
+        end
+      end
+
+      vim.keymap.set("n", "<leader>gl", open_gitgraph, { desc = "Git: Log graph" })
     end,
   },
 
