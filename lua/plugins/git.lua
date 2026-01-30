@@ -131,6 +131,7 @@ return {
 
         -- 新しい空のバッファを作成してから古いバッファを削除
         vim.cmd("enew")
+        local temp_buf = vim.api.nvim_get_current_buf()  -- enewで作成された一時バッファ
         pcall(vim.api.nvim_buf_delete, current_buf, { force = true })
 
         -- 再描画
@@ -147,6 +148,13 @@ return {
           vim.bo.buflisted = true
           -- rキーマッピングを再設定
           vim.keymap.set("n", "r", reload_gitgraph_buffer, { buffer = true, desc = "Reload git graph" })
+
+          -- enewで作成された一時バッファを削除
+          vim.defer_fn(function()
+            if vim.api.nvim_buf_is_valid(temp_buf) then
+              pcall(vim.api.nvim_buf_delete, temp_buf, { force = true })
+            end
+          end, 50)
         end)
       end
 
