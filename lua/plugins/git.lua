@@ -120,7 +120,30 @@ return {
       })
 
       vim.keymap.set("n", "<leader>gl", function()
+        -- 既存のgitgraphバッファを探す
+        for _, buf in ipairs(vim.api.nvim_list_bufs()) do
+          if vim.api.nvim_buf_is_valid(buf) then
+            local name = vim.api.nvim_buf_get_name(buf)
+            if name:match("GitGraph") then
+              -- 既存のバッファのウィンドウを探す
+              for _, win in ipairs(vim.api.nvim_list_wins()) do
+                if vim.api.nvim_win_get_buf(win) == buf then
+                  vim.api.nvim_set_current_win(win)
+                  return
+                end
+              end
+              -- ウィンドウがなければバッファを開く
+              vim.cmd("buffer " .. buf)
+              return
+            end
+          end
+        end
+        -- 新規作成
         require("gitgraph").draw({}, { all = true, max_count = 5000 })
+        -- バッファをlistedに設定（タブバーに表示されるように）
+        vim.schedule(function()
+          vim.bo.buflisted = true
+        end)
       end, { desc = "Git: Log graph" })
     end,
   },

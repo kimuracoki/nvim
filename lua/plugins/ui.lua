@@ -165,7 +165,7 @@ return {
         options = {
           component_separators = { left = "", right = "" },
           section_separators = { left = "", right = "" },
-          ignore_focus = { "NvimTree", "Trouble", "aerial" },
+          ignore_focus = { "neo-tree", "Trouble", "aerial" },
         },
       })
     end,
@@ -199,7 +199,7 @@ return {
           diagnostics_update_in_insert = false,
           offsets = {
             {
-              filetype = "NvimTree",
+              filetype = "neo-tree",
               text = "File Explorer",
               text_align = "left",
             },
@@ -248,25 +248,103 @@ return {
   -- アイコン
   { "nvim-tree/nvim-web-devicons" },
 
-  -- ファイラ (VSCode のエクスプローラー的)
+  -- ファイラ (VSCode のエクスプローラー的) + Git変更ファイル表示
   {
-    "nvim-tree/nvim-tree.lua",
+    "nvim-neo-tree/neo-tree.nvim",
+    branch = "v3.x",
+    dependencies = {
+      "nvim-lua/plenary.nvim",
+      "nvim-tree/nvim-web-devicons",
+      "MunifTanjim/nui.nvim",
+    },
     config = function()
-      require("nvim-tree").setup({
-        view = {
-          width = 30,
-          preserve_window_proportions = true,  -- ウィンドウ比率を維持
+      require("neo-tree").setup({
+        close_if_last_window = true,
+        popup_border_style = "rounded",
+        enable_git_status = true,
+        enable_diagnostics = true,
+        -- ソース切り替えタブを上部に表示
+        source_selector = {
+          winbar = true,
+          statusline = false,
+          sources = {
+            { source = "filesystem", display_name = " 󰉓 Files " },
+            { source = "git_status", display_name = " 󰊢 Git " },
+            { source = "buffers", display_name = " 󰈚 Buffers " },
+          },
         },
-        renderer = {
-          highlight_git = true,
-          icons = {
-            show = {
-              git = true,
+        default_component_configs = {
+          indent = {
+            indent_size = 2,
+            with_markers = true,
+          },
+          icon = {
+            folder_closed = "",
+            folder_open = "",
+            folder_empty = "",
+          },
+          git_status = {
+            symbols = {
+              added = "✚",
+              modified = "",
+              deleted = "✖",
+              renamed = "󰁕",
+              untracked = "",
+              ignored = "",
+              unstaged = "󰄱",
+              staged = "",
+              conflict = "",
+            },
+          },
+        },
+        window = {
+          position = "left",
+          width = 30,
+          mappings = {
+            ["<space>"] = "none", -- leaderキーと競合しないように
+            ["<tab>"] = "toggle_node",
+            ["<cr>"] = "open",
+            ["s"] = "open_split",
+            ["v"] = "open_vsplit",
+            ["a"] = "add",
+            ["d"] = "delete",
+            ["r"] = "rename",
+            ["c"] = "copy",
+            ["m"] = "move",
+            ["q"] = "close_window",
+            ["R"] = "refresh",
+            ["?"] = "show_help",
+          },
+        },
+        filesystem = {
+          filtered_items = {
+            visible = false,
+            hide_dotfiles = false,
+            hide_gitignored = false,
+          },
+          follow_current_file = {
+            enabled = true,
+          },
+          use_libuv_file_watcher = true,
+        },
+        git_status = {
+          window = {
+            position = "left",
+            mappings = {
+              ["A"] = "git_add_all",
+              ["gu"] = "git_unstage_file",
+              ["ga"] = "git_add_file",
+              ["gr"] = "git_revert_file",
+              ["gc"] = "git_commit",
+              ["gp"] = "git_push",
+              ["gg"] = "git_commit_and_push",
             },
           },
         },
       })
-      vim.keymap.set("n", "<leader>e", ":NvimTreeToggle<CR>", { desc = "Explorer: Toggle" })
+      -- キーマップ
+      vim.keymap.set("n", "<leader>e", "<cmd>Neotree toggle<cr>", { desc = "Explorer: Toggle" })
+      vim.keymap.set("n", "<leader>ge", "<cmd>Neotree git_status toggle<cr>", { desc = "Git: Explorer (changed files)" })
     end,
   },
 
