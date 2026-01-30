@@ -22,8 +22,6 @@ function M.setup()
   vim.api.nvim_set_hl(0, "NeoTreeWinSeparator",  { bg = "none", fg = "none" })
   vim.api.nvim_set_hl(0, "NeoTreeTabActive",     { bg = "none" })
   vim.api.nvim_set_hl(0, "NeoTreeTabInactive",   { bg = "none" })
-  vim.api.nvim_set_hl(0, "NeoTreeTabSeparatorActive",   { bg = "none" })
-  vim.api.nvim_set_hl(0, "NeoTreeTabSeparatorInactive", { bg = "none" })
 
   -- Trouble.nvimの透過（問題タブ）
   vim.api.nvim_set_hl(0, "TroubleNormal",   { bg = "none" })

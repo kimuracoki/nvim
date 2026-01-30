@@ -621,7 +621,7 @@ return {
       local codewindow = require("codewindow")
       codewindow.setup({
         active_in_terminals = false,
-        auto_enable = false,
+        auto_enable = true,
         exclude_filetypes = { "NvimTree", "Trouble", "aerial" },
         max_minimap_height = nil,
         max_lines = nil,
