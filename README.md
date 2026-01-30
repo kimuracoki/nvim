@@ -99,11 +99,48 @@ Buffer = バッファ（開いているファイル）
 
 ## Explorer (`<leader>e`)
 
-Explorer = ファイルエクスプローラー
+Explorer = ファイルエクスプローラー（neo-tree）
 
 | キー | 機能 | 由来 |
 |------|------|------|
 | `<leader>e` | ファイルツリーをトグル | **E**xplorer |
+| `<leader>ge` | Git変更ファイル一覧 | **G**it: **E**xplorer |
+
+### Neo-tree の機能
+
+Neo-treeは3つのビューを上部タブで切り替えられます：
+- **Files** (📁) - ファイルシステムブラウザ
+- **Git** (󰊢) - Git変更ファイル一覧（VSCodeのSource Control Files相当）
+- **Buffers** (󰈚) - 開いているバッファ一覧
+
+#### ファイル操作キーマップ（Neo-tree内）
+
+| キー | 機能 |
+|------|------|
+| `<tab>` | ファイル/フォルダを開く/閉じる |
+| `<cr>` | ファイルを開く |
+| `s` | 横分割で開く |
+| `v` | 縦分割で開く |
+| `a` | 新規ファイル/フォルダ作成 |
+| `d` | 削除 |
+| `r` | リネーム |
+| `c` | コピー |
+| `m` | 移動 |
+| `q` | 閉じる |
+| `R` | リフレッシュ |
+| `?` | ヘルプ表示 |
+
+#### Git操作（Gitビュー内）
+
+| キー | 機能 |
+|------|------|
+| `A` | すべての変更をステージ |
+| `ga` | ファイルをステージ |
+| `gu` | ファイルをアンステージ |
+| `gr` | ファイルを元に戻す |
+| `gc` | コミット |
+| `gp` | プッシュ |
+| `gg` | コミット&プッシュ |
 
 ## Find/File操作 (`<leader>f`)
 
@@ -171,16 +208,86 @@ Git = Git操作
 | キー | 機能 | 由来 |
 |------|------|------|
 | `<leader>gg` | Neogit（ステータス） | **G**it: Neo**g**it |
-| `<leader>gL` | Lazygit | **G**it: **L**azygit |
-| `<leader>gl` | Gitグラフ | **G**it: **l**og graph |
+| `<leader>gL` | Lazygit（右側パネル） | **G**it: **L**azygit |
+| `<leader>gl` | Gitグラフ（gitgraph） | **G**it: **l**og graph |
 | `<leader>gH` | 履歴グラフ（Flog） | **G**it: **H**istory |
-| `<leader>gh` | ファイル履歴 | **G**it: **h**istory (file) |
+| `<leader>gh` | ファイル履歴（diffview） | **G**it: **h**istory (file) |
+| `<leader>ge` | Git変更ファイル一覧 | **G**it: **e**xplorer |
 | `<leader>gd` | Diff表示 | **G**it: **d**iff |
 | `<leader>gD` | Diff閉じる | **G**it: **D**iff close |
 | `<leader>gs` | ハンクをステージ | **G**it: **s**tage |
 | `<leader>gr` | ハンクをリセット | **G**it: **r**eset |
 | `<leader>gb` | 行のblame | **G**it: **b**lame |
 | `<leader>gp` | ハンクをプレビュー | **G**it: **p**review |
+| `<leader>gu` | ステージをアンドゥ | **G**it: **u**ndo stage |
+| `]c` | 次のハンク | Next hunk |
+| `[c` | 前のハンク | Previous hunk |
+
+### GitHub PR/Issue操作 (Octo.nvim)
+
+Neovim内でGitHub PR/Issueを直接操作できます。
+
+| キー | 機能 | 由来 |
+|------|------|------|
+| `<leader>go` | Octoメニューを開く | **G**it: **O**cto |
+| `<leader>gpc` | PRを作成 | **G**it: **P**R **c**reate |
+| `<leader>gpl` | PR一覧 | **G**it: **P**R **l**ist |
+| `<leader>gps` | PR検索 | **G**it: **P**R **s**earch |
+| `<leader>gic` | Issueを作成 | **G**it: **I**ssue **c**reate |
+| `<leader>gil` | Issue一覧 | **G**it: **I**ssue **l**ist |
+
+#### PR/Issue内での操作
+
+PRやIssueを開いた後、以下のキーバインドが利用可能です：
+
+**コメント・レビュー操作**
+- `<space>ca` - コメント追加
+- `<space>cd` - コメント削除
+- `]c` / `[c` - 次/前のコメントへ移動
+- `<C-r>` - リロード
+- `<C-b>` - ブラウザで開く
+- `<C-y>` - URLをコピー
+
+**PR操作**
+- `<space>po` - PRをチェックアウト
+- `<space>pm` - PRをマージ
+- `<space>psm` - Squash & Merge
+- `<space>prm` - Rebase & Merge
+- `<space>pc` - コミット一覧
+- `<space>pf` - 変更ファイル一覧
+- `<space>pd` - PR差分表示
+
+**レビュー操作**
+- `<space>vs` - レビュー開始
+- `<space>vr` - レビュー再開
+- `<space>va` - レビュー承認
+- `<space>vc` - レビューコメント
+- `<space>vd` - レビュー却下
+
+**その他**
+- `<space>aa` / `<space>ad` - アサイニー追加/削除
+- `<space>la` / `<space>ld` - ラベル追加/削除
+- `<space>r+` / `<space>r-` - リアクション（👍/👎）
+- `<space>rh` / `<space>rp` - リアクション（❤️/🎉）
+
+### Gitグラフ機能
+
+#### Gitgraph (`<leader>gl`)
+- VSCodeのGitGraph拡張相当の視覚的なコミット履歴表示
+- ブランチ構造が美しいASCIIアートで表示されます
+- コミットを選択すると自動的にdiffviewで差分が表示されます
+- 範囲選択（複数コミット）にも対応
+- Catppuccin Mochaテーマに最適化された配色
+
+#### Flog (`<leader>gH`)
+- Vimの伝統的なコミットグラフビューア
+- vim-fugitiveと統合された履歴表示
+- より詳細なコミット情報を表示
+
+#### Diffview (`<leader>gh`)
+- ファイル単位の変更履歴を閲覧
+- 差分を見やすく表示
+- `:DiffviewFileHistory` で表示
 
 ## Terminal (`<leader>t`)
 
@@ -305,24 +412,38 @@ Window = ウィンドウ操作
 
 ### 通知システム
 - 改善された通知表示（nvim-notify）
+- フローティングウィンドウで通知が表示されます
+
+### コマンドライン・メッセージ表示
+- コマンドライン入力が中央のフローティングウィンドウに表示されます（noice.nvim）
+- 検索結果もフローティングウィンドウで表示され、見やすくなっています
+- LSPドキュメントもマークダウン形式で見やすく表示されます
+
+### キーバインドヘルプ
+- `<leader>` キーを押すと、利用可能なキーバインドがポップアップ表示されます（which-key.nvim）
+- 各キーマップのカテゴリと説明が表示されるため、覚えやすくなっています
 
 ## 補足
 
 - `<leader>` キーはデフォルトでスペースキー（` `）です
 - 複数ファイルを同時に開くことができます（`hidden`オプション有効）
-- 起動時に自動的にファイルツリーと問題パネルが開きます
+- 起動時に自動的にレイアウトが設定され、ファイルツリーと問題パネルが開きます
+- ミニマップは自動的に有効化されます（`<leader>um`でトグル可能）
+- フォーカスが外れると自動的にファイルが保存されます
 
 ## プラグイン一覧
 
 ### UI
 - `bufferline.nvim` - ファイルタブ
 - `lualine.nvim` - ステータスライン
-- `nvim-tree` - ファイルエクスプローラー
+- `neo-tree.nvim` - ファイルエクスプローラー（ファイル/Git/バッファビュー）
 - `telescope.nvim` - ファジーファインダー
 - `aerial.nvim` - シンボルアウトライン
 - `trouble.nvim` - 問題パネル
 - `nvim-notify` - 通知システム
-- `codewindow.nvim` - ミニマップ
+- `noice.nvim` - コマンドライン/メッセージのフローティング表示
+- `which-key.nvim` - キーバインドのヘルプ表示
+- `codewindow.nvim` - ミニマップ（VSCodeの右側コードマップ）
 
 ### エディタ機能
 - `nvim-treesitter` - 構文ハイライト
@@ -343,10 +464,13 @@ Window = ウィンドウ操作
 - `nvim-dap-ui` - デバッガーUI
 
 ### Git
-- `gitsigns.nvim` - Git差分表示
-- `neogit` - Git管理
-- `diffview.nvim` - 差分表示
-- `lazygit` - Git TUI
+- `gitsigns.nvim` - Git差分表示（ハンクナビゲーション/ステージング）
+- `neogit` - Git管理（VSCodeのSource Control相当）
+- `diffview.nvim` - 差分表示（ブランチ比較/履歴閲覧）
+- `gitgraph.nvim` - コミットグラフ（GitGraph相当）
+- `vim-flog` - 履歴グラフビュー
+- `lazygit` - Git TUI（ターミナルベースのGit UI）
+- `octo.nvim` - GitHub PR/Issue管理（Neovim内でPR操作完結）
 
 ### AI機能
 - `claudecode.nvim` - Claude Code統合（AIアシスタント）
@@ -382,13 +506,12 @@ Window = ウィンドウ操作
 │   │   ├── options.lua      # Neovimオプション設定
 │   │   ├── keymaps.lua      # キーマップ設定
 │   │   ├── lazy.lua         # プラグインマネージャー設定
-│   │   ├── highlight.lua    # ハイライト設定
-│   │   └── startup.lua      # 起動時設定
+│   │   ├── highlight.lua    # ハイライト・透過設定
+│   │   └── startup.lua      # 起動時レイアウト設定
 │   └── plugins/
-│       ├── ui.lua           # UI関連プラグイン
-│       ├── editor.lua       # エディタ機能プラグイン
-│       ├── lsp.lua          # LSP・補完プラグイン
-│       ├── git.lua          # Git関連プラグイン
-│       └── ai.lua           # AI機能プラグイン
+│       ├── ui.lua           # UI関連（カラースキーム、ステータスライン、ファイラ、AI統合）
+│       ├── editor.lua       # エディタ機能（構文ハイライト、補完、フォーマッター）
+│       ├── lsp.lua          # LSP・補完（Language Server設定）
+│       └── git.lua          # Git関連（gitsigns、neogit、diffview、gitgraph、octo）
 └── README.md                # このファイル
 ```
