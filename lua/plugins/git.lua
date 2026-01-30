@@ -58,15 +58,18 @@ return {
     "isakbm/gitgraph.nvim",
     dependencies = { "sindrets/diffview.nvim" },
     config = function()
-      -- 透過ターミナル用の高コントラストハイライト
-      vim.api.nvim_set_hl(0, "GitGraphHash", { fg = "#00d7ff", bold = true })
-      vim.api.nvim_set_hl(0, "GitGraphTimestamp", { fg = "#00ff87" })
-      vim.api.nvim_set_hl(0, "GitGraphAuthor", { fg = "#ffff00" })
-      vim.api.nvim_set_hl(0, "GitGraphBranchName", { fg = "#ff87ff", bold = true })
-      vim.api.nvim_set_hl(0, "GitGraphBranchTag", { fg = "#ff5f5f", bold = true })
-      vim.api.nvim_set_hl(0, "GitGraphBranchMsg", { fg = "#ffffff" })
-      -- ブランチカラー（高コントラスト）
-      for i, color in ipairs({ "#ffffff", "#00ffff", "#00ff00", "#ffff00", "#ff8700", "#ff5fff", "#ff5f5f", "#87d7ff" }) do
+      -- Catppuccin Mocha カラーパレット
+      vim.api.nvim_set_hl(0, "GitGraphHash", { fg = "#89b4fa" })           -- Blue
+      vim.api.nvim_set_hl(0, "GitGraphTimestamp", { fg = "#bac2de" })      -- Subtext0
+      vim.api.nvim_set_hl(0, "GitGraphAuthor", { fg = "#f5c2e7" })         -- Pink
+      vim.api.nvim_set_hl(0, "GitGraphBranchMsg", { fg = "#ffffff" })              -- 白
+      -- ブランチ名（Green背景バッジ）
+      vim.api.nvim_set_hl(0, "GitGraphBranchName", { fg = "#1e1e2e", bg = "#a6e3a1", bold = true })
+      -- タグ（Mauve背景バッジ）
+      vim.api.nvim_set_hl(0, "GitGraphBranchTag", { fg = "#1e1e2e", bg = "#cba6f7", bold = true })
+      -- ブランチカラー（Catppuccin Mocha）
+      local branch_colors = { "#89b4fa", "#a6e3a1", "#f9e2af", "#f38ba8", "#cba6f7", "#89dceb", "#94e2d5", "#fab387" }
+      for i, color in ipairs(branch_colors) do
         vim.api.nvim_set_hl(0, "GitGraphBranch" .. i, { fg = color })
       end
 
