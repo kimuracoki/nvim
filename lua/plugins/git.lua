@@ -56,13 +56,61 @@ return {
   -- GitGraph相当（コミットグラフ）
   {
     "isakbm/gitgraph.nvim",
-    dependencies = { "nvim-lua/plenary.nvim" },
-    config = function()
-      -- Gitグラフ表示
-      vim.keymap.set("n", "<leader>gl", function()
-        require("gitgraph").draw({}, { all = true, max_count = 200 })
-      end, { desc = "Git: Log graph" })
-    end,
+    dependencies = { "sindrets/diffview.nvim" },
+    opts = {
+      symbols = {
+        merge_commit = "○",
+        commit = "●",
+        merge_commit_end = "○",
+        commit_end = "●",
+        -- Advanced symbols
+        GVER = "│",
+        GHOR = "─",
+        GCLD = "╮",
+        GCRD = "╭",
+        GCLU = "╯",
+        GCRU = "╰",
+        GLRU = "┴",
+        GLRD = "┬",
+        GLUD = "┤",
+        GRUD = "├",
+        GFORKU = "┼",
+        GFORKD = "┼",
+        GRUDCD = "├",
+        GRUDCU = "┡",
+        GLUDCD = "┪",
+        GLUDCU = "┩",
+        GLRDCL = "┬",
+        GLRDCR = "┬",
+        GLRUCL = "┴",
+        GLRUCR = "┴",
+      },
+      format = {
+        timestamp = "%Y-%m-%d %H:%M",
+        fields = { "hash", "timestamp", "author", "branch_name", "tag" },
+      },
+      hooks = {
+        -- コミット選択時に diffview で差分表示
+        on_select_commit = function(commit)
+          vim.notify("DiffviewOpen " .. commit.hash .. "^!")
+          vim.cmd(":DiffviewOpen " .. commit.hash .. "^!")
+        end,
+        -- 範囲選択時に diffview で差分表示
+        on_select_range_commit = function(from, to)
+          vim.notify("DiffviewOpen " .. from.hash .. "~1.." .. to.hash)
+          vim.cmd(":DiffviewOpen " .. from.hash .. "~1.." .. to.hash)
+        end,
+      },
+    },
+    keys = {
+      {
+        "<leader>gl",
+        function()
+          require("gitgraph").draw({}, { all = true, max_count = 5000 })
+        end,
+        desc = "Git: Log graph",
+      },
+    },
   },
 
   -- ToggleTerm（ターミナル管理とlazygit統合）
