@@ -229,7 +229,7 @@ return {
         reaction_viewer_hint_icon = "",
         user_icon = " ",
         timeline_marker = "",
-        timeline_indent = "2",
+        timeline_indent = 2,
         right_bubble_delimiter = "",
         left_bubble_delimiter = "",
         github_hostname = "",
@@ -343,9 +343,9 @@ return {
             react_confused = { lhs = "<space>rc", desc = "add/remove 😕 reaction" },
           },
           submit_win = {
-            approve_review = { lhs = "<C-a>", desc = "approve review" },
-            comment_review = { lhs = "<C-m>", desc = "comment review" },
-            request_changes = { lhs = "<C-r>", desc = "request changes review" },
+            approve_review = { lhs = "<leader>va", desc = "approve review" },
+            comment_review = { lhs = "<leader>vc", desc = "comment review" },
+            request_changes = { lhs = "<leader>vr", desc = "request changes review" },
             close_review_tab = { lhs = "<C-c>", desc = "close review tab" },
           },
           review_diff = {
