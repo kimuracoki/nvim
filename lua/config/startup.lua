@@ -3,8 +3,8 @@ local M = {}
 function M.setup_layout()
   vim.defer_fn(function()
     -- 左側にツリーを開く
-    if vim.fn.exists(":NvimTreeOpen") == 2 then
-      vim.cmd("NvimTreeOpen")
+    if vim.fn.exists(":Neotree") == 2 then
+      vim.cmd("Neotree show")
       vim.cmd("wincmd l") -- エディタに移動
     end
     

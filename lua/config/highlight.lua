@@ -15,11 +15,15 @@ function M.setup()
   vim.api.nvim_set_hl(0, "SignColumn", { bg = "none" })
   vim.api.nvim_set_hl(0, "LineNr",     { bg = "none" })
 
-  -- nvim-treeの透過
-  vim.api.nvim_set_hl(0, "NvimTreeNormal",       { bg = "none" })
-  vim.api.nvim_set_hl(0, "NvimTreeNormalNC",     { bg = "none" })
-  vim.api.nvim_set_hl(0, "NvimTreeEndOfBuffer",  { bg = "none" })
-  vim.api.nvim_set_hl(0, "NvimTreeWinSeparator", { bg = "none", fg = "none" })
+  -- neo-treeの透過
+  vim.api.nvim_set_hl(0, "NeoTreeNormal",        { bg = "none" })
+  vim.api.nvim_set_hl(0, "NeoTreeNormalNC",      { bg = "none" })
+  vim.api.nvim_set_hl(0, "NeoTreeEndOfBuffer",   { bg = "none" })
+  vim.api.nvim_set_hl(0, "NeoTreeWinSeparator",  { bg = "none", fg = "none" })
+  vim.api.nvim_set_hl(0, "NeoTreeTabActive",     { bg = "none" })
+  vim.api.nvim_set_hl(0, "NeoTreeTabInactive",   { bg = "none" })
+  vim.api.nvim_set_hl(0, "NeoTreeTabSeparatorActive",   { bg = "none" })
+  vim.api.nvim_set_hl(0, "NeoTreeTabSeparatorInactive", { bg = "none" })
 
   -- Trouble.nvimの透過（問題タブ）
   vim.api.nvim_set_hl(0, "TroubleNormal",   { bg = "none" })
