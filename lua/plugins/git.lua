@@ -120,31 +120,53 @@ return {
       })
 
       vim.keymap.set("n", "<leader>gl", function()
-        -- 既存のgitgraphバッファを探す
+        -- 既存のgitgraphバッファを探して削除（最新の状態を取得するため）
         for _, buf in ipairs(vim.api.nvim_list_bufs()) do
           if vim.api.nvim_buf_is_valid(buf) then
             local name = vim.api.nvim_buf_get_name(buf)
             if name:match("GitGraph") then
-              -- 既存のバッファのウィンドウを探す
-              for _, win in ipairs(vim.api.nvim_list_wins()) do
-                if vim.api.nvim_win_get_buf(win) == buf then
-                  vim.api.nvim_set_current_win(win)
-                  return
-                end
-              end
-              -- ウィンドウがなければバッファを開く
-              vim.cmd("buffer " .. buf)
-              return
+              vim.api.nvim_buf_delete(buf, { force = true })
             end
           end
         end
-        -- 新規作成
+        -- 常に最新のグラフを描画
         require("gitgraph").draw({}, { all = true, max_count = 5000 })
         -- バッファをlistedに設定（タブバーに表示されるように）
         vim.schedule(function()
           vim.bo.buflisted = true
         end)
       end, { desc = "Git: Log graph" })
+
+      -- gitgraphバッファの自動リロード
+      vim.api.nvim_create_autocmd({ "BufWritePost", "FocusGained" }, {
+        pattern = "*",
+        callback = function()
+          -- gitgraphバッファが開いている場合のみリロード
+          for _, win in ipairs(vim.api.nvim_list_wins()) do
+            local buf = vim.api.nvim_win_get_buf(win)
+            if vim.api.nvim_buf_is_valid(buf) then
+              local name = vim.api.nvim_buf_get_name(buf)
+              if name:match("GitGraph") then
+                -- 現在のウィンドウを保存
+                local current_win = vim.api.nvim_get_current_win()
+                -- gitgraphウィンドウに移動
+                vim.api.nvim_set_current_win(win)
+                -- バッファを削除して再描画
+                vim.api.nvim_buf_delete(buf, { force = true })
+                require("gitgraph").draw({}, { all = true, max_count = 5000 })
+                vim.schedule(function()
+                  vim.bo.buflisted = true
+                end)
+                -- 元のウィンドウに戻る
+                if vim.api.nvim_win_is_valid(current_win) then
+                  vim.api.nvim_set_current_win(current_win)
+                end
+                break
+              end
+            end
+          end
+        end,
+      })
     end,
   },
 
