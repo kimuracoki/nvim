@@ -279,9 +279,10 @@ return {
             with_markers = true,
           },
           icon = {
-            folder_closed = "",
-            folder_open = "",
-            folder_empty = "",
+            folder_closed = "󰉋",
+            folder_open = "󰝰",
+            folder_empty = "󰉖",
+            default = "",
           },
           git_status = {
             symbols = {
