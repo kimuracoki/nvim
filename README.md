@@ -207,18 +207,16 @@ Git = Git操作
 
 | キー | 機能 | 由来 |
 |------|------|------|
-| `<leader>gg` | Neogit（ステータス） | **G**it: Neo**g**it |
-| `<leader>gL` | Lazygit（右側パネル） | **G**it: **L**azygit |
+| `<leader>gg` | Lazygit | **G**it: Lazy**g**it |
 | `<leader>gl` | Gitグラフ（gitgraph） | **G**it: **l**og graph |
-| `<leader>gH` | 履歴グラフ（Flog） | **G**it: **H**istory |
 | `<leader>gh` | ファイル履歴（diffview） | **G**it: **h**istory (file) |
 | `<leader>ge` | Git変更ファイル一覧 | **G**it: **e**xplorer |
 | `<leader>gd` | Diff表示 | **G**it: **d**iff |
 | `<leader>gD` | Diff閉じる | **G**it: **D**iff close |
 | `<leader>gs` | ハンクをステージ | **G**it: **s**tage |
 | `<leader>gr` | ハンクをリセット | **G**it: **r**eset |
+| `<leader>gv` | ハンクをプレビュー | **G**it: **v**iew hunk |
 | `<leader>gb` | 行のblame | **G**it: **b**lame |
-| `<leader>gp` | ハンクをプレビュー | **G**it: **p**review |
 | `<leader>gu` | ステージをアンドゥ | **G**it: **u**ndo stage |
 | `]c` | 次のハンク | Next hunk |
 | `[c` | 前のハンク | Previous hunk |
@@ -279,11 +277,6 @@ PRやIssueを開いた後、以下のキーバインドが利用可能です：
 - 範囲選択（複数コミット）にも対応
 - Catppuccin Mochaテーマに最適化された配色
 
-#### Flog (`<leader>gH`)
-- Vimの伝統的なコミットグラフビューア
-- vim-fugitiveと統合された履歴表示
-- より詳細なコミット情報を表示
-
 #### Diffview (`<leader>gh`)
 - ファイル単位の変更履歴を閲覧
 - 差分を見やすく表示
@@ -297,7 +290,8 @@ Terminal = ターミナル
 |------|------|------|
 | `<leader>tt` | ターミナルをトグル | **T**erminal **T**oggle |
 | `<C-\>` | ターミナルをトグル | ToggleTermデフォルト |
-| `<Esc>` / `jk` | ターミナルモードを終了 | - |
+| `<Esc>` | ターミナルモードを終了 | 通常ターミナルのみ |
+| `<C-h/j/k/l>` | ターミナルからウィンドウ移動 | Vim慣例 |
 
 ## Run (`<leader>r`)
 
@@ -368,13 +362,13 @@ Claude Codeは、CursorのようなAIアシスタント体験をNeovimで実現�
 | `<C-k>` | Claude Codeを開く（挿入モード） | Cursor準拠 |
 
 ### 表示設定
-- **フローティングウィンドウ表示**: 中央に85%サイズでポップアップ表示（nvim-treeと競合しない）
+- **右側分割表示**: 現在のウィンドウの右側に幅80で表示
 - **自動コンテキスト追跡**: 現在のファイルと選択範囲が自動的にClaude Codeに共有されます
 
 ### 操作方法
 - `<leader>ii` で開く/閉じる
 - `<C-\>` でClaude Codeを隠す（ターミナル内から）
-- Claude Code内では通常のターミナル操作が可能（`<Esc>`や`jk`は競合しない）
+- Claude Code内では通常のターミナル操作が可能
 
 ### 使い方の例
 1. `<leader>ii`でClaude Codeを開く
@@ -465,11 +459,9 @@ Window = ウィンドウ操作
 
 ### Git
 - `gitsigns.nvim` - Git差分表示（ハンクナビゲーション/ステージング）
-- `neogit` - Git管理（VSCodeのSource Control相当）
 - `diffview.nvim` - 差分表示（ブランチ比較/履歴閲覧）
 - `gitgraph.nvim` - コミットグラフ（GitGraph相当）
-- `vim-flog` - 履歴グラフビュー
-- `lazygit` - Git TUI（ターミナルベースのGit UI）
+- `toggleterm.nvim` + `lazygit` - Git TUI（フローティングウィンドウ）
 - `octo.nvim` - GitHub PR/Issue管理（Neovim内でPR操作完結）
 
 ### AI機能
@@ -512,6 +504,6 @@ Window = ウィンドウ操作
 │       ├── ui.lua           # UI関連（カラースキーム、ステータスライン、ファイラ、AI統合）
 │       ├── editor.lua       # エディタ機能（構文ハイライト、補完、フォーマッター）
 │       ├── lsp.lua          # LSP・補完（Language Server設定）
-│       └── git.lua          # Git関連（gitsigns、neogit、diffview、gitgraph、octo）
+│       └── git.lua          # Git関連（gitsigns、diffview、gitgraph、lazygit、octo）
 └── README.md                # このファイル
 ```

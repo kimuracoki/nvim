@@ -381,6 +381,9 @@ return {
         dapui.close()
       end
       vim.keymap.set("n", "<F5>", dap.continue, { desc = "Debug: Start/Continue" })
+      vim.keymap.set("n", "<F1>", dap.step_into, { desc = "Debug: Step into" })
+      vim.keymap.set("n", "<F2>", dap.step_over, { desc = "Debug: Step over" })
+      vim.keymap.set("n", "<F3>", dap.step_out, { desc = "Debug: Step out" })
       vim.keymap.set("n", "<leader>db", dap.toggle_breakpoint, { desc = "Debug: Breakpoint toggle" })
     end,
   },

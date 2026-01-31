@@ -26,7 +26,7 @@ return {
       vim.keymap.set("v", "<leader>gr", function() gs.reset_hunk({ vim.fn.line("."), vim.fn.line("v") }) end, { desc = "Git: Reset selection" })
 
       -- その他
-      vim.keymap.set("n", "<leader>gp", gs.preview_hunk, { desc = "Git: Preview hunk" })
+      vim.keymap.set("n", "<leader>gv", gs.preview_hunk, { desc = "Git: View hunk (preview)" })
       vim.keymap.set("n", "<leader>gb", function() gs.blame_line({ full = true }) end, { desc = "Git: Blame line" })
       vim.keymap.set("n", "<leader>gu", gs.undo_stage_hunk, { desc = "Git: Undo stage" })
     end,
@@ -230,9 +230,8 @@ return {
         lazygit:toggle()
       end
 
-      -- キーマップ設定（neogitの代わりに<leader>ggも設定）
+      -- キーマップ設定
       vim.keymap.set("n", "<leader>gg", _lazygit_toggle, { desc = "Git: Lazygit" })
-      vim.keymap.set("n", "<leader>gL", _lazygit_toggle, { desc = "Git: Lazygit" })
     end,
   },
 
