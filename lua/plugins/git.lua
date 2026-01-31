@@ -32,16 +32,6 @@ return {
     end,
   },
 
-  -- VSCodeのSource Controlに近い操作感（コミット/ブランチ/ステージング）
-  {
-    "NeogitOrg/neogit",
-    dependencies = { "nvim-lua/plenary.nvim" },
-    config = function()
-      require("neogit").setup()
-      vim.keymap.set("n", "<leader>gg", function() require("neogit").open() end, { desc = "Git: Neogit (status)" })
-    end,
-  },
-
   -- ブランチ差分・履歴閲覧（VSCodeの差分ビュー強化）
   {
     "sindrets/diffview.nvim",
@@ -216,26 +206,22 @@ return {
         shell = vim.o.shell,
       })
 
-      -- Lazygit用のカスタムターミナル（右側に開く）
+      -- Lazygit用のカスタムターミナル（フローティングウィンドウ）
       local Terminal = require("toggleterm.terminal").Terminal
       local lazygit = Terminal:new({
         cmd = "lazygit",
         dir = "git_dir",
-        direction = "vertical",
-        size = 80,
+        direction = "float",
+        float_opts = {
+          border = "rounded",
+          width = function() return math.floor(vim.o.columns * 0.9) end,
+          height = function() return math.floor(vim.o.lines * 0.9) end,
+        },
         hidden = true,
-        close_on_exit = false, -- lazygitを閉じてもターミナルを閉じない
         on_open = function(term)
-          -- ターミナルバッファのオプションを設定
-          vim.api.nvim_buf_set_option(term.bufnr, "number", false)
-          vim.api.nvim_buf_set_option(term.bufnr, "relativenumber", false)
-          vim.api.nvim_buf_set_option(term.bufnr, "cursorline", false)
-          vim.api.nvim_buf_set_option(term.bufnr, "cursorcolumn", false)
-          -- ターミナルモードに入る（キーマッピングが正しく動作するように）
           vim.cmd("startinsert!")
-        end,
-        on_close = function(term)
-          -- 閉じる時の処理
+          -- lazygit内でESCが効くように、ターミナルモードのマッピングを無効化
+          vim.api.nvim_buf_set_keymap(term.bufnr, "t", "<Esc>", "<Esc>", { noremap = true, silent = true })
         end,
       })
 
@@ -244,20 +230,10 @@ return {
         lazygit:toggle()
       end
 
-      -- キーマップ設定
-      vim.keymap.set("n", "<leader>gL", function()
-        _lazygit_toggle()
-      end, { desc = "Git: Lazygit" })
+      -- キーマップ設定（neogitの代わりに<leader>ggも設定）
+      vim.keymap.set("n", "<leader>gg", _lazygit_toggle, { desc = "Git: Lazygit" })
+      vim.keymap.set("n", "<leader>gL", _lazygit_toggle, { desc = "Git: Lazygit" })
     end,
-  },
-    -- Flog（コミットグラフ / 履歴ビュー）
-  {
-    "rbong/vim-flog",
-    cmd = { "Flog", "Flogsplit", "Floggit" },
-    dependencies = { "tpope/vim-fugitive" },
-    keys = {
-      { "<leader>gH", "<cmd>Flog<cr>", desc = "Git: History graph (Flog)" },
-    },
   },
 
   -- GitHub PR/Issue管理（Neovim内でPR操作完結）

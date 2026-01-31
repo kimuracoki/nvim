@@ -54,14 +54,6 @@ return {
     end,
   },
 
-  -- Git 差分表示
-  {
-    "lewis6991/gitsigns.nvim",
-    config = function()
-      require("gitsigns").setup()
-    end,
-  },
-
   -- コメントトグル (VSCode の Ctrl+/ 的)
   {
     "numToStr/Comment.nvim",
