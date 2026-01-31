@@ -120,6 +120,21 @@ return {
     end,
   },
 
+  -- セッション管理（VSCodeの.vscode的な機能）
+  {
+    "rmagatti/auto-session",
+    lazy = false,
+    opts = {
+      auto_restore_enabled = true,
+      auto_save_enabled = true,
+      auto_session_suppress_dirs = { "~/", "~/Downloads", "/" },
+      -- セッションに保存する内容
+      session_lens = {
+        load_on_setup = true,
+      },
+    },
+  },
+
   -- コード折りたたみ
   {
     "kevinhwang91/nvim-ufo",
