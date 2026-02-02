@@ -6,7 +6,7 @@ return {
   { "hrsh7th/cmp-nvim-lsp" },
   { "hrsh7th/cmp-buffer" },
   { "hrsh7th/cmp-path" },
-  { "f3fora/cmp-spell" },  -- 英単語補完
+  { "f3fora/cmp-spell" }, -- 英単語補完
   { "L3MON4D3/LuaSnip" },
   { "saadparwaiz1/cmp_luasnip" },
 
@@ -53,15 +53,15 @@ return {
       open_no_results = true,
       win = {
         type = "split",
-        relative = "win",   -- 現在のウィンドウに対して相対的に開く
+        relative = "win", -- 現在のウィンドウに対して相対的に開く
         position = "bottom",
         size = 10,
       },
     },
     keys = {
       { "<leader>xx", "<cmd>Trouble diagnostics toggle filter.buf=0<cr>", desc = "Diagnostics: Buffer" },
-      { "<leader>xw", "<cmd>Trouble diagnostics toggle<cr>", desc = "Diagnostics: Workspace" },
-      { "<leader>xq", "<cmd>Trouble qflist toggle<cr>", desc = "Diagnostics: Quickfix list" },
+      { "<leader>xw", "<cmd>Trouble diagnostics toggle<cr>",              desc = "Diagnostics: Workspace" },
+      { "<leader>xq", "<cmd>Trouble qflist toggle<cr>",                   desc = "Diagnostics: Quickfix list" },
     },
   },
 
@@ -102,12 +102,12 @@ return {
           "bashls",
           "dockerls",
           "marksman",
-          "jdtls",      -- Java
-          "gopls",      -- Go
-          "clangd",     -- C/C++
+          "jdtls",        -- Java
+          "gopls",        -- Go
+          "clangd",       -- C/C++
           "intelephense", -- PHP
-          "ruby_lsp",   -- Ruby (Ruby LSP)
-          "hls",        -- Haskell
+          "ruby_lsp",     -- Ruby (Ruby LSP)
+          "hls",          -- Haskell
         },
         -- automatic_enable = true（デフォルト）
       })
@@ -231,12 +231,13 @@ return {
         root_dir = function(fname)
           -- .eslintrc.* または package.json があるディレクトリを探す
           local util = require("lspconfig.util")
-          return util.root_pattern(".eslintrc", ".eslintrc.js", ".eslintrc.json", ".eslintrc.yaml", ".eslintrc.yml", "eslint.config.js", "package.json")(fname)
-            or util.find_git_ancestor(fname)
-            or vim.fn.getcwd()
+          return util.root_pattern(".eslintrc", ".eslintrc.js", ".eslintrc.json", ".eslintrc.yaml", ".eslintrc.yml",
+                "eslint.config.js", "package.json")(fname)
+              or util.find_git_ancestor(fname)
+              or vim.fn.getcwd()
         end,
       })
-      
+
       -----------------------------------------------------------------------
       -- LSPのホバーウィンドウにボーダーを追加（透過のままでも見やすく）
       -----------------------------------------------------------------------
@@ -245,28 +246,28 @@ return {
       vim.lsp.util.open_floating_preview = function(contents, syntax, opts)
         opts = opts or {}
         -- ボーダーを設定（透過のままでも見やすくするため）
-        opts.border = opts.border or "rounded"  -- "single", "double", "rounded", "solid", "shadow" など
+        opts.border = opts.border or "rounded" -- "single", "double", "rounded", "solid", "shadow" など
         return original_open_floating_preview(contents, syntax, opts)
       end
-      
+
       -- カラースキーム変更時にFloatBorderの色を再設定
       vim.api.nvim_create_autocmd("ColorScheme", {
         callback = function()
           vim.defer_fn(function()
             -- ボーダーを目立たせる（透過のままでも見やすく）
-            vim.api.nvim_set_hl(0, "FloatBorder", { 
-              bg = "none", 
-              fg = "#808080",  -- グレーのボーダー
+            vim.api.nvim_set_hl(0, "FloatBorder", {
+              bg = "none",
+              fg = "#808080", -- グレーのボーダー
               bold = true,
             })
           end, 50)
         end,
       })
-      
+
       -- 初回設定
       vim.defer_fn(function()
-        vim.api.nvim_set_hl(0, "FloatBorder", { 
-          bg = "none", 
+        vim.api.nvim_set_hl(0, "FloatBorder", {
+          bg = "none",
           fg = "#808080",
           bold = true,
         })
@@ -309,9 +310,9 @@ return {
           {
             name = "spell",
             option = {
-              keep_all_entries = true,  -- すべての候補を表示
+              keep_all_entries = true, -- すべての候補を表示
               enable_in_context = function()
-                return true  -- 常に有効
+                return true            -- 常に有効
               end,
             },
           },
@@ -421,7 +422,7 @@ return {
           rust = "cd $dir && rustc $fileName && $dir/$fileNameWithoutExt",
           go = "cd $dir && go run $fileName",
           javascript = "node",
-          typescript = "ts-node",
+          typescript = "tsx",
           html = "open",
           sh = "bash",
           lua = "lua",
@@ -434,7 +435,6 @@ return {
         -- 実行時に挿入モードで開始（入力を受け付けるため）
         startinsert = true,
       })
-
     end,
   },
 }
