@@ -453,10 +453,12 @@ return {
   -- リーダーキーの表示（スペースキーを打ったときに利用可能なキーマップを表示）
   {
     "folke/which-key.nvim",
-    event = "VeryLazy",
+    lazy = false,
+    priority = 999,
     config = function()
       local wk = require("which-key")
       wk.setup({
+        delay = 200,
         plugins = {
           marks = false,
           registers = false,
