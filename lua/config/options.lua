@@ -22,6 +22,19 @@ opt.clipboard = "unnamedplus"  -- システムクリップボードを使用
 opt.hidden = true  -- バッファを切り替えてもファイルを閉じない（複数ファイルを開くため）
 opt.cmdheight = 0  -- コマンドラインの高さを0にして、noice.nvimのフローティングウィンドウを使用
 
+-- ターミナルタイトル（Warp等のタブにディレクトリ名を表示）
+opt.title = true
+opt.titlestring = "%{fnamemodify(getcwd(), ':t')}"
+
+-- :cd でディレクトリを変えたときもタブタイトルを更新
+vim.api.nvim_create_autocmd("DirChanged", {
+  pattern = "*",
+  callback = function()
+    vim.opt.title = true
+  end,
+  desc = "Refresh terminal title when directory changes",
+})
+
 -- キーシーケンスの待ち時間
 -- 挿入モード・ターミナルモードのjkマッピングに使用
 opt.timeoutlen = 300   -- jkでノーマルモード復帰用（300ms以内にjkと打てばOK）
