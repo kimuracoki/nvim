@@ -49,29 +49,29 @@ map({ "n", "i" }, "<C-v>", '"+p', { desc = "Paste" })
 map("n", "<C-z>", "u", { desc = "Undo" })
 map("n", "<C-S-z>", "<C-r>", { desc = "Redo" })
 
--- Claude Codeのターミナルでは除外（キー競合を避けるため）
-local function is_claude_terminal()
+-- これらのターミナルでは jk マッピングを設定しない（j の遅延を防ぐ）
+local function is_terminal_no_jk_mapping()
   local bufname = vim.api.nvim_buf_get_name(0)
-  return bufname:match("claude") or bufname:match("ClaudeCode")
+  return bufname:match("claude") or bufname:match("ClaudeCode") or bufname:match("lazygit")
 end
 
 map("t", "<Esc>", function()
-  if is_claude_terminal() then
-    -- Claude Codeではそのまま<Esc>を送信
+  if is_terminal_no_jk_mapping() then
+    -- Claude/lazygit などではそのまま<Esc>を送信
     return "<Esc>"
   else
     return [[<C-\><C-n>]]
   end
-end, { expr = true, desc = "Terminal: Exit to normal mode (except Claude)" })
+end, { expr = true, desc = "Terminal: Exit to normal mode (except Claude/lazygit)" })
 
--- jkはClaude以外のターミナルにのみバッファローカルで設定（Claudeでは待ちが発生しないようにする）
+-- jk は通常ターミナルのみバッファローカルで設定（Claude/lazygit では j の遅延を防ぐため設定しない）
 vim.api.nvim_create_autocmd("TermEnter", {
   callback = function()
-    if not is_claude_terminal() then
+    if not is_terminal_no_jk_mapping() then
       vim.keymap.set("t", "jk", [[<C-\><C-n>]], { noremap = true, buffer = true, desc = "Terminal: jk to normal mode" })
     end
   end,
-  desc = "Set jk mapping only in non-Claude terminals",
+  desc = "Set jk mapping only in normal terminals (not Claude/lazygit)",
 })
 
 -- ターミナルモードでもウィンドウ移動をノーマルモードと同じキーで行えるようにする
