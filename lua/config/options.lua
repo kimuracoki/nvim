@@ -22,9 +22,10 @@ opt.clipboard = "unnamedplus"  -- システムクリップボードを使用
 opt.hidden = true  -- バッファを切り替えてもファイルを閉じない（複数ファイルを開くため）
 opt.cmdheight = 0  -- コマンドラインの高さを0にして、noice.nvimのフローティングウィンドウを使用
 
--- ターミナルタイトル（Warp等のタブにディレクトリ名を表示）
+-- ターミナルタイトル（Warp等のタブにディレクトリ名 + エディタ起動中のアイコン）
+-- ⚡ = 稲妻、他: ✎ ペン / ✏ ペンシル / ⬡ 六角形 / ◆ ダイヤ
 opt.title = true
-opt.titlestring = "%{fnamemodify(getcwd(), ':t')}"
+opt.titlestring = "⚡%{fnamemodify(getcwd(), ':t')}"
 
 -- :cd でディレクトリを変えたときもタブタイトルを更新
 vim.api.nvim_create_autocmd("DirChanged", {
