@@ -140,7 +140,7 @@ return {
   -- ステータスライン
   {
     "nvim-lualine/lualine.nvim",
-    dependencies = { "nvim-tree/nvim-web-devicons" },
+    dependencies = { "nvim-tree/nvim-web-devicons", "S1M0N38/ccusage.nvim" },
     config = function()
       local function modified()
         if vim.bo.modified then
@@ -157,7 +157,7 @@ return {
             { "filename", path = 1 },
             modified,
           },
-          lualine_x = { "encoding", "fileformat", "filetype" },
+          lualine_x = { "ccusage", "encoding", "fileformat", "filetype" },
           lualine_y = { "progress" },
           lualine_z = { "location" },
         },
@@ -417,6 +417,13 @@ return {
       })
       vim.keymap.set("n", "<leader>o", "<cmd>AerialToggle<CR>", { desc = "Outline: Toggle symbols" })
     end,
+  },
+
+  -- Claude Code 使用量表示（ステータスラインに time% | tok% を表示、:CCUsage で詳細）
+  {
+    "S1M0N38/ccusage.nvim",
+    version = "1.*",
+    opts = {},
   },
 
   -- Claude Code（aerialと同じく「現在のウィンドウを右に分割」で表示）
