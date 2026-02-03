@@ -201,9 +201,15 @@ return {
         start_in_insert = true,
         insert_mappings = true,
         persist_size = true,
-        direction = "horizontal", -- 下部固定パネルとして表示（VSCode風）
-        close_on_exit = true,
+        direction = "float", -- フローティングウィンドウとして表示
+        close_on_exit = false, -- プロセス継続のため
         shell = vim.o.shell,
+        float_opts = {
+          border = "rounded",
+          width = function() return math.floor(vim.o.columns * 0.9) end,
+          height = function() return math.floor(vim.o.lines * 0.9) end,
+          winblend = 0,
+        },
       })
 
       -- Lazygit用のカスタムターミナル（フローティングウィンドウ）
