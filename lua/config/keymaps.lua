@@ -28,6 +28,12 @@ map("n", "<C-j>", "<C-w>j", { desc = "Move to bottom window" })
 map("n", "<C-k>", "<C-w>k", { desc = "Move to top window" })
 map("n", "<C-l>", "<C-w>l", { desc = "Move to right window" })
 
+-- ウィンドウリサイズ（leader + whjkl）
+map("n", "<leader>wh", "<C-w><", { desc = "Resize: Decrease width" })
+map("n", "<leader>wl", "<C-w>>", { desc = "Resize: Increase width" })
+map("n", "<leader>wk", "<C-w>+", { desc = "Resize: Increase height" })
+map("n", "<leader>wj", "<C-w>-", { desc = "Resize: Decrease height" })
+
 -- jkでノーマルモードに戻る
 map("i", "jk", "<Esc>", { noremap = true })
 
@@ -74,6 +80,12 @@ map("t", "<C-h>", [[<C-\><C-n><C-w>h]], { silent = true, desc = "Terminal: Move 
 map("t", "<C-j>", [[<C-\><C-n><C-w>j]], { silent = true, desc = "Terminal: Move to bottom window" })
 map("t", "<C-k>", [[<C-\><C-n><C-w>k]], { silent = true, desc = "Terminal: Move to top window" })
 map("t", "<C-l>", [[<C-\><C-n><C-w>l]], { silent = true, desc = "Terminal: Move to right window" })
+
+-- ターミナルモードでもウィンドウリサイズ（leader + whjkl）
+map("t", "<leader>wh", [[<C-\><C-n><C-w><]], { silent = true, desc = "Terminal: Resize decrease width" })
+map("t", "<leader>wl", [[<C-\><C-n><C-w>>]], { silent = true, desc = "Terminal: Resize increase width" })
+map("t", "<leader>wk", [[<C-\><C-n><C-w>+]], { silent = true, desc = "Terminal: Resize increase height" })
+map("t", "<leader>wj", [[<C-\><C-n><C-w>-]], { silent = true, desc = "Terminal: Resize decrease height" })
 
 map("n", "<leader>tt", function()
   require("toggleterm").toggle(1)

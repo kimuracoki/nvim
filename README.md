@@ -427,6 +427,10 @@ Window = ウィンドウ操作
 |------|------|------|
 | `<leader>ww` | レイアウトを設定 | **W**indow: setup **W**indow |
 | `<C-h/j/k/l>` | ウィンドウ移動 | Vim慣例 |
+| `<leader>wh` | 幅を減らす | **W**indow: **h**（左方向） |
+| `<leader>wl` | 幅を増やす | **W**indow: **l**（右方向） |
+| `<leader>wk` | 高さを増やす | **W**indow: **k**（上方向） |
+| `<leader>wj` | 高さを減らす | **W**indow: **j**（下方向） |
 
 ## 視覚的機能
 
