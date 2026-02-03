@@ -58,14 +58,15 @@ map("t", "<Esc>", function()
   end
 end, { expr = true, desc = "Terminal: Exit to normal mode (except Claude)" })
 
-map("t", "jk", function()
-  if is_claude_terminal() then
-    -- Claude Codeではjkをそのまま送信（noremap + exprで再マッピングしない）
-    return "jk"
-  else
-    return [[<C-\><C-n>]]
-  end
-end, { noremap = true, expr = true, desc = "Terminal: jk to normal mode (except Claude)" })
+-- jkはClaude以外のターミナルにのみバッファローカルで設定（Claudeでは待ちが発生しないようにする）
+vim.api.nvim_create_autocmd("TermEnter", {
+  callback = function()
+    if not is_claude_terminal() then
+      vim.keymap.set("t", "jk", [[<C-\><C-n>]], { noremap = true, buffer = true, desc = "Terminal: jk to normal mode" })
+    end
+  end,
+  desc = "Set jk mapping only in non-Claude terminals",
+})
 
 -- ターミナルモードでもウィンドウ移動をノーマルモードと同じキーで行えるようにする
 -- （Claude Codeを含め、どのターミナルでも有効）
