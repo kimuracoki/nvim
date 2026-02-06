@@ -504,6 +504,22 @@ return {
         { "<leader>w", group = "Window (ウィンドウ)" },
         { "<leader>x", group = "Diagnostics (診断)" },
       })
+
+      -- Register localleader groups for octo.nvim
+      vim.api.nvim_create_autocmd("FileType", {
+        pattern = "octo",
+        callback = function()
+          require("which-key").add({
+            { "<localleader>p", group = "PR operations" },
+            { "<localleader>v", group = "Review operations" },
+            { "<localleader>i", group = "Issue operations" },
+            { "<localleader>a", group = "Assignee" },
+            { "<localleader>l", group = "Label" },
+            { "<localleader>r", group = "Reactions/Reviewer" },
+            { "<localleader>g", group = "Goto" },
+          }, { buffer = true })
+        end,
+      })
     end,
   },
 
