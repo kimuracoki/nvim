@@ -510,13 +510,13 @@ return {
         pattern = "octo",
         callback = function()
           require("which-key").add({
-            { "<localleader>p", group = "PR operations" },
-            { "<localleader>v", group = "Review operations" },
-            { "<localleader>i", group = "Issue operations" },
-            { "<localleader>a", group = "Assignee" },
-            { "<localleader>l", group = "Label" },
-            { "<localleader>r", group = "Reactions/Reviewer" },
-            { "<localleader>g", group = "Goto" },
+            { "<localleader>p", group = "PR operations (PR操作)" },
+            { "<localleader>v", group = "Review operations (レビュー)" },
+            { "<localleader>i", group = "Issue operations (Issue操作)" },
+            { "<localleader>a", group = "Assignee (担当者)" },
+            { "<localleader>l", group = "Label (ラベル)" },
+            { "<localleader>r", group = "Reactions/Reviewer (リアクション/レビュアー)" },
+            { "<localleader>g", group = "Goto (移動)" },
           }, { buffer = true })
         end,
       })

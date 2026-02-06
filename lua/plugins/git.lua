@@ -347,8 +347,8 @@ return {
             react_rocket = { lhs = "<localleader>rr", desc = "add/remove 🚀 reaction" },
             react_laugh = { lhs = "<localleader>rl", desc = "add/remove 😄 reaction" },
             react_confused = { lhs = "<localleader>rc", desc = "add/remove 😕 reaction" },
-            review_start = { lhs = "<localleader>vs", desc = "start a review for the current PR" },
-            review_resume = { lhs = "<localleader>vr", desc = "resume a pending review for the current PR" },
+            review_start = { lhs = "<localleader>vs", desc = "start/resume review" },
+            review_resume = { lhs = "<localleader>vs", desc = "start/resume review" },
           },
           review_thread = {
             goto_issue = { lhs = "<localleader>gi", desc = "navigate to a local repo issue" },
