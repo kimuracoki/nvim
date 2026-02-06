@@ -347,8 +347,8 @@ return {
             react_rocket = { lhs = "<localleader>rr", desc = "add/remove 🚀 reaction" },
             react_laugh = { lhs = "<localleader>rl", desc = "add/remove 😄 reaction" },
             react_confused = { lhs = "<localleader>rc", desc = "add/remove 😕 reaction" },
-            review_start = { lhs = "<localleader>vs", desc = "start/resume review" },
-            review_resume = { lhs = "<localleader>vs", desc = "start/resume review" },
+            review_start = { lhs = "<localleader>vs", desc = "start review" },
+            review_resume = { lhs = "<localleader>vr", desc = "resume pending review" },
           },
           review_thread = {
             goto_issue = { lhs = "<localleader>gi", desc = "navigate to a local repo issue" },
@@ -440,6 +440,30 @@ return {
       vim.keymap.set("n", "<leader>gps", ":Octo pr search<CR>", { desc = "Git: PR search" })
       vim.keymap.set("n", "<leader>gic", ":Octo issue create<CR>", { desc = "Git: Issue create" })
       vim.keymap.set("n", "<leader>gil", ":Octo issue list<CR>", { desc = "Git: Issue list" })
+
+      -- Hunk移動のキーバインド（グローバル設定）
+      -- diffモードでのhunk移動
+      vim.keymap.set("n", "]h", function()
+        if vim.wo.diff then
+          vim.cmd("normal! ]c")
+        else
+          -- 通常のファイルでは次の変更行へ（gitsignsのhunk移動を使用）
+          if package.loaded["gitsigns"] then
+            require("gitsigns").next_hunk()
+          end
+        end
+      end, { desc = "Next hunk (次の変更箇所)" })
+
+      vim.keymap.set("n", "[h", function()
+        if vim.wo.diff then
+          vim.cmd("normal! [c")
+        else
+          -- 通常のファイルでは前の変更行へ（gitsignsのhunk移動を使用）
+          if package.loaded["gitsigns"] then
+            require("gitsigns").prev_hunk()
+          end
+        end
+      end, { desc = "Previous hunk (前の変更箇所)" })
     end,
   }
 }
