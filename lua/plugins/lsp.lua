@@ -288,15 +288,71 @@ return {
       end, 100)
 
       -----------------------------------------------------------------------
-      -- Haskellでインレイヒントを自動有効化（型シグネチャ表示）
+      -- Haskell: 型シグネチャを行の上に仮想行として表示（VSCode風）
       -----------------------------------------------------------------------
+      local hls_ns = vim.api.nvim_create_namespace("hls_type_sig")
+
+      local function show_hls_type_sigs(bufnr)
+        if not vim.api.nvim_buf_is_valid(bufnr) then return end
+        vim.lsp.buf_request(bufnr, "textDocument/codeLens", {
+          textDocument = { uri = vim.uri_from_bufnr(bufnr) },
+        }, function(err, result, ctx)
+          if err or not result then return end
+          if not vim.api.nvim_buf_is_valid(bufnr) then return end
+          local c = vim.lsp.get_client_by_id(ctx.client_id)
+          if not c or c.name ~= "hls" then return end
+
+          vim.api.nvim_buf_clear_namespace(bufnr, hls_ns, 0, -1)
+
+          local pending = 0
+          local has_line0 = false
+
+          local function place(line, title)
+            if line == 0 then has_line0 = true end
+            vim.api.nvim_buf_set_extmark(bufnr, hls_ns, line, 0, {
+              virt_lines_above = true,
+              virt_lines = { { { title, "LspCodeLens" } } },
+            })
+            pending = pending - 1
+            -- 全て完了後、1行目の仮想行があれば1回だけスクロール
+            if pending == 0 and has_line0 then
+              vim.defer_fn(function()
+                for _, win in ipairs(vim.fn.win_findbuf(bufnr)) do
+                  vim.api.nvim_win_call(win, function()
+                    vim.cmd("normal! \25") -- Ctrl-Y
+                  end)
+                end
+              end, 100)
+            end
+          end
+
+          for _, lens in ipairs(result) do
+            pending = pending + 1
+            if lens.command then
+              place(lens.range.start.line, lens.command.title)
+            else
+              vim.lsp.buf_request(bufnr, "codeLens/resolve", lens, function(rerr, resolved)
+                if rerr or not resolved or not resolved.command then
+                  pending = pending - 1
+                  return
+                end
+                if not vim.api.nvim_buf_is_valid(bufnr) then return end
+                place(resolved.range.start.line, resolved.command.title)
+              end)
+            end
+          end
+        end)
+      end
+
       vim.api.nvim_create_autocmd("LspAttach", {
         callback = function(args)
-          local client = vim.lsp.get_client_by_id(args.data.client_id)
-          if client and client.name == "hls" then
-            -- インレイヒントを有効化（Neovim 0.10+）
-            vim.lsp.inlay_hint.enable(true, { bufnr = args.buf })
-          end
+          local c = vim.lsp.get_client_by_id(args.data.client_id)
+          if not c or c.name ~= "hls" then return end
+          vim.api.nvim_create_autocmd({ "BufWritePost", "InsertLeave" }, {
+            buffer = args.buf,
+            callback = function() show_hls_type_sigs(args.buf) end,
+          })
+          vim.defer_fn(function() show_hls_type_sigs(args.buf) end, 3000)
         end,
       })
     end,
