@@ -128,6 +128,20 @@ return {
         },
       })
 
+      -- Haskell用の設定（型シグネチャのインレイヒント）
+      vim.lsp.config("hls", {
+        settings = {
+          haskell = {
+            plugin = {
+              -- 型シグネチャのインレイヒントを有効化
+              ["ghcide-type-lenses"] = {
+                globalOn = true,
+              },
+            },
+          },
+        },
+      })
+
       -- Java用の設定
       vim.lsp.config("jdtls", {
         settings = {
@@ -272,6 +286,19 @@ return {
           bold = true,
         })
       end, 100)
+
+      -----------------------------------------------------------------------
+      -- Haskellでインレイヒントを自動有効化（型シグネチャ表示）
+      -----------------------------------------------------------------------
+      vim.api.nvim_create_autocmd("LspAttach", {
+        callback = function(args)
+          local client = vim.lsp.get_client_by_id(args.data.client_id)
+          if client and client.name == "hls" then
+            -- インレイヒントを有効化（Neovim 0.10+）
+            vim.lsp.inlay_hint.enable(true, { bufnr = args.buf })
+          end
+        end,
+      })
     end,
   },
 
