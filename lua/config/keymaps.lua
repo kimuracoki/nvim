@@ -116,36 +116,27 @@ end, { desc = "Window: Setup layout" })
 -- 終了（Quit）
 map("n", "<leader>q", ":qa<CR>", { desc = "Quit: All" })
 
--- LSP関連
-map("n", "K", function()
-  -- lspsagaのhoverを使用（ボーダー付きフローティングウィンドウ）
-  vim.lsp.buf.hover()
-end, { desc = "Hover documentation" })
-
+-- LSP関連（K, grn, gra, grr, gri, grt, gO, Ctrl-S, [d, ]d は Neovim 0.11+ デフォルト）
 map("n", "gd", function()
   vim.lsp.buf.definition()
 end, { desc = "Go to definition" })
 
-map("n", "gr", function()
-  vim.lsp.buf.references()
-end, { desc = "Find references" })
+map("n", "gD", function()
+  vim.lsp.buf.declaration()
+end, { desc = "Go to declaration" })
 
-map("n", "<leader>ca", function()
-  vim.lsp.buf.code_action()
-end, { desc = "Code: Action" })
+map("n", "<leader>ch", function()
+  vim.lsp.inlay_hint.enable(not vim.lsp.inlay_hint.is_enabled({ bufnr = 0 }), { bufnr = 0 })
+end, { desc = "Code: Inlay hints toggle" })
+
+map("n", "<leader>sw", function()
+  require("telescope.builtin").lsp_workspace_symbols()
+end, { desc = "Search: Workspace symbols" })
 
 -- 診断（eXamine/Diagnostics）
 map("n", "<leader>xd", function()
   vim.diagnostic.open_float()
 end, { desc = "Diagnostics: Show at cursor" })
-
-map("n", "[d", function()
-  vim.diagnostic.goto_prev()
-end, { desc = "Previous diagnostic" })
-
-map("n", "]d", function()
-  vim.diagnostic.goto_next()
-end, { desc = "Next diagnostic" })
 
 -- カラースキーム切り替え（UI Theme）
 map("n", "<leader>ut", function()

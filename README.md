@@ -168,6 +168,7 @@ Search = 検索
 | キー | 機能 | 由来 |
 |------|------|------|
 | `<leader>sg` | ワークスペース全体を検索 | **S**earch: **G**rep |
+| `<leader>sw` | ワークスペースシンボル検索 | **S**earch: **W**orkspace symbols |
 
 ## Outline (`<leader>o`)
 
@@ -181,12 +182,35 @@ Outline = シンボルアウトライン
 
 Code = コード（LSP機能）
 
+### Neovim 0.11+ デフォルトキーマップ
+
+以下はNeovim 0.11+に組み込まれているため、設定不要で使えます：
+
+| キー | 機能 | 備考 |
+|------|------|------|
+| `K` | ホバードキュメント | デフォルト |
+| `grn` | リネーム（名前変更） | デフォルト |
+| `gra` | コードアクション | デフォルト（Normal/Visual） |
+| `grr` | 参照を検索 | デフォルト |
+| `gri` | 実装へ移動 | デフォルト |
+| `grt` | 型定義へ移動 | デフォルト |
+| `gO` | ドキュメントシンボル | デフォルト |
+| `<C-s>` | シグネチャヘルプ | デフォルト（Insert mode） |
+
+### カスタムキーマップ
+
 | キー | 機能 | 由来 |
 |------|------|------|
-| `<leader>ca` | コードアクション | **C**ode **A**ction |
 | `gd` | 定義へジャンプ | **g**o to **d**efinition |
-| `gr` | 参照を検索 | **g**o to **r**eferences |
-| `K` | ホバードキュメント | Vimの慣例 |
+| `gD` | 宣言へジャンプ | **g**o to **D**eclaration |
+| `<leader>ch` | インレイヒントの切り替え | **C**ode: **H**ints |
+
+### インレイヒント（Inlay Hints）
+
+LSPがサポートする言語では、変数の型やパラメータ名がコード内にインラインで薄く表示されます。LspAttach時に自動有効化されます。
+
+- **対応言語**: TypeScript, Rust, Go, C/C++, Lua, Python 等
+- **切り替え**: `<leader>ch` で現在のバッファの表示/非表示を切り替え
 
 ## Diagnostics (`<leader>x`)
 
@@ -198,8 +222,8 @@ Diagnostics = 診断・問題（eXamine = 検査、fiX = 修正）
 | `<leader>xw` | ワークスペースの診断 | e**X**amine **W**orkspace |
 | `<leader>xq` | クイックフィックスリスト | e**X**amine **Q**uickfix |
 | `<leader>xd` | カーソル位置の診断 | e**X**amine **D**iagnostic |
-| `[d` | 前の診断へ | previous **d**iagnostic |
-| `]d` | 次の診断へ | next **d**iagnostic |
+| `[d` | 前の診断へ | デフォルト |
+| `]d` | 次の診断へ | デフォルト |
 
 ## Git操作 (`<leader>g`)
 

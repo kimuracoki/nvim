@@ -252,6 +252,47 @@ return {
         end,
       })
 
+      -- Rust用の設定（インレイヒント）
+      vim.lsp.config("rust_analyzer", {
+        settings = {
+          ["rust-analyzer"] = {
+            inlayHints = {
+              typeHints = { enable = true },
+              parameterHints = { enable = true },
+              chainingHints = { enable = true },
+            },
+          },
+        },
+      })
+
+      -- Go用の設定（インレイヒント）
+      vim.lsp.config("gopls", {
+        settings = {
+          gopls = {
+            hints = {
+              assignVariableTypes = true,
+              compositeLiteralFields = true,
+              constantValues = true,
+              functionTypeParameters = true,
+              parameterNames = true,
+              rangeVariableTypes = true,
+            },
+          },
+        },
+      })
+
+      -----------------------------------------------------------------------
+      -- LspAttach: インレイヒントを自動有効化（全言語共通）
+      -----------------------------------------------------------------------
+      vim.api.nvim_create_autocmd("LspAttach", {
+        callback = function(args)
+          local client = vim.lsp.get_client_by_id(args.data.client_id)
+          if client and client:supports_method("textDocument/inlayHint") then
+            vim.lsp.inlay_hint.enable(true, { bufnr = args.buf })
+          end
+        end,
+      })
+
       -----------------------------------------------------------------------
       -- LSPのホバーウィンドウにボーダーを追加（透過のままでも見やすく）
       -----------------------------------------------------------------------
