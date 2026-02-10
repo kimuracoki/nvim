@@ -13,7 +13,7 @@ opt.termguicolors = true
 opt.cursorline = true
 opt.swapfile = false
 opt.scrolloff = 4
-opt.sidescrolloff = 8
+opt.sidescrolloff = 25  -- ミニマップ分の余白を確保
 opt.cursorline = true
 opt.cursorcolumn = true
 opt.splitright = true  -- 右側に分割
@@ -21,6 +21,7 @@ opt.splitbelow = true  -- 下側に分割
 opt.clipboard = "unnamedplus"  -- システムクリップボードを使用
 opt.hidden = true  -- バッファを切り替えてもファイルを閉じない（複数ファイルを開くため）
 opt.cmdheight = 0  -- コマンドラインの高さを0にして、noice.nvimのフローティングウィンドウを使用
+opt.wrap = false  -- 行の折り返しを無効化（ミニマップと重ならないように）
 
 -- ターミナルタイトル（Warp等のタブにディレクトリ名 + エディタ起動中のアイコン）
 -- ⚡ = 稲妻、他: ✎ ペン / ✏ ペンシル / ⬡ 六角形 / ◆ ダイヤ

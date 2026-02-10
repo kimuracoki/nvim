@@ -642,7 +642,18 @@ return {
         z_index = 1,
         window_border = "none",
       })
-      vim.keymap.set("n", "<leader>um", codewindow.toggle_minimap, { desc = "UI: Minimap toggle" })
+
+      -- ミニマップのトグルと同時にsidescrolloffも切り替え
+      local minimap_open = true  -- auto_enable = true なので初期状態はtrue
+      vim.keymap.set("n", "<leader>um", function()
+        codewindow.toggle_minimap()
+        minimap_open = not minimap_open
+        if minimap_open then
+          vim.opt.sidescrolloff = 25  -- ミニマップON時は余白を確保
+        else
+          vim.opt.sidescrolloff = 8   -- ミニマップOFF時は通常の余白
+        end
+      end, { desc = "UI: Minimap toggle" })
     end,
   },
 
