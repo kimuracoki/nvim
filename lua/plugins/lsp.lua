@@ -108,6 +108,7 @@ return {
           "intelephense", -- PHP
           "ruby_lsp",     -- Ruby (Ruby LSP)
           "hls",          -- Haskell
+          "clojure_lsp",  -- Clojure/Lisp
         },
         -- automatic_enable = true（デフォルト）
       })
@@ -553,6 +554,7 @@ return {
           ruby = "ruby",
           php = "php",
           haskell = "runhaskell",
+          lisp = "sbcl --noinform --load $fileName --quit",
         },
         -- 実行前に保存
         save_before_run = true,

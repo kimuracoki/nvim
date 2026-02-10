@@ -29,6 +29,7 @@ return {
           "cpp",
           "php",
           "haskell", -- Haskellパーサーを追加
+          "commonlisp",
           -- その他
           "markdown",
           "dockerfile",
@@ -111,6 +112,7 @@ return {
           python = { "black", "isort" },
           rust = { "rustfmt" },
           go = { "gofmt", "goimports" },
+          lisp = { "lisp-format" },
         },
         format_on_save = {
           timeout_ms = 500,
