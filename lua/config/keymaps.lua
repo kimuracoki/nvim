@@ -129,6 +129,11 @@ map("n", "<leader>ch", function()
   vim.lsp.inlay_hint.enable(not vim.lsp.inlay_hint.is_enabled({ bufnr = 0 }), { bufnr = 0 })
 end, { desc = "Code: Inlay hints toggle" })
 
+-- 手動フォーマット
+map("n", "<leader>cf", function()
+  require("conform").format({ timeout_ms = 500, lsp_fallback = true })
+end, { desc = "Code: Format" })
+
 map("n", "<leader>sw", function()
   require("telescope.builtin").lsp_workspace_symbols()
 end, { desc = "Search: Workspace symbols" })

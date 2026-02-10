@@ -114,10 +114,11 @@ return {
           go = { "gofmt", "goimports" },
           lisp = { "lisp-format" },
         },
-        format_on_save = {
-          timeout_ms = 500,
-          lsp_fallback = true,
-        },
+        -- 自動フォーマットを無効化（手動フォーマットは <leader>cf で実行）
+        -- format_on_save = {
+        --   timeout_ms = 500,
+        --   lsp_fallback = true,
+        -- },
       })
     end,
   },

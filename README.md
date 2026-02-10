@@ -422,6 +422,7 @@ Code = コード（LSP機能）
 |------|------|------|
 | `gd` | 定義へジャンプ | **g**o to **d**efinition |
 | `gD` | 宣言へジャンプ | **g**o to **D**eclaration |
+| `<leader>cf` | コードフォーマット（手動） | **C**ode: **F**ormat |
 | `<leader>ch` | インレイヒントの切り替え | **C**ode: **H**ints |
 
 ### インレイヒント（Inlay Hints）
@@ -430,6 +431,14 @@ LSPがサポートする言語では、変数の型やパラメータ名がコ�
 
 - **対応言語**: TypeScript, Rust, Go, C/C++, Lua, Python 等
 - **切り替え**: `<leader>ch` で現在のバッファの表示/非表示を切り替え
+
+### コードフォーマット
+
+ファイル保存時の自動フォーマットは無効化されています。手動でフォーマットを実行できます。
+
+- **手動フォーマット**: `<leader>cf` で現在のファイルをフォーマット
+- **対応フォーマッター**: Prettier (JS/TS/HTML/CSS/JSON/YAML), stylua (Lua), black/isort (Python), rustfmt (Rust), gofmt/goimports (Go) 等
+- **LSPフォールバック**: フォーマッターが見つからない場合は、LSPのフォーマット機能を使用
 
 ## スニペット
 
