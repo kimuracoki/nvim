@@ -244,6 +244,11 @@ return {
         -- モノレポ対応: 各ファイルのディレクトリから設定ファイルを探す
         -- VSCode/Cursorでは自動的に行われるが、Neovimでは明示的に設定が必要
         root_dir = function(fname)
+          -- fnameが数値（バッファ番号）の場合は文字列パスに変換
+          if type(fname) == "number" then
+            fname = vim.api.nvim_buf_get_name(fname)
+          end
+
           -- .eslintrc.* または package.json があるディレクトリを探す
           local util = require("lspconfig.util")
           return util.root_pattern(".eslintrc", ".eslintrc.js", ".eslintrc.json", ".eslintrc.yaml", ".eslintrc.yml",
