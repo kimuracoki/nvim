@@ -51,7 +51,7 @@ mkdir -p ~/.config
 [ -d ~/.config/nvim ] && mv ~/.config/nvim ~/.config/nvim.backup
 
 # この設定をクローン
-git clone https://github.com/kimuracoki/nvim.git ~/.config/nvim
+git clone https://github.com/kimuracoki/nvim.git ~/.config/
 ```
 
 ### 3. 必須ツールのインストール
