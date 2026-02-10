@@ -230,6 +230,16 @@ return {
           vim.cmd("startinsert!")
           -- lazygit内でESCが効くように、ターミナルモードのマッピングを無効化
           vim.api.nvim_buf_set_keymap(term.bufnr, "t", "<Esc>", "<Esc>", { noremap = true, silent = true })
+          -- プロセスが終了したら自動的にバッファを閉じる
+          vim.api.nvim_create_autocmd("TermClose", {
+            buffer = term.bufnr,
+            callback = function()
+              vim.schedule(function()
+                vim.api.nvim_buf_delete(term.bufnr, { force = true })
+              end)
+            end,
+            once = true,
+          })
         end,
       })
 
