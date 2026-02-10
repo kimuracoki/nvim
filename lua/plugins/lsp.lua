@@ -9,6 +9,7 @@ return {
   { "f3fora/cmp-spell" }, -- 英単語補完
   { "L3MON4D3/LuaSnip" },
   { "saadparwaiz1/cmp_luasnip" },
+  { "rafamadriz/friendly-snippets" }, -- VSCode風のスニペット集
 
   ---------------------------------------------------------------------------
   -- LSP 設定
@@ -414,6 +415,9 @@ return {
       local cmp = require("cmp")
       local luasnip = require("luasnip")
 
+      -- VSCode風のスニペットをロード
+      require("luasnip.loaders.from_vscode").lazy_load()
+
       cmp.setup({
         snippet = {
           expand = function(args)
@@ -423,8 +427,26 @@ return {
         mapping = cmp.mapping.preset.insert({
           ["<C-Space>"] = cmp.mapping.complete(),
           ["<CR>"] = cmp.mapping.confirm({ select = true }),
-          ["<Tab>"] = cmp.mapping.select_next_item(),
-          ["<S-Tab>"] = cmp.mapping.select_prev_item(),
+          -- Tab: スニペット展開中はジャンプ、それ以外は補完候補選択
+          ["<Tab>"] = cmp.mapping(function(fallback)
+            if cmp.visible() then
+              cmp.select_next_item()
+            elseif luasnip.expand_or_jumpable() then
+              luasnip.expand_or_jump()
+            else
+              fallback()
+            end
+          end, { "i", "s" }),
+          -- Shift-Tab: スニペット展開中は前へジャンプ、それ以外は前の補完候補
+          ["<S-Tab>"] = cmp.mapping(function(fallback)
+            if cmp.visible() then
+              cmp.select_prev_item()
+            elseif luasnip.jumpable(-1) then
+              luasnip.jump(-1)
+            else
+              fallback()
+            end
+          end, { "i", "s" }),
         }),
         sources = cmp.config.sources({
           { name = "nvim_lsp" },

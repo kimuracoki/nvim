@@ -7,6 +7,7 @@ VSCodeのような操作感を実現するためのNeovim設定です。
 - **VSCode風のキーバインド**: Ctrl+P、Ctrl+F、Ctrl+Sなど、VSCodeと同じショートカット
 - **直感的なキーマップ設計**: `<leader>`（スペース）+ 覚えやすい1-2文字のキー
 - **LSP・補完**: Mason経由で簡単にLSPサーバーをインストール
+- **スニペット機能**: VSCode互換のスニペット（HTML、TSX、JS/TS等の定型文を素早く入力）
 - **Git統合**: lazygit、GitHub PR/Issue管理（octo.nvim）、Gitグラフ表示
 - **AI機能**: Claude Code統合（Cursor風のAIアシスタント）
 - **豊富なUI**: ミニマップ、アウトライン、問題パネル、通知システム
@@ -256,6 +257,7 @@ gh auth login
 - [Search](#search-leaders)
 - [Outline](#outline-leadero)
 - [Code操作](#code操作-leaderc)
+- [スニペット](#スニペット)
 - [Diagnostics](#diagnostics-leaderx)
 - [Git操作](#git操作-leaderg)
 - [Terminal](#terminal-leadert)
@@ -428,6 +430,58 @@ LSPがサポートする言語では、変数の型やパラメータ名がコ�
 
 - **対応言語**: TypeScript, Rust, Go, C/C++, Lua, Python 等
 - **切り替え**: `<leader>ch` で現在のバッファの表示/非表示を切り替え
+
+## スニペット
+
+VSCode風のスニペット機能が利用可能です。定型文を素早く入力できます。
+
+### 基本操作
+
+| キー | 機能 |
+|------|------|
+| `Tab` | スニペット展開/次のプレースホルダーへジャンプ |
+| `Shift-Tab` | 前のプレースホルダーへジャンプ |
+
+### スニペット例
+
+**HTML**:
+- `div` → `<div></div>`
+- `a` → `<a href=""></a>`
+- `img` → `<img src="" alt="">`
+- `input` → `<input type="text">`
+- `form` → `<form></form>`
+
+**TSX/React**:
+- `rfc` → React Function Component
+- `useState` → useState hook
+- `useEffect` → useEffect hook
+- `rafce` → Arrow function component with export
+
+**JavaScript/TypeScript**:
+- `log` → `console.log()`
+- `func` → function declaration
+- `arrow` → arrow function
+- `imp` → import statement
+- `exp` → export statement
+
+### カスタムスニペットの追加
+
+独自のスニペットを追加する場合は、`~/.config/nvim/snippets/` ディレクトリを作成してVSCode形式のJSONファイルを配置できます。
+
+例 (`~/.config/nvim/snippets/typescript.json`):
+```json
+{
+  "My Component": {
+    "prefix": "mycomp",
+    "body": [
+      "const ${1:ComponentName} = () => {",
+      "  return <div>$2</div>",
+      "}"
+    ],
+    "description": "My custom component template"
+  }
+}
+```
 
 ## Diagnostics (`<leader>x`)
 
@@ -794,6 +848,8 @@ Window = ウィンドウ操作
 - `mason.nvim` - LSPインストーラー
 - `nvim-cmp` - 補完エンジン
 - `lspsaga.nvim` - LSP UI改善
+- `LuaSnip` - スニペットエンジン
+- `friendly-snippets` - VSCode風スニペット集（HTML、TSX、JS/TS等）
 
 ### デバッグ
 - `nvim-dap` - デバッガー
