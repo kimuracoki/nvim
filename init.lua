@@ -82,3 +82,50 @@ vim.api.nvim_create_autocmd("BufEnter", {
     end, 100)
   end,
 })
+
+-- 特殊バッファ（Diffview、Octo、GitGraphなど）の自動クリーンアップ
+vim.api.nvim_create_autocmd("FileType", {
+  pattern = { "DiffviewFiles", "DiffviewFileHistory", "octo", "octo_panel", "octo_issue", "octo_pr" },
+  callback = function(args)
+    vim.bo[args.buf].buflisted = false
+    vim.bo[args.buf].bufhidden = "wipe"
+  end,
+})
+
+-- ウィンドウが閉じられたときに特殊バッファを削除
+vim.api.nvim_create_autocmd("WinClosed", {
+  callback = function()
+    vim.defer_fn(function()
+      local buffers = vim.api.nvim_list_bufs()
+      for _, buf in ipairs(buffers) do
+        if vim.api.nvim_buf_is_valid(buf) then
+          local name = vim.api.nvim_buf_get_name(buf)
+          local buftype = vim.api.nvim_buf_get_option(buf, "buftype")
+
+          -- GitGraph、Diffview、Octoなどの特殊バッファをチェック
+          local is_special = name:match("GitGraph") or
+                            name:match("Diffview") or
+                            name:match("octo://") or
+                            buftype == "terminal" or
+                            buftype == "nofile"
+
+          if is_special then
+            -- このバッファを表示しているウィンドウがあるか確認
+            local has_window = false
+            for _, win in ipairs(vim.api.nvim_list_wins()) do
+              if vim.api.nvim_win_get_buf(win) == buf then
+                has_window = true
+                break
+              end
+            end
+
+            -- ウィンドウに表示されていない場合のみ削除
+            if not has_window then
+              pcall(vim.api.nvim_buf_delete, buf, { force = true })
+            end
+          end
+        end
+      end
+    end, 100)
+  end,
+})
