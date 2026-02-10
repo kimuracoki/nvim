@@ -128,6 +128,9 @@ return {
           return
         end
 
+        -- ハイライトを再適用
+        setup_gitgraph_highlights()
+
         -- 新しい空のバッファを作成してから古いバッファを削除
         vim.cmd("enew")
         local temp_buf = vim.api.nvim_get_current_buf()  -- enewで作成された一時バッファ
@@ -158,37 +161,27 @@ return {
       end
 
       local function open_gitgraph()
-        -- 既存のgitgraphバッファを探す
-        local gitgraph_buf = nil
+        -- ハイライトを常に再適用（透過切り替えやカラースキーム変更後も正しく表示）
+        setup_gitgraph_highlights()
+
+        -- 既存のgitgraphバッファを探して削除（常に新規作成）
         for _, buf in ipairs(vim.api.nvim_list_bufs()) do
           if vim.api.nvim_buf_is_valid(buf) then
             local name = vim.api.nvim_buf_get_name(buf)
             if name:match("GitGraph") then
-              gitgraph_buf = buf
-              break
+              -- 既存のGitGraphバッファを削除
+              pcall(vim.api.nvim_buf_delete, buf, { force = true })
             end
           end
         end
 
-        -- 既存のバッファがあればそこに移動
-        if gitgraph_buf then
-          for _, win in ipairs(vim.api.nvim_list_wins()) do
-            if vim.api.nvim_win_get_buf(win) == gitgraph_buf then
-              vim.api.nvim_set_current_win(win)
-              return
-            end
-          end
-          -- ウィンドウが閉じられている場合は新しいウィンドウで開く
-          vim.cmd("buffer " .. gitgraph_buf)
-        else
-          -- 新規作成
-          require("gitgraph").draw({}, { all = true, max_count = 5000 })
-          vim.schedule(function()
-            vim.bo.buflisted = true
-            -- rキーでリロード
-            vim.keymap.set("n", "r", reload_gitgraph_buffer, { buffer = true, desc = "Reload git graph" })
-          end)
-        end
+        -- 常に新規作成
+        require("gitgraph").draw({}, { all = true, max_count = 5000 })
+        vim.schedule(function()
+          vim.bo.buflisted = true
+          -- rキーでリロード
+          vim.keymap.set("n", "r", reload_gitgraph_buffer, { buffer = true, desc = "Reload git graph" })
+        end)
       end
 
       vim.keymap.set("n", "<leader>gl", open_gitgraph, { desc = "Git: Log graph" })
