@@ -452,6 +452,31 @@ return {
       focus_after_send = false,
       log_level = "info",
     },
+    config = function(_, opts)
+      require("claudecode").setup(opts)
+
+      -- ClaudeCodeのdiffバッファが閉じられた時に自動的に分割を整理
+      vim.api.nvim_create_autocmd("BufDelete", {
+        pattern = "*claude*",
+        callback = function()
+          vim.defer_fn(function()
+            -- 残っているウィンドウが2つ以上ある場合、メインウィンドウにフォーカス
+            local wins = vim.api.nvim_list_wins()
+            if #wins > 1 then
+              for _, win in ipairs(wins) do
+                local buf = vim.api.nvim_win_get_buf(win)
+                local bufname = vim.api.nvim_buf_get_name(buf)
+                -- ClaudeCodeのバッファではないウィンドウにフォーカス
+                if not bufname:match("claude") then
+                  vim.api.nvim_set_current_win(win)
+                  break
+                end
+              end
+            end
+          end, 100)
+        end,
+      })
+    end,
   },
 
   -- 通知システム（noice.nvimの依存として必要）
