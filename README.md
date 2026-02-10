@@ -2,6 +2,235 @@
 
 このNeovim設定は、VSCodeのような操作感を実現するために最適化されています。
 
+## セットアップ（初回インストール）
+
+### 前提条件
+
+#### 必須
+
+1. **Neovim 0.11以上**
+   ```bash
+   # Homebrewでインストール（Mac）
+   brew install neovim
+
+   # バージョン確認
+   nvim --version
+   ```
+
+2. **Git**
+   ```bash
+   # 通常はmacOSにプリインストール済み
+   git --version
+   ```
+
+3. **Nerd Font**（アイコン表示に必要）
+   ```bash
+   # Homebrewでインストール
+   brew tap homebrew/cask-fonts
+   brew install font-hack-nerd-font
+
+   # または、他のNerd Fontをお好みで
+   # brew install font-jetbrains-mono-nerd-font
+   # brew install font-fira-code-nerd-font
+   ```
+
+   インストール後、ターミナルの設定でNerd Fontを選択してください。
+
+#### コマンドラインツール
+
+4. **ripgrep**（コード検索用）
+   ```bash
+   brew install ripgrep
+   ```
+
+5. **fd**（ファイル検索用）
+   ```bash
+   brew install fd
+   ```
+
+6. **lazygit**（Git TUI）
+   ```bash
+   brew install lazygit
+   ```
+
+#### オプション（機能別）
+
+7. **GitHub CLI**（PR/Issue操作用）
+   ```bash
+   brew install gh
+
+   # 認証が必要
+   gh auth login
+   ```
+
+8. **Claude Code CLI**（AI機能用）
+   ```bash
+   # インストール方法は公式ドキュメント参照
+   # https://github.com/coder/claudecode
+
+   # バージョン確認（v2.0.73以上が必要）
+   claude --version
+   ```
+
+### インストール手順
+
+1. **この設定をクローン**
+   ```bash
+   # .configディレクトリがない場合は作成
+   mkdir -p ~/.config
+
+   # 既存の設定がある場合はバックアップ
+   mv ~/.config/nvim ~/.config/nvim.backup
+
+   # この設定をクローン
+   git clone https://github.com/kimuracoki/nvim.git ~/.config/nvim
+   ```
+
+2. **Neovimを起動**
+   ```bash
+   nvim
+   ```
+
+   初回起動時に自動的にプラグインマネージャー（lazy.nvim）とすべてのプラグインがインストールされます。
+
+3. **LSPサーバーとツールのインストール**
+
+   Neovim起動後、以下のコマンドでLSPサーバーとフォーマッターが自動インストールされます：
+   ```vim
+   :MasonInstallAll
+   ```
+
+   または、手動でインストール：
+   ```vim
+   :Mason
+   ```
+
+   Mason UIで必要なツールを選択してインストール（`i`キーでインストール）。
+
+4. **言語別ツールのインストール（開発する言語に応じて）**
+
+   **Lua**:
+   ```bash
+   brew install lua
+   brew install stylua  # フォーマッター
+   ```
+
+   **JavaScript/TypeScript**:
+   ```bash
+   brew install node
+   npm install -g typescript tsx prettier eslint
+   ```
+
+   **Python**:
+   ```bash
+   brew install python3
+   pip3 install black isort debugpy  # フォーマッター + デバッガー
+   ```
+
+   **Rust**:
+   ```bash
+   curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
+   rustup component add rustfmt rust-analyzer
+   ```
+
+   **Go**:
+   ```bash
+   brew install go
+   go install golang.org/x/tools/cmd/goimports@latest
+   ```
+
+   **Java**:
+   ```bash
+   brew install openjdk
+   # または特定のバージョン
+   # brew install openjdk@17
+   ```
+
+   **C/C++**:
+   ```bash
+   # macOSにはclangがプリインストール済み
+   # Xcodeコマンドラインツールをインストール
+   xcode-select --install
+   ```
+
+   **Ruby**:
+   ```bash
+   brew install ruby
+   # またはrbenvを使用
+   # brew install rbenv ruby-build
+   ```
+
+   **PHP**:
+   ```bash
+   brew install php
+   ```
+
+   **Haskell**:
+   ```bash
+   brew install ghc cabal-install haskell-language-server
+   ```
+
+   **Common Lisp**:
+   ```bash
+   brew install sbcl  # Steel Bank Common Lisp
+   ```
+
+   **Clojure**:
+   ```bash
+   brew install clojure/tools/clojure
+   ```
+
+   **Bash**:
+   ```bash
+   # macOSにプリインストール済み
+   # 新しいバージョンが必要な場合
+   brew install bash
+   ```
+
+### 推奨ターミナル設定
+
+透過背景機能を活用するには、以下のターミナルアプリを推奨：
+
+- **iTerm2**（Mac）- 透過設定が簡単
+- **WezTerm** - GPU加速、クロスプラットフォーム
+- **kitty** - 高速、Ligatureサポート
+
+ターミナルで透過を有効にした後、Neovim内で `<leader>uo` で透過のオン/オフを切り替えられます。
+
+### インストール後の確認
+
+1. **ヘルスチェック**
+   ```vim
+   :checkhealth
+   ```
+
+   警告やエラーがないか確認してください。
+
+2. **プラグインの状態確認**
+   ```vim
+   :Lazy
+   ```
+
+3. **LSPの状態確認**
+   ```vim
+   :LspInfo
+   ```
+
+### よくある質問
+
+**Q: プラグインのインストールが失敗する**
+- インターネット接続を確認
+- `~/.local/share/nvim`を削除して再インストール
+
+**Q: アイコンが文字化けする**
+- Nerd Fontがインストールされているか確認
+- ターミナルでNerd Fontが選択されているか確認
+
+**Q: LSPが動作しない**
+- `:LspInfo`で状態確認
+- `:Mason`で必要なLSPサーバーがインストールされているか確認
+- プロジェクトルートに設定ファイル（`package.json`, `.eslintrc`等）があるか確認
+
 ## キーマップの設計思想
 
 キーマップは**覚えやすさ**を重視し、論理的なカテゴリ分けをしています。
