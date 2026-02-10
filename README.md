@@ -4,110 +4,91 @@
 
 ## セットアップ（初回インストール）
 
-### 前提条件
+まっさらなMacから始める場合の完全な手順です。
 
-#### 必須
+### 1. 基本環境のセットアップ
 
-1. **Neovim 0.11以上**
+1. **Xcodeコマンドラインツールのインストール**（Gitが含まれます）
    ```bash
-   # Homebrewでインストール（Mac）
-   brew install neovim
-
-   # バージョン確認
-   nvim --version
+   xcode-select --install
    ```
 
-2. **Git**
+2. **Homebrewのインストール**
    ```bash
-   # 通常はmacOSにプリインストール済み
-   git --version
+   /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+
+   # インストール後、PATHを通す（画面の指示に従う）
    ```
 
-3. **Nerd Font**（アイコン表示に必要）
-   ```bash
-   # Homebrewでインストール
-   brew tap homebrew/cask-fonts
-   brew install font-hack-nerd-font
+### 2. このリポジトリをクローン
 
-   # または、他のNerd Fontをお好みで
-   # brew install font-jetbrains-mono-nerd-font
-   # brew install font-fira-code-nerd-font
-   ```
+```bash
+# .configディレクトリがない場合は作成
+mkdir -p ~/.config
 
-   インストール後、ターミナルの設定でNerd Fontを選択してください。
+# 既存のNeovim設定がある場合はバックアップ
+[ -d ~/.config/nvim ] && mv ~/.config/nvim ~/.config/nvim.backup
 
-#### コマンドラインツール
+# この設定をクローン
+git clone https://github.com/kimuracoki/nvim.git ~/.config/nvim
+```
 
-4. **ripgrep**（コード検索用）
-   ```bash
-   brew install ripgrep
-   ```
+### 3. 必須ツールのインストール
 
-5. **fd**（ファイル検索用）
-   ```bash
-   brew install fd
-   ```
+```bash
+# Neovim（バージョン0.11以上が必要）
+brew install neovim
 
-6. **lazygit**（Git TUI）
-   ```bash
-   brew install lazygit
-   ```
+# Nerd Font（アイコン表示に必要）
+brew tap homebrew/cask-fonts
+brew install font-hack-nerd-font
 
-#### オプション（機能別）
+# コマンドラインツール
+brew install ripgrep fd lazygit
+```
 
-7. **GitHub CLI**（PR/Issue操作用）
-   ```bash
-   brew install gh
+### 4. ターミナルの設定
 
-   # 認証が必要
-   gh auth login
-   ```
+使用しているターミナルアプリ（ターミナル.app、iTerm2、WezTerm等）の設定で：
+1. フォントを **Hack Nerd Font** に変更
+2. お好みでフォントサイズを調整（推奨: 12-14pt）
+3. （オプション）背景の透過を有効化
 
-8. **Claude Code CLI**（AI機能用）
-   ```bash
-   # インストール方法は公式ドキュメント参照
-   # https://github.com/coder/claudecode
+### 5. Neovimの初回起動
 
-   # バージョン確認（v2.0.73以上が必要）
-   claude --version
-   ```
+```bash
+nvim
+```
 
-### インストール手順
+初回起動時に自動的に：
+- プラグインマネージャー（lazy.nvim）がインストールされます
+- すべてのプラグインがダウンロード・インストールされます
+- 数分かかる場合があります（インターネット速度による）
 
-1. **この設定をクローン**
-   ```bash
-   # .configディレクトリがない場合は作成
-   mkdir -p ~/.config
+### 6. LSPサーバーの自動インストール
 
-   # 既存の設定がある場合はバックアップ
-   mv ~/.config/nvim ~/.config/nvim.backup
+Neovim起動後、自動的にLSPサーバーがインストールされます。手動で確認する場合：
+```vim
+:Mason
+```
 
-   # この設定をクローン
-   git clone https://github.com/kimuracoki/nvim.git ~/.config/nvim
-   ```
+Mason UIで必要なツールを選択してインストール（`i`キーでインストール）。
 
-2. **Neovimを起動**
-   ```bash
-   nvim
-   ```
+### 7. オプションツールのインストール（必要に応じて）
 
-   初回起動時に自動的にプラグインマネージャー（lazy.nvim）とすべてのプラグインがインストールされます。
+**GitHub CLI**（PR/Issue操作用）:
+```bash
+brew install gh
+gh auth login
+```
 
-3. **LSPサーバーとツールのインストール**
+**Claude Code CLI**（AI機能用）:
+```bash
+# インストール方法は公式ドキュメント参照
+# https://github.com/coder/claudecode
+```
 
-   Neovim起動後、以下のコマンドでLSPサーバーとフォーマッターが自動インストールされます：
-   ```vim
-   :MasonInstallAll
-   ```
-
-   または、手動でインストール：
-   ```vim
-   :Mason
-   ```
-
-   Mason UIで必要なツールを選択してインストール（`i`キーでインストール）。
-
-4. **言語別ツールのインストール（開発する言語に応じて）**
+### 8. 言語別ツールのインストール（開発する言語に応じて）
 
    **Lua**:
    ```bash
