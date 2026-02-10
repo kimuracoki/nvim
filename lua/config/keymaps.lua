@@ -197,6 +197,10 @@ map("n", "<leader>ut", function()
         vim.g.current_colorscheme = next_cs
         -- 透過設定を再適用
         require("config.highlight").setup()
+        -- GitGraphのハイライトを再適用
+        if _G.setup_gitgraph_highlights then
+          _G.setup_gitgraph_highlights()
+        end
         vim.notify("Colorscheme: " .. next_cs, vim.log.levels.INFO)
       else
         vim.notify("Failed: " .. next_cs .. " - " .. tostring(err), vim.log.levels.ERROR)
@@ -209,6 +213,10 @@ map("n", "<leader>ut", function()
       vim.g.current_colorscheme = next_cs
       -- 透過設定を再適用
       require("config.highlight").setup()
+      -- GitGraphのハイライトを再適用
+      if _G.setup_gitgraph_highlights then
+        _G.setup_gitgraph_highlights()
+      end
       vim.notify("Colorscheme: " .. next_cs, vim.log.levels.INFO)
     else
       vim.notify("Failed: " .. next_cs .. " - " .. tostring(err), vim.log.levels.ERROR)

@@ -60,6 +60,11 @@ function M.toggle_transparency()
     end
   end
 
+  -- GitGraphのハイライトを再適用（カラースキーム再適用で失われるため）
+  if _G.setup_gitgraph_highlights then
+    _G.setup_gitgraph_highlights()
+  end
+
   vim.notify("透過: " .. (M.enabled and "有効" or "無効"), vim.log.levels.INFO)
 end
 
