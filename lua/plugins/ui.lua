@@ -426,6 +426,15 @@ return {
       image = {
         force = true, -- Warp等で自動検出が失敗する場合に強制有効化
       },
+      -- 画像フロートの表示位置（bufferlineとの重なりを避けるため上にマージン）
+      -- 画像フロートを「エディタ基準」にし、上端からの行で位置指定（cursor基準だとrowが効かない）
+      styles = {
+        snacks_image = {
+          relative = "editor",
+          row = 2,   -- エディタ上端から2行目（bufferline直下）
+          col = -1,  -- -1 = 中央
+        },
+      },
     },
   },
 
