@@ -419,6 +419,16 @@ return {
     end,
   },
 
+  -- 画像表示（Kitty graphics protocol対応ターミナルで画像をインライン表示）
+  {
+    "folke/snacks.nvim",
+    opts = {
+      image = {
+        force = true, -- Warp等で自動検出が失敗する場合に強制有効化
+      },
+    },
+  },
+
   -- Claude Code 使用量表示（ステータスラインに time% | tok% を表示、:CCUsage で詳細）
   {
     "S1M0N38/ccusage.nvim",

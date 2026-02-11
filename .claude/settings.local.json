@@ -3,7 +3,8 @@
     "allow": [
       "WebFetch(domain:github.com)",
       "WebSearch",
-      "WebFetch(domain:neovim.io)"
+      "WebFetch(domain:neovim.io)",
+      "Bash(brew install:*)"
     ]
   }
 }
