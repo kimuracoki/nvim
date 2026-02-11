@@ -11,7 +11,7 @@ VSCodeのような操作感を実現するためのNeovim設定です。
 - **Git統合**: lazygit、GitHub PR/Issue管理（octo.nvim）、Gitグラフ表示
 - **AI機能**: Claude Code統合（Cursor風のAIアシスタント）
 - **豊富なUI**: ミニマップ、アウトライン、問題パネル、通知システム
-- **多言語対応**: TypeScript/JavaScript、Python、Rust、Go、Java、C/C++、Ruby、PHP、Haskell、Lispなど
+- **多言語対応**: TypeScript/JavaScript、Python、Rust、Go、Java、C/C++、C#、Ruby、PHP、Haskell、Lispなど
 
 ## 目次
 
@@ -159,6 +159,11 @@ gh auth login
    # macOSにはclangがプリインストール済み
    # Xcodeコマンドラインツールをインストール
    xcode-select --install
+   ```
+
+   **C#**（Unity や .NET 開発時。OmniSharp の動作に必要）:
+   ```bash
+   brew install dotnet
    ```
 
    **Ruby**:
@@ -429,7 +434,7 @@ Code = コード（LSP機能）
 
 LSPがサポートする言語では、変数の型やパラメータ名がコード内にインラインで薄く表示されます。LspAttach時に自動有効化されます。
 
-- **対応言語**: TypeScript, Rust, Go, C/C++, Lua, Python 等
+- **対応言語**: TypeScript, Rust, Go, C/C++, C#, Lua, Python 等
 - **切り替え**: `<leader>ch` で現在のバッファの表示/非表示を切り替え
 
 ### コードフォーマット
@@ -704,7 +709,7 @@ Run = コード実行
 | `<leader>rc` | 実行ウィンドウを閉じる | **R**un: **C**lose |
 
 ### 対応言語
-- Python, Java, C/C++, Rust, Go, JavaScript, TypeScript, HTML, Bash, Lua, Ruby, PHP, Haskell
+- Python, Java, C/C++, C#, Rust, Go, JavaScript, TypeScript, HTML, Bash, Lua, Ruby, PHP, Haskell
 
 ## Debug (`<leader>d`)
 

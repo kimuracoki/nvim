@@ -110,6 +110,7 @@ return {
           "ruby_lsp",     -- Ruby (Ruby LSP)
           "hls",          -- Haskell
           "clojure_lsp",  -- Clojure/Lisp
+          "omnisharp",    -- C#
         },
         -- automatic_enable = true（デフォルト）
       })
@@ -582,6 +583,7 @@ return {
           php = "php",
           haskell = "runhaskell",
           lisp = "sbcl --noinform --load $fileName --quit",
+          csharp = "cd $dir && dotnet run",
         },
         -- 実行前に保存
         save_before_run = true,
