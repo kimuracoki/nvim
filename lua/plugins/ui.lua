@@ -438,34 +438,35 @@ return {
     config = function(_, opts)
       require("snacks").setup(opts)
 
-      -- 画像→テキストのときだけターミナルから画像を削除（シンプル版）
-      local placement = require("snacks.image.placement")
       local terminal = require("snacks.image.terminal")
+      local reloading = false
 
-      -- placement 作成時に BufLeave を追加
-      local orig_new = placement.new
-      placement.new = function(buf, src, opts)
-        local self = orig_new(buf, src, opts)
-        if self and self.buf and vim.bo[self.buf].filetype == "image" then
-          vim.api.nvim_create_autocmd("BufLeave", {
-            buffer = self.buf,
-            callback = function()
-              vim.schedule(function()
-                local cur_buf = vim.api.nvim_get_current_buf()
-                -- テキストに切り替わったときだけ削除（画像→画像は何もしない）
-                if vim.api.nvim_buf_is_valid(cur_buf) and vim.bo[cur_buf].filetype ~= "image" then
-                  pcall(function()
-                    if self.img and self.img.id and self.id then
-                      terminal.request({ a = "d", d = "p", i = self.img.id, p = self.id })
-                    end
-                  end)
-                end
-              end)
-            end,
-          })
-        end
-        return self
-      end
+      -- 画像バッファを離れるとき: ターミナル上の全画像をクリア
+      vim.api.nvim_create_autocmd("BufLeave", {
+        callback = function()
+          if vim.bo.filetype == "image" then
+            pcall(function()
+              terminal.request({ a = "d", d = "a" })
+            end)
+          end
+        end,
+      })
+
+      -- 画像バッファに入るとき: :edit で再レンダリングをトリガー
+      vim.api.nvim_create_autocmd("BufEnter", {
+        callback = function()
+          if reloading then return end
+          if vim.bo.filetype == "image" then
+            reloading = true
+            vim.schedule(function()
+              if vim.api.nvim_buf_is_valid(vim.api.nvim_get_current_buf()) then
+                pcall(function() vim.cmd("edit") end)
+              end
+              reloading = false
+            end)
+          end
+        end,
+      })
     end,
   },
 
