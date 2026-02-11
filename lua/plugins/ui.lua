@@ -427,15 +427,46 @@ return {
         force = true, -- Warp等で自動検出が失敗する場合に強制有効化
       },
       -- 画像フロートの表示位置（bufferlineとの重なりを避けるため上にマージン）
-      -- 画像フロートを「エディタ基準」にし、上端からの行で位置指定（cursor基準だとrowが効かない）
       styles = {
         snacks_image = {
           relative = "editor",
-          row = 2,   -- エディタ上端から2行目（bufferline直下）
-          col = -1,  -- -1 = 中央
+          row = 2,
+          col = -1,
         },
       },
     },
+    config = function(_, opts)
+      require("snacks").setup(opts)
+
+      -- 画像→テキストのときだけターミナルから画像を削除（シンプル版）
+      local placement = require("snacks.image.placement")
+      local terminal = require("snacks.image.terminal")
+
+      -- placement 作成時に BufLeave を追加
+      local orig_new = placement.new
+      placement.new = function(buf, src, opts)
+        local self = orig_new(buf, src, opts)
+        if self and self.buf and vim.bo[self.buf].filetype == "image" then
+          vim.api.nvim_create_autocmd("BufLeave", {
+            buffer = self.buf,
+            callback = function()
+              vim.schedule(function()
+                local cur_buf = vim.api.nvim_get_current_buf()
+                -- テキストに切り替わったときだけ削除（画像→画像は何もしない）
+                if vim.api.nvim_buf_is_valid(cur_buf) and vim.bo[cur_buf].filetype ~= "image" then
+                  pcall(function()
+                    if self.img and self.img.id and self.id then
+                      terminal.request({ a = "d", d = "p", i = self.img.id, p = self.id })
+                    end
+                  end)
+                end
+              end)
+            end,
+          })
+        end
+        return self
+      end
+    end,
   },
 
   -- Claude Code 使用量表示（ステータスラインに time% | tok% を表示、:CCUsage で詳細）
