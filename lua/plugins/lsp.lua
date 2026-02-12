@@ -12,6 +12,11 @@ return {
   { "rafamadriz/friendly-snippets" }, -- VSCode風のスニペット集
 
   ---------------------------------------------------------------------------
+  -- JSON/YAML スキーマ補完
+  ---------------------------------------------------------------------------
+  { "b0o/SchemaStore.nvim", lazy = true },
+
+  ---------------------------------------------------------------------------
   -- LSP 設定
   ---------------------------------------------------------------------------
   { "neovim/nvim-lspconfig" },
@@ -127,6 +132,30 @@ return {
           Lua = {
             diagnostics = { globals = { "vim" } },
             workspace = { checkThirdParty = false },
+          },
+        },
+      })
+
+      -- JSON用の設定（SchemaStoreでスキーマ補完）
+      vim.lsp.config("jsonls", {
+        settings = {
+          json = {
+            schemas = require("schemastore").json.schemas(),
+            validate = { enable = true },
+          },
+        },
+      })
+
+      -- YAML用の設定（SchemaStoreでスキーマ補完）
+      vim.lsp.config("yamlls", {
+        settings = {
+          yaml = {
+            schemaStore = {
+              -- schemastore.nvim側で管理するため、組み込みを無効化
+              enable = false,
+              url = "",
+            },
+            schemas = require("schemastore").yaml.schemas(),
           },
         },
       })
