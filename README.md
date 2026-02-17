@@ -174,11 +174,15 @@ brew install macism
    brew install dotnet
    ```
 
-   **Ruby**:
+   **Ruby**（Ruby LSP を使う場合は **Ruby 3.0 以上**が必要）:
    ```bash
-   brew install ruby
-   # またはrbenvを使用
-   # brew install rbenv ruby-build
+   # 推奨: rbenv で Ruby 3 をインストール（Mason の ruby_lsp が動きます）
+   brew install rbenv ruby-build
+   echo 'eval "$(rbenv init - zsh)"' >> ~/.zshrc && source ~/.zshrc
+   rbenv install 3.3.6
+   rbenv global 3.3.6
+   # または
+   # brew install ruby
    ```
 
    **PHP**:
@@ -871,6 +875,7 @@ Window = ウィンドウ操作
 ### LSP・補完
 - `nvim-lspconfig` - LSP設定
 - `mason.nvim` - LSPインストーラー
+- `mason-lspconfig.nvim` - Mason と LSP の統合（ensure_installed 等）
 - `nvim-cmp` - 補完エンジン
 - `lspsaga.nvim` - LSP UI改善
 - `LuaSnip` - スニペットエンジン
@@ -916,6 +921,9 @@ Window = ウィンドウ操作
 - `:Mason`で必要なLSPサーバーがインストールされているか確認
 - プロジェクトルートに設定ファイル（`package.json`, `.eslintrc`等）があるか確認
 
+**Q: ruby_lsp のインストールに失敗する**
+- Ruby LSP は **Ruby 3.0 以上**が必要です。`ruby -v` で確認し、2.6 の場合は [Ruby のセットアップ](#8-言語別ツールのインストール開発する言語に応じて) の rbenv 手順で Ruby 3 を入れてください。Neovim はターミナルから起動すると rbenv の Ruby が使われます。
+
 **Q: 透過背景が効かない**
 - `<leader>uo`で透過のオン/オフを切り替え
 - ターミナルアプリ側で透過が有効になっているか確認
@@ -952,6 +960,7 @@ Window = ウィンドウ操作
 │       ├── ui.lua           # UI関連（カラースキーム、ステータスライン、ファイラ、AI統合）
 │       ├── editor.lua       # エディタ機能（構文ハイライト、補完、フォーマッター）
 │       ├── lsp.lua          # LSP・補完（Language Server設定）
-│       └── git.lua          # Git関連（gitsigns、diffview、gitgraph、lazygit、octo）
+│       ├── git.lua          # Git関連（gitsigns、diffview、gitgraph、lazygit、octo）
+│       └── im.lua           # 日本語入力（IME）切り替え
 └── README.md                # このファイル
 ```
