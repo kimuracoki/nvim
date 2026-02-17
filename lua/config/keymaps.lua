@@ -117,6 +117,11 @@ end, { desc = "Window: Setup layout" })
 map("n", "<leader>q", ":qa<CR>", { desc = "Quit: All" })
 
 -- LSP関連（K, grn, gra, grr, gri, grt, gO, Ctrl-S, [d, ]d は Neovim 0.11+ デフォルト）
+-- grr: 参照をフローティング（Telescope）で表示
+map("n", "grr", function()
+  require("telescope.builtin").lsp_references()
+end, { desc = "LSP: References (floating)" })
+
 map("n", "gd", function()
   vim.lsp.buf.definition()
 end, { desc = "Go to definition" })
