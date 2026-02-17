@@ -12,6 +12,7 @@ VSCodeのような操作感を実現するためのNeovim設定です。
 - **AI機能**: Claude Code統合（Cursor風のAIアシスタント）
 - **豊富なUI**: ミニマップ、アウトライン、問題パネル、通知システム
 - **多言語対応**: TypeScript/JavaScript、Python、Rust、Go、Java、C/C++、C#、Ruby、PHP、Haskell、Lispなど
+- **日本語入力（IME）**: ノーマルモードに戻ったときに半角（英数）に自動切り替え（macism 要インストール）
 
 ## 目次
 
@@ -114,6 +115,13 @@ gh auth login
 # インストール方法は公式ドキュメント参照
 # https://github.com/coder/claudecode
 ```
+
+**macism**（ノーマルモード時に半角IMEへ自動切り替え用）:
+```bash
+brew tap laishulu/homebrew
+brew install macism
+```
+インストール後、挿入モードを抜けるたびに入力ソースが半角（英数）に切り替わります。未インストールでもNeovimは問題なく動作します。
 
 ### 8. 言語別ツールのインストール（開発する言語に応じて）
 
@@ -285,6 +293,9 @@ gh auth login
 
 ### モード切り替え
 - `jk`: 挿入モードからノーマルモードに戻る（Escの代わり）
+
+### 日本語入力（IME）
+ノーマルモード・コマンドラインモードでは半角（英数）に自動で切り替わります。挿入モードやコマンドライン入力時には、直前の入力ソースが復元されます。利用には [macism](#7-オプションツールのインストール必要に応じて) のインストールが必要です。
 
 ### 全選択
 - `<leader>a`: 全選択（**A**ll）
@@ -881,6 +892,7 @@ Window = ウィンドウ操作
 - `snacks.nvim` - ターミナル統合（Claude Code用）
 
 ### その他
+- `im-select.nvim` - 日本語入力の自動切り替え（ノーマル時に半角、挿入時に前のIMEを復元。macOS では macism が必要）
 - `vim-bookmarks` - ブックマーク
 - `toggleterm.nvim` - ターミナル管理
 - `code_runner.nvim` - コード実行
