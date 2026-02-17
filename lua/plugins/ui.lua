@@ -263,6 +263,16 @@ return {
         popup_border_style = "rounded",
         enable_git_status = true,
         enable_diagnostics = true,
+        -- Neo-tree バッファも通常のエディタと同じように行番号を表示
+        event_handlers = {
+          {
+            event = "neo_tree_buffer_enter",
+            handler = function()
+              vim.opt_local.number = true
+              vim.opt_local.relativenumber = true
+            end,
+          },
+        },
         -- ソース切り替えタブを上部に表示
         source_selector = {
           winbar = true,
