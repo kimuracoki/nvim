@@ -131,6 +131,13 @@ return {
       auto_restore_enabled = true,
       auto_save_enabled = true,
       auto_session_suppress_dirs = { "~/", "~/Downloads", "/" },
+      -- ターミナルバッファをセッションに保存しない
+      auto_session_opts = {
+        -- バッファタイプでフィルタリング
+        buftypes_to_ignore = { "terminal" },
+        -- ファイルタイプでフィルタリング
+        filetypes_to_ignore = {},
+      },
       -- セッションに保存する内容
       session_lens = {
         load_on_setup = true,
