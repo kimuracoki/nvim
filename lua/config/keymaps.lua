@@ -123,8 +123,8 @@ map("n", "grr", function()
 end, { desc = "LSP: References (floating)" })
 
 map("n", "gd", function()
-  vim.lsp.buf.definition()
-end, { desc = "Go to definition" })
+  require("telescope.builtin").lsp_definitions()
+end, { desc = "Go to definition (floating)" })
 
 map("n", "gD", function()
   vim.lsp.buf.declaration()
