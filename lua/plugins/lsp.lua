@@ -208,13 +208,13 @@ return {
             preferences = {
               includePackageJsonAutoImports = "auto",
             },
-            -- より厳密な型チェック（必要に応じて調整）
             inlayHints = {
-              parameterNames = { enabled = "all" },
-              variableTypes = { enabled = false },
-              propertyDeclarationTypes = { enabled = true },
-              functionLikeReturnTypes = { enabled = true },
-              enumMemberValues = { enabled = true },
+              includeInlayParameterNameHints = "all",
+              includeInlayParameterNameHintsWhenArgumentMatchesName = true,
+              includeInlayVariableTypeHints = false,
+              includeInlayPropertyDeclarationTypeHints = true,
+              includeInlayFunctionLikeReturnTypeHints = true,
+              includeInlayEnumMemberValueHints = true,
             },
           },
           javascript = {
@@ -222,11 +222,12 @@ return {
               includePackageJsonAutoImports = "auto",
             },
             inlayHints = {
-              parameterNames = { enabled = "all" },
-              variableTypes = { enabled = false },
-              propertyDeclarationTypes = { enabled = true },
-              functionLikeReturnTypes = { enabled = true },
-              enumMemberValues = { enabled = true },
+              includeInlayParameterNameHints = "all",
+              includeInlayParameterNameHintsWhenArgumentMatchesName = true,
+              includeInlayVariableTypeHints = false,
+              includeInlayPropertyDeclarationTypeHints = true,
+              includeInlayFunctionLikeReturnTypeHints = true,
+              includeInlayEnumMemberValueHints = true,
             },
           },
           -- モノレポ対応: ワークスペースの検出を改善
