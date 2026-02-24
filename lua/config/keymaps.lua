@@ -5,8 +5,21 @@ map("n", "<C-s>", ":w<CR>", { desc = "Save" })
 map("i", "<C-s>", "<Esc>:w<CR>a", { desc = "Save" })
 
 -- バッファ移動（Buffer操作）
-map("n", "<S-h>", ":BufferLineCyclePrev<CR>", { desc = "Buffer: Previous" })
-map("n", "<S-l>", ":BufferLineCycleNext<CR>", { desc = "Buffer: Next" })
+-- buflisted=false のバッファ（gitgraph等）にいるときは bprev/bnext でリスト済みバッファへ移動
+map("n", "<S-h>", function()
+  if not vim.bo.buflisted then
+    vim.cmd("bprevious")
+  else
+    vim.cmd("BufferLineCyclePrev")
+  end
+end, { desc = "Buffer: Previous" })
+map("n", "<S-l>", function()
+  if not vim.bo.buflisted then
+    vim.cmd("bnext")
+  else
+    vim.cmd("BufferLineCycleNext")
+  end
+end, { desc = "Buffer: Next" })
 map("n", "<leader>bc", function()
   -- 他にバッファがあれば前のバッファに移動してから削除
   local buf_count = 0
