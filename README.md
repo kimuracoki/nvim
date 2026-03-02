@@ -442,6 +442,9 @@ Code = コード（LSP機能）
 |------|------|------|
 | `gd` | 定義へジャンプ | **g**o to **d**efinition |
 | `gD` | 宣言へジャンプ | **g**o to **D**eclaration |
+| `gcc` | 行コメントのトグル（コメントアウト/解除） | Comment.nvim（**g**o **c**omment **c**urrent） |
+| `gbc` | ブロックコメントのトグル | Comment.nvim（**g**o **b**lock **c**omment） |
+| `gc` | 選択範囲をコメントトグル（Visual モード） | Comment.nvim |
 | `<leader>cf` | コードフォーマット（手動） | **C**ode: **F**ormat |
 | `<leader>ch` | インレイヒントの切り替え | **C**ode: **H**ints |
 
