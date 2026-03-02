@@ -629,6 +629,109 @@ return {
         { "<leader>x", group = "Diagnostics (診断)" },
       })
 
+      -- <leader> サブキー（英語 + 日本語、元のグループ表記に合わせる）
+      wk.add({
+        -- Buffer
+        { "<leader>bc", desc = "Buffer: Close (バッファを閉じる)" },
+        { "<leader>bl", desc = "Buffer: List (バッファ一覧)" },
+        -- Code
+        { "<leader>cf", desc = "Code: Format (コードフォーマット)" },
+        { "<leader>ch", desc = "Code: Inlay hints (インレイヒントの切り替え)" },
+        -- Debug
+        { "<leader>db", desc = "Debug: Breakpoint toggle (ブレークポイントのトグル)" },
+        -- Find/File
+        { "<leader>ff", desc = "Find: In file (ファイル内検索)" },
+        { "<leader>fr", desc = "File: Recent (最近開いたファイル)" },
+        { "<leader>fs", desc = "Find: Symbols (シンボル検索・ファイル内)" },
+        -- Git
+        { "<leader>gb", desc = "Git: Blame (行の Blame 表示)" },
+        { "<leader>gD", desc = "Git: Diff close (Diff を閉じる)" },
+        { "<leader>gd", desc = "Git: Diff open (Diff を開く)" },
+        { "<leader>ge", desc = "Git: Explorer (変更ファイル一覧)" },
+        { "<leader>gh", desc = "Git: History (ファイル履歴)" },
+        { "<leader>gic", desc = "Git: Issue create (Issue を作成)" },
+        { "<leader>gil", desc = "Git: Issue list (Issue 一覧)" },
+        { "<leader>gl", desc = "Git: Log graph (コミットグラフ)" },
+        { "<leader>go", desc = "Git: Octo menu (Octo メニュー)" },
+        { "<leader>gpc", desc = "Git: PR create (PR を作成)" },
+        { "<leader>gpl", desc = "Git: PR list (PR 一覧)" },
+        { "<leader>gps", desc = "Git: PR search (PR 検索)" },
+        { "<leader>gr", desc = "Git: Reset hunk (ハンクをリセット)" },
+        { "<leader>gs", desc = "Git: Stage hunk (ハンクをステージ)" },
+        { "<leader>gu", desc = "Git: Undo stage (ステージを取り消し)" },
+        { "<leader>gv", desc = "Git: View hunk (ハンクのプレビュー)" },
+        { "<leader>gg", desc = "Git: Lazygit (Lazygit)" },
+        -- Help
+        { "<leader>hc", desc = "Help: Checkhealth (Checkhealth)" },
+        { "<leader>hm", desc = "Help: Messages (メッセージログ)" },
+        -- AI (Claude Code)
+        { "<leader>if", desc = "AI: Focus toggle (フォーカス切り替え)" },
+        { "<leader>ii", desc = "AI: Claude Code (Claude Code を開く)" },
+        { "<leader>im", desc = "AI: Model select (モデル選択)" },
+        { "<leader>is", desc = "AI: Send selection (選択範囲を送信・Visual)" },
+        -- Lazy
+        { "<leader>ll", desc = "Lazy: Status (Lazy ステータス)" },
+        { "<leader>ls", desc = "Lazy: Sync (Lazy 同期)" },
+        -- Picker
+        { "<leader>pc", desc = "Picker: Commands (コマンドパレット)" },
+        { "<leader>pf", desc = "Picker: Files (ファイル検索)" },
+        -- Run
+        { "<leader>rc", desc = "Run: Close (実行ウィンドウを閉じる)" },
+        { "<leader>rf", desc = "Run: File (ファイルを実行)" },
+        { "<leader>rp", desc = "Run: Project (プロジェクトを実行)" },
+        { "<leader>rr", desc = "Run: Code (コードを実行)" },
+        -- Search
+        { "<leader>sg", desc = "Search: Grep (ワークスペース検索)" },
+        { "<leader>sw", desc = "Search: Workspace symbols (ワークスペースシンボル)" },
+        -- Terminal
+        { "<leader>ta", desc = "Terminal: Toggle all (ターミナル一括トグル)" },
+        { "<leader>t1", desc = "Terminal: 1 (ターミナル 1)" },
+        { "<leader>t2", desc = "Terminal: 2 (ターミナル 2)" },
+        { "<leader>t3", desc = "Terminal: 3 (ターミナル 3)" },
+        { "<leader>ts", desc = "Terminal: Select (ターミナル選択)" },
+        { "<leader>tt", desc = "Terminal: Toggle (ターミナルをトグル)" },
+        -- UI
+        { "<leader>um", desc = "UI: Minimap toggle (ミニマップのトグル)" },
+        { "<leader>uo", desc = "UI: Transparency (透過のトグル)" },
+        { "<leader>ut", desc = "UI: Theme (カラースキーム切り替え)" },
+        -- Window
+        { "<leader>wh", desc = "Window: Decrease width (幅を狭く)" },
+        { "<leader>wj", desc = "Window: Decrease height (高さを狭く)" },
+        { "<leader>wk", desc = "Window: Increase height (高さを広く)" },
+        { "<leader>wl", desc = "Window: Increase width (幅を広く)" },
+        { "<leader>ww", desc = "Window: Setup layout (レイアウトをセットアップ)" },
+        -- Diagnostics
+        { "<leader>xd", desc = "Diagnostics: At cursor (カーソル位置の診断)" },
+        { "<leader>xq", desc = "Diagnostics: Quickfix (クイックフィックスリスト)" },
+        { "<leader>xw", desc = "Diagnostics: Workspace (ワークスペースの診断)" },
+        { "<leader>xx", desc = "Diagnostics: Buffer (バッファの診断)" },
+      })
+
+      -- g プレフィックス（この設定で使うもの + よく使うビルトインのみ）
+      wk.add({
+        { "g", group = "General (ジャンプ/コメント/LSP)" },
+        -- この設定で定義しているもの（keymaps / Comment.nvim / LSP / Treesitter）
+        { "gd", desc = "Go to definition (定義へジャンプ)" },
+        { "gD", desc = "Go to declaration (宣言へジャンプ)" },
+        { "gcc", desc = "Comment: Toggle line (行コメントトグル)" },
+        { "gbc", desc = "Comment: Toggle block (ブロックコメントトグル)" },
+        { "gc", desc = "Comment: Toggle selection (選択範囲をコメント・Visual)" },
+        { "grn", desc = "Rename / Node expand (リネーム / ノード拡張)" },
+        { "gra", desc = "Code action (コードアクション)" },
+        { "grr", desc = "References (参照を検索・Telescope)" },
+        { "gri", desc = "Go to implementation (実装へ移動)" },
+        { "grt", desc = "Go to type definition (型定義へ移動)" },
+        { "gO", desc = "Document symbol (ドキュメントシンボル)" },
+        { "gx", desc = "Open link (リンクを開く・ホバー内)" },
+        { "gnn", desc = "Selection: Init (選択開始・Treesitter)" },
+        { "grc", desc = "Selection: Scope expand (スコープ拡張・Treesitter)" },
+        { "grm", desc = "Selection: Node decrement (ノード縮小・Treesitter)" },
+        -- よく使うビルトインのみ
+        { "g%", desc = "Match: Cycle backward (逆方向にマッチへ)" },
+        { "g,", desc = "Changelist: Newer (変更リストで新しい方へ)" },
+        { "g;", desc = "Changelist: Older (変更リストで古い方へ)" },
+      })
+
       -- Register localleader groups for octo.nvim
       vim.api.nvim_create_autocmd("FileType", {
         pattern = "octo",
