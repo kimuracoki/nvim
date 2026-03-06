@@ -197,6 +197,14 @@ return {
           tab_size = 18,
           diagnostics = "nvim_lsp",
           diagnostics_update_in_insert = false,
+          -- Claude Code 用バッファはタブに出さない
+          custom_filter = function(bufnr, _)
+            local name = vim.api.nvim_buf_get_name(bufnr)
+            if name:match("claude") or name:match("ClaudeCode") then
+              return false
+            end
+            return true
+          end,
           offsets = {
             {
               filetype = "neo-tree",
