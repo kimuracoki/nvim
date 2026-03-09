@@ -17,6 +17,11 @@ return {
   { "b0o/SchemaStore.nvim", lazy = true },
 
   ---------------------------------------------------------------------------
+  -- Prisma: シンタックスハイライト・ファイルタイプ検出
+  ---------------------------------------------------------------------------
+  { "prisma/vim-prisma" },
+
+  ---------------------------------------------------------------------------
   -- LSP 設定
   ---------------------------------------------------------------------------
   { "neovim/nvim-lspconfig" },
@@ -116,6 +121,7 @@ return {
           "hls",          -- Haskell
           "clojure_lsp",  -- Clojure/Lisp
           "omnisharp",    -- C#
+          "prismals",     -- Prisma (.prisma)
         },
         -- automatic_enable = true（デフォルト）
       })
@@ -208,13 +214,13 @@ return {
             preferences = {
               includePackageJsonAutoImports = "auto",
             },
-            -- より厳密な型チェック（必要に応じて調整）
             inlayHints = {
-              parameterNames = { enabled = "all" },
-              variableTypes = { enabled = false },
-              propertyDeclarationTypes = { enabled = true },
-              functionLikeReturnTypes = { enabled = true },
-              enumMemberValues = { enabled = true },
+              includeInlayParameterNameHints = "all",
+              includeInlayParameterNameHintsWhenArgumentMatchesName = true,
+              includeInlayVariableTypeHints = false,
+              includeInlayPropertyDeclarationTypeHints = true,
+              includeInlayFunctionLikeReturnTypeHints = true,
+              includeInlayEnumMemberValueHints = true,
             },
           },
           javascript = {
@@ -222,11 +228,12 @@ return {
               includePackageJsonAutoImports = "auto",
             },
             inlayHints = {
-              parameterNames = { enabled = "all" },
-              variableTypes = { enabled = false },
-              propertyDeclarationTypes = { enabled = true },
-              functionLikeReturnTypes = { enabled = true },
-              enumMemberValues = { enabled = true },
+              includeInlayParameterNameHints = "all",
+              includeInlayParameterNameHintsWhenArgumentMatchesName = true,
+              includeInlayVariableTypeHints = false,
+              includeInlayPropertyDeclarationTypeHints = true,
+              includeInlayFunctionLikeReturnTypeHints = true,
+              includeInlayEnumMemberValueHints = true,
             },
           },
           -- モノレポ対応: ワークスペースの検出を改善

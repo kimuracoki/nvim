@@ -3,32 +3,54 @@ return {
   {
     "lewis6991/gitsigns.nvim",
     config = function()
-      require("gitsigns").setup()
-      local gs = require("gitsigns")
+      require("gitsigns").setup({
+        signs = {
+          add          = { text = "▎" },
+          change       = { text = "▎" },
+          delete       = { text = "" },
+          topdelete    = { text = "" },
+          changedelete = { text = "▎" },
+          untracked    = { text = "▎" },
+        },
+        signs_staged = {
+          add          = { text = "▎" },
+          change       = { text = "▎" },
+          delete       = { text = "" },
+          topdelete    = { text = "" },
+          changedelete = { text = "▎" },
+          untracked    = { text = "▎" },
+        },
+        on_attach = function(bufnr)
+          local gs = require("gitsigns")
+          local opts = function(desc)
+            return { buffer = bufnr, expr = true, desc = desc }
+          end
 
-      -- hunk間のナビゲーション（Claude Codeの変更箇所を移動）
-      vim.keymap.set("n", "]c", function()
-        if vim.wo.diff then return "]c" end
-        vim.schedule(function() gs.next_hunk() end)
-        return "<Ignore>"
-      end, { expr = true, desc = "Git: Next hunk" })
+          -- hunk間のナビゲーション
+          vim.keymap.set("n", "]c", function()
+            if vim.wo.diff then return "]c" end
+            vim.schedule(function() gs.nav_hunk("next") end)
+            return "<Ignore>"
+          end, opts("Git: Next hunk"))
 
-      vim.keymap.set("n", "[c", function()
-        if vim.wo.diff then return "[c" end
-        vim.schedule(function() gs.prev_hunk() end)
-        return "<Ignore>"
-      end, { expr = true, desc = "Git: Prev hunk" })
+          vim.keymap.set("n", "[c", function()
+            if vim.wo.diff then return "[c" end
+            vim.schedule(function() gs.nav_hunk("prev") end)
+            return "<Ignore>"
+          end, opts("Git: Prev hunk"))
 
-      -- Accept/Reject操作
-      vim.keymap.set("n", "<leader>gs", gs.stage_hunk, { desc = "Git: Stage hunk (Accept)" })
-      vim.keymap.set("n", "<leader>gr", gs.reset_hunk, { desc = "Git: Reset hunk (Reject)" })
-      vim.keymap.set("v", "<leader>gs", function() gs.stage_hunk({ vim.fn.line("."), vim.fn.line("v") }) end, { desc = "Git: Stage selection" })
-      vim.keymap.set("v", "<leader>gr", function() gs.reset_hunk({ vim.fn.line("."), vim.fn.line("v") }) end, { desc = "Git: Reset selection" })
+          -- Accept/Reject操作
+          vim.keymap.set("n", "<leader>gs", gs.stage_hunk, { buffer = bufnr, desc = "Git: Stage hunk (Accept)" })
+          vim.keymap.set("n", "<leader>gr", gs.reset_hunk, { buffer = bufnr, desc = "Git: Reset hunk (Reject)" })
+          vim.keymap.set("v", "<leader>gs", function() gs.stage_hunk({ vim.fn.line("."), vim.fn.line("v") }) end, { buffer = bufnr, desc = "Git: Stage selection" })
+          vim.keymap.set("v", "<leader>gr", function() gs.reset_hunk({ vim.fn.line("."), vim.fn.line("v") }) end, { buffer = bufnr, desc = "Git: Reset selection" })
 
-      -- その他
-      vim.keymap.set("n", "<leader>gv", gs.preview_hunk, { desc = "Git: View hunk (preview)" })
-      vim.keymap.set("n", "<leader>gb", function() gs.blame_line({ full = true }) end, { desc = "Git: Blame line" })
-      vim.keymap.set("n", "<leader>gu", gs.undo_stage_hunk, { desc = "Git: Undo stage" })
+          -- その他
+          vim.keymap.set("n", "<leader>gv", gs.preview_hunk, { buffer = bufnr, desc = "Git: View hunk (preview)" })
+          vim.keymap.set("n", "<leader>gb", function() gs.blame_line({ full = true }) end, { buffer = bufnr, desc = "Git: Blame line" })
+          vim.keymap.set("n", "<leader>gu", gs.undo_stage_hunk, { buffer = bufnr, desc = "Git: Undo stage" })
+        end,
+      })
     end,
   },
 
@@ -490,7 +512,7 @@ return {
         else
           -- 通常のファイルでは次の変更行へ（gitsignsのhunk移動を使用）
           if package.loaded["gitsigns"] then
-            require("gitsigns").next_hunk()
+            require("gitsigns").nav_hunk("next")
           end
         end
       end, { desc = "Next hunk (次の変更箇所)" })
@@ -501,7 +523,7 @@ return {
         else
           -- 通常のファイルでは前の変更行へ（gitsignsのhunk移動を使用）
           if package.loaded["gitsigns"] then
-            require("gitsigns").prev_hunk()
+            require("gitsigns").nav_hunk("prev")
           end
         end
       end, { desc = "Previous hunk (前の変更箇所)" })
