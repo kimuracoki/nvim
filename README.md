@@ -110,10 +110,16 @@ brew install gh
 gh auth login
 ```
 
-**Claude Code CLI**（AI機能用）:
+**Claude Code CLI**（AI機能・Claude 用）:
 ```bash
 # インストール方法は公式ドキュメント参照
 # https://github.com/coder/claudecode
+```
+
+**Cursor CLI**（AI機能・Cursor Agent 用）:
+```bash
+# Cursor アプリから CLI を有効化するか、公式案内に従ってインストール
+# https://cursor.com
 ```
 
 **macism**（ノーマルモード時に半角IMEへ自動切り替え用）:
@@ -251,7 +257,7 @@ brew install macism
 | `<leader>f` | Find/File操作 | **F**ind / **F**ile |
 | `<leader>g` | Git操作 | **G**it |
 | `<leader>h` | Help/Health（診断・ログ） | **H**elp |
-| `<leader>i` | Intelligence/AI（Claude Code） | **I**ntelligence |
+| `<leader>i` | Intelligence/AI（Claude Code / Cursor CLI） | **I**ntelligence |
 | `<leader>l` | Lazy（プラグイン管理） | **L**azy |
 | `<leader>o` | Outline（シンボル） | **O**utline |
 | `<leader>p` | Picker（検索・選択） | **P**icker (VSCode Ctrl+P) |
@@ -283,7 +289,7 @@ brew install macism
 - [Help/Health](#helphealth-leaderh)
 - [Lazy（プラグイン管理）](#lazy-leaderl)
 - [UI](#ui-leaderu)
-- [AI（Claude Code）](#ai-leaderi)
+- [AI（Claude Code / Cursor CLI）](#ai-leaderi)
 - [Window](#window-leaderw)
 
 ## 基本操作
@@ -771,37 +777,45 @@ UI = ユーザーインターフェース（外観）
 
 ## AI (`<leader>i`)
 
-Intelligence = AI（Claude Code）
+Intelligence = AI（Claude Code / Cursor CLI）
 
-Claude Codeは、CursorのようなAIアシスタント体験をNeovimで実現します。
+**Claude Code** と **Cursor CLI** の両方を使えます。表示はどちらも同じで、現在のウィンドウの**右側に幅80・角丸**で開きます。
 
 | キー | 機能 | 由来 |
 |------|------|------|
 | `<leader>ii` | Claude Codeを開く | **I**ntelligence: **I**ntelligence |
-| `<leader>if` | フォーカス切り替え | **I**ntelligence: **F**ocus |
-| `<leader>is` | 選択範囲を送信（ビジュアル） | **I**ntelligence: **S**end |
-| `<leader>im` | モデルを選択 | **I**ntelligence: **M**odel |
 | `<C-k>` | Claude Codeを開く（挿入モード） | Cursor準拠 |
+| `<leader>if` | フォーカス切り替え（Claude） | **I**ntelligence: **F**ocus |
+| `<leader>is` | 選択範囲を送信（ビジュアル・Claude） | **I**ntelligence: **S**end |
+| `<leader>im` | モデルを選択（Claude） | **I**ntelligence: **M**odel |
+| `<leader>ic` | Cursor CLIを開く（カレントディレクトリ） | **I**ntelligence: **C**ursor |
+| `<leader>ir` | Cursor CLIを開く（プロジェクトルート） | **I**ntelligence: **R**oot |
+| `<leader>il` | Cursor CLI セッション一覧 | **I**ntelligence: **L**ist |
 
-### 表示設定
-- **右側分割表示**: 現在のウィンドウの右側に幅80で表示
-- **自動コンテキスト追跡**: 現在のファイルと選択範囲が自動的にClaude Codeに共有されます
+### 表示設定（Claude も Cursor CLI も同じ）
+- **右側分割表示**: 現在のウィンドウの右側に幅80・角丸で表示
+- **Claude Code**: 現在のファイルと選択範囲が自動で共有されます
+- **Cursor CLI**: 開いたときにカレントファイルをコンテキストに付与（`<C-p>` でファイルパス、`<C-p><C-p>` で全バッファを付与可能）
 
 ### 操作方法
-- `<leader>ii` で開く/閉じる
-- `<C-\>` でClaude Codeを隠す（ターミナル内から）
-- Claude Code内では通常のターミナル操作が可能
+- **Claude**: `<leader>ii` で開く/閉じる。`<C-\>` で隠す。ターミナル内で通常操作可能
+- **Cursor CLI**: `<leader>ic` または `<leader>ir` で開く。`<C-f>` で幅トグル。`<Esc>` で隠す
 
-### 使い方の例
+### 使い方の例（Claude Code）
 1. `<leader>ii`でClaude Codeを開く
 2. コードを選択して`<leader>is`で送信
-3. Claude Codeが提案や説明を提供
-4. 提案された変更はdiff形式で確認・適用可能
-5. `<leader>ii`または`<C-\>`で閉じる
+3. 提案はdiff形式で確認・適用可能
+4. `<leader>ii`または`<C-\>`で閉じる
+
+### 使い方の例（Cursor CLI）
+1. `<leader>ic`（cwd）または`<leader>ir`（プロジェクトルート）で開く
+2. プロンプトを入力して `<C-CR>` または `<C-s>` で送信
+3. 続きは `<leader>il` でセッション一覧から選択して再開可能
 
 ### 注意事項
-- Claude Code CLI（v2.0.73以上）が必要です
-- 初回起動時は認証が必要な場合があります
+- **Claude Code**: Claude Code CLI（v2.0.73以上）が必要です
+- **Cursor CLI**: Cursor CLI がインストールされ `$PATH` から利用可能である必要があります（Neovim 0.9.0 以上）
+- 初回起動時はそれぞれ認証が必要な場合があります
 
 ## Window (`<leader>w`)
 
@@ -897,7 +911,8 @@ Window = ウィンドウ操作
 
 ### AI機能
 - `claudecode.nvim` - Claude Code統合（AIアシスタント）
-- `snacks.nvim` - ターミナル統合（Claude Code用）
+- `cursor-agent.nvim` - Cursor CLI統合（右分割・Claude と同じUI）
+- `snacks.nvim` - ターミナル統合（Claude Code / Cursor CLI 共通）
 
 ### その他
 - `im-select.nvim` - 日本語入力の自動切り替え（ノーマル時に半角、挿入時に前のIMEを復元。macOS では macism が必要）
