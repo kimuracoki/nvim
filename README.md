@@ -9,7 +9,7 @@ VSCodeのような操作感を実現するためのNeovim設定です。
 - **LSP・補完**: Mason経由で簡単にLSPサーバーをインストール
 - **スニペット機能**: VSCode互換のスニペット（HTML、TSX、JS/TS等の定型文を素早く入力）
 - **Git統合**: lazygit、GitHub PR/Issue管理（octo.nvim）、Gitグラフ表示
-- **AI機能**: Claude Code統合（Cursor風のAIアシスタント）
+- **AI機能**: Claude Code と Cursor CLI 統合（どちらも同じ右分割UIで利用可能）
 - **豊富なUI**: ミニマップ、アウトライン、問題パネル、通知システム
 - **多言語対応**: TypeScript/JavaScript、Python、Rust、Go、Java、C/C++、C#、Ruby、PHP、Haskell、Lispなど
 - **日本語入力（IME）**: ノーマルモードに戻ったときに半角（英数）に自動切り替え（macism 要インストール）

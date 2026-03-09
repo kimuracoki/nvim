@@ -220,10 +220,10 @@ return {
           tab_size = 18,
           diagnostics = "nvim_lsp",
           diagnostics_update_in_insert = false,
-          -- Claude Code 用バッファはタブに出さない
+          -- Claude Code / Cursor CLI 用バッファはタブに出さない
           custom_filter = function(bufnr, _)
             local name = vim.api.nvim_buf_get_name(bufnr)
-            if name:match("claude") or name:match("ClaudeCode") then
+            if name:match("claude") or name:match("ClaudeCode") or name:match("cursor") or name:match("cursor%-agent") then
               return false
             end
             return true
@@ -585,19 +585,17 @@ return {
     config = function(_, opts)
       require("claudecode").setup(opts)
 
-      -- ClaudeCodeのdiffバッファが閉じられた時に自動的に分割を整理
+      -- ClaudeCode/Cursor CLI の diff バッファが閉じられた時に自動的に分割を整理
       vim.api.nvim_create_autocmd("BufDelete", {
-        pattern = "*claude*",
+        pattern = { "*claude*", "*cursor*", "*cursor-agent*" },
         callback = function()
           vim.defer_fn(function()
-            -- 残っているウィンドウが2つ以上ある場合、メインウィンドウにフォーカス
             local wins = vim.api.nvim_list_wins()
             if #wins > 1 then
               for _, win in ipairs(wins) do
                 local buf = vim.api.nvim_win_get_buf(win)
                 local bufname = vim.api.nvim_buf_get_name(buf)
-                -- ClaudeCodeのバッファではないウィンドウにフォーカス
-                if not bufname:match("claude") then
+                if not bufname:match("claude") and not bufname:match("cursor") then
                   vim.api.nvim_set_current_win(win)
                   break
                 end
@@ -607,6 +605,24 @@ return {
         end,
       })
     end,
+  },
+
+  -- Cursor CLI（<leader>ic/ir/il で起動、snacks で右分割）
+  {
+    "Sarctiann/cursor-agent.nvim",
+    dependencies = { "folke/snacks.nvim" },
+    keys = {
+      { "<leader>ic", "<cmd>CursorAgent open_cwd<cr>", desc = "AI: Cursor CLI (cwd)" },
+      { "<leader>ir", "<cmd>CursorAgent open_root<cr>", desc = "AI: Cursor CLI (root)" },
+      { "<leader>il", "<cmd>CursorAgent session_list<cr>", desc = "AI: Cursor sessions" },
+    },
+    opts = {
+      use_default_mappings = false,
+      show_help_on_open = true,
+      new_lines_amount = 2,
+      window_width = 80,
+      open_mode = "normal",
+    },
   },
 
   -- 通知システム（noice.nvimの依存として必要）
@@ -647,7 +663,7 @@ return {
         { "<leader>f", group = "Find/File (検索/ファイル)" },
         { "<leader>g", group = "Git" },
         { "<leader>h", group = "Help/Health (ヘルプ)" },
-        { "<leader>i", group = "Intelligence/AI (Claude Code)" },
+        { "<leader>i", group = "Intelligence/AI (Claude Code / Cursor CLI)" },
         { "<leader>l", group = "Lazy (プラグイン)" },
         { "<leader>o", desc = "Outline (シンボル)" },
         { "<leader>p", group = "Picker (選択)" },
@@ -695,10 +711,13 @@ return {
         -- Help
         { "<leader>hc", desc = "Help: Checkhealth (Checkhealth)" },
         { "<leader>hm", desc = "Help: Messages (メッセージログ)" },
-        -- AI (Claude Code)
+        -- AI (Claude Code / Cursor CLI)
+        { "<leader>ic", desc = "AI: Cursor CLI cwd (カレントディレクトリで開く)" },
         { "<leader>if", desc = "AI: Focus toggle (フォーカス切り替え)" },
         { "<leader>ii", desc = "AI: Claude Code (Claude Code を開く)" },
+        { "<leader>il", desc = "AI: Cursor sessions (セッション一覧)" },
         { "<leader>im", desc = "AI: Model select (モデル選択)" },
+        { "<leader>ir", desc = "AI: Cursor CLI root (プロジェクトルートで開く)" },
         { "<leader>is", desc = "AI: Send selection (選択範囲を送信・Visual)" },
         -- Lazy
         { "<leader>ll", desc = "Lazy: Status (Lazy ステータス)" },

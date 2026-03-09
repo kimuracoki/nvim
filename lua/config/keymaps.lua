@@ -65,19 +65,19 @@ map("n", "<C-S-z>", "<C-r>", { desc = "Redo" })
 -- これらのターミナルでは jk マッピングを設定しない（j の遅延を防ぐ）
 local function is_terminal_no_jk_mapping()
   local bufname = vim.api.nvim_buf_get_name(0)
-  return bufname:match("claude") or bufname:match("ClaudeCode") or bufname:match("lazygit")
+  return bufname:match("claude") or bufname:match("ClaudeCode") or bufname:match("cursor") or bufname:match("cursor%-agent") or bufname:match("lazygit")
 end
 
 map("t", "<Esc>", function()
   if is_terminal_no_jk_mapping() then
-    -- Claude/lazygit などではそのまま<Esc>を送信
+    -- Claude/Cursor CLI/lazygit などではそのまま<Esc>を送信
     return "<Esc>"
   else
     return [[<C-\><C-n>]]
   end
 end, { expr = true, desc = "Terminal: Exit to normal mode (except Claude/lazygit)" })
 
--- jk は通常ターミナルのみバッファローカルで設定（Claude/lazygit では j の遅延を防ぐため設定しない）
+-- jk は通常ターミナルのみバッファローカルで設定（Claude/Cursor CLI/lazygit では j の遅延を防ぐため設定しない）
 vim.api.nvim_create_autocmd("TermEnter", {
   callback = function()
     if not is_terminal_no_jk_mapping() then
