@@ -265,6 +265,7 @@ return {
         },
       })
 
+      -- 全ターミナルで Esc をノーマルモードにせずそのままターミナルに送る（ic/ii 含む）→ keymaps.lua の Esc マップと BufEnter で対応
       -- Lazygit用のカスタムターミナル（フローティングウィンドウ）
       local Terminal = require("toggleterm.terminal").Terminal
       local lazygit = Terminal:new({

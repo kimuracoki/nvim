@@ -87,6 +87,16 @@ vim.api.nvim_create_autocmd("TermEnter", {
   desc = "Set jk mapping only in normal terminals (not Claude/lazygit)",
 })
 
+-- ic/ii（Cursor CLI / Claude Code）などターミナルにフォーカスしたら常に挿入モードにする（他画面移動やAI編集後にノーマルで止まらない）
+vim.api.nvim_create_autocmd("BufEnter", {
+  callback = function(args)
+    if vim.bo[args.buf].buftype == "terminal" then
+      vim.cmd("startinsert")
+    end
+  end,
+  desc = "Terminal: always start insert when focusing (ic/ii panels)",
+})
+
 -- ターミナルモードでもウィンドウ移動をノーマルモードと同じキーで行えるようにする
 -- （Claude Codeを含め、どのターミナルでも有効）
 map("t", "<C-h>", [[<C-\><C-n><C-w>h]], { silent = true, desc = "Terminal: Move to left window" })
