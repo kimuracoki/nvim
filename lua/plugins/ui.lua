@@ -627,17 +627,24 @@ return {
       require("cursor-agent").setup(opts)
       -- Claude と同じレイアウト: 現在ウィンドウに対して右分割・幅80（ツリーが消えない）
       local Snacks = require("snacks")
-      local orig_terminal = Snacks.terminal
-      Snacks.terminal = function(cmd, term_opts)
-        if type(cmd) == "string" and cmd:match("^cursor%-agent") and term_opts and term_opts.win and term_opts.win.position == "right" then
-          term_opts.win = vim.tbl_extend("force", term_opts.win, {
-            relative = "win",
-            win = vim.api.nvim_get_current_win(),
-            width = 80,
-          })
-          term_opts.win.min_width = nil
+      if Snacks.terminal and Snacks.terminal.open then
+        local orig_open = Snacks.terminal.open
+        Snacks.terminal.open = function(cmd, term_opts)
+          if type(cmd) == "string"
+            and cmd:match("^cursor%-agent")
+            and term_opts
+            and term_opts.win
+            and term_opts.win.position == "right"
+          then
+            term_opts.win = vim.tbl_extend("force", term_opts.win, {
+              relative = "win",
+              win = vim.api.nvim_get_current_win(),
+              width = 80,
+            })
+            term_opts.win.min_width = nil
+          end
+          return orig_open(cmd, term_opts)
         end
-        return orig_terminal(cmd, term_opts)
       end
     end,
   },
