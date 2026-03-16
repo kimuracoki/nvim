@@ -182,4 +182,13 @@ return {
     end,
   },
 
+  -- 文字コード自動判定（Shift-JIS などを VSCode 的に検出）
+  {
+    "mbbill/fencview",
+    config = function()
+      -- ファイルを開くたびに自動でエンコード判定
+      vim.g.fencview_autodetect = 1
+    end,
+  },
+
 }
