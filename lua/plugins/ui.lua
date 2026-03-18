@@ -398,24 +398,25 @@ return {
       local builtin = require("telescope.builtin")
       local map = vim.keymap.set
       
-      -- ファイル検索（Picker: files）
-      map("n", "<leader>pf", builtin.find_files, { desc = "Picker: Files" })
+      -- ファイル検索（Files）
+      map("n", "<leader>ff", builtin.find_files, { desc = "Find: Files" })
       map("n", "<C-p>", builtin.find_files, { desc = "Picker: Files" })
-      -- グローバル検索（Search: grep）
-      map("n", "<leader>sg", builtin.live_grep, { desc = "Search: Grep (workspace)" })
-      -- コマンドパレット（Picker: commands）
-      map("n", "<leader>pc", builtin.commands, { desc = "Picker: Commands" })
+
+      -- ワークスペース検索（Grep）
+      map("n", "<leader>fg", builtin.live_grep, { desc = "Find: Grep (workspace)" })
+
+      -- コマンドパレット（Commands）
+      map("n", "<leader>fc", builtin.commands, { desc = "Find: Commands" })
       map("n", "<C-S-p>", builtin.commands, { desc = "Picker: Commands" })
+
       -- 最近開いたファイル（File: recent）
       map("n", "<leader>fr", builtin.oldfiles, { desc = "File: Recent" })
       map("n", "<C-t>", builtin.oldfiles, { desc = "File: Recent" })
-      -- ファイル内検索（Find: in file）
-      map("n", "<leader>ff", builtin.current_buffer_fuzzy_find, { desc = "Find: In current file" })
-      map("n", "<C-f>", builtin.current_buffer_fuzzy_find, { desc = "Find: In current file" })
       -- シンボル検索（Find: Symbols）
       map("n", "<leader>fs", builtin.lsp_document_symbols, { desc = "Find: Symbols in file" })
       map("n", "<C-S-o>", builtin.lsp_document_symbols, { desc = "Find: Symbols in file" })
       -- バッファ一覧（Buffer: list）
+      map("n", "<leader>fb", builtin.buffers, { desc = "Find: Buffers" })
       map("n", "<leader>bl", builtin.buffers, { desc = "Buffer: List" })
       map("n", "<C-S-e>", builtin.buffers, { desc = "Buffer: List" })
     end,
@@ -690,7 +691,6 @@ return {
         { "<leader>i", group = "Intelligence/AI (Claude Code / Cursor CLI)" },
         { "<leader>l", group = "Lazy (プラグイン)" },
         { "<leader>o", desc = "Outline (シンボル)" },
-        { "<leader>p", group = "Picker (選択)" },
         { "<leader>q", desc = "Quit (終了)" },
         { "<leader>r", group = "Run (実行)" },
         { "<leader>s", group = "Search (検索)" },
@@ -711,7 +711,10 @@ return {
         -- Debug
         { "<leader>db", desc = "Debug: Breakpoint toggle (ブレークポイントのトグル)" },
         -- Find/File
-        { "<leader>ff", desc = "Find: In file (ファイル内検索)" },
+        { "<leader>ff", desc = "Find: Files (ファイル検索)" },
+        { "<leader>fb", desc = "Find: Buffers (バッファ一覧)" },
+        { "<leader>fc", desc = "Find: Commands (コマンド一覧)" },
+        { "<leader>fg", desc = "Find: Grep (ワークスペース検索)" },
         { "<leader>fr", desc = "File: Recent (最近開いたファイル)" },
         { "<leader>fs", desc = "Find: Symbols (シンボル検索・ファイル内)" },
         -- Git
@@ -746,16 +749,12 @@ return {
         -- Lazy
         { "<leader>ll", desc = "Lazy: Status (Lazy ステータス)" },
         { "<leader>ls", desc = "Lazy: Sync (Lazy 同期)" },
-        -- Picker
-        { "<leader>pc", desc = "Picker: Commands (コマンドパレット)" },
-        { "<leader>pf", desc = "Picker: Files (ファイル検索)" },
         -- Run
         { "<leader>rc", desc = "Run: Close (実行ウィンドウを閉じる)" },
         { "<leader>rf", desc = "Run: File (ファイルを実行)" },
         { "<leader>rp", desc = "Run: Project (プロジェクトを実行)" },
         { "<leader>rr", desc = "Run: Code (コードを実行)" },
         -- Search
-        { "<leader>sg", desc = "Search: Grep (ワークスペース検索)" },
         { "<leader>sw", desc = "Search: Workspace symbols (ワークスペースシンボル)" },
         -- Terminal
         { "<leader>ta", desc = "Terminal: Toggle all (ターミナル一括トグル)" },
