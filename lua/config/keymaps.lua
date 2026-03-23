@@ -262,6 +262,59 @@ map("n", "<leader>uo", function()
   require("config.highlight").toggle_transparency()
 end, { desc = "UI: Toggle transparency" })
 
+-- 行の折り返し（ウィンドウローカル）。いずれかのウィンドウで ON のあいだはミニマップを閉じ sidescrolloff=8（<leader>um と同趣旨）。全ウィンドウで OFF に戻したときだけ復元する
+map("n", "<leader>uw", function()
+  local enable_wrap = not vim.wo.wrap
+
+  local function any_window_wrapped()
+    for _, win in ipairs(vim.api.nvim_list_wins()) do
+      if vim.api.nvim_win_is_valid(win) and vim.wo[win].wrap then
+        return true
+      end
+    end
+    return false
+  end
+
+  if enable_wrap then
+    vim.wo.wrap = true
+    if not vim.g._wrap_ui_active then
+      vim.g._wrap_saved_sidescrolloff = vim.o.sidescrolloff
+      local had_minimap = false
+      local ok_win, cw_win = pcall(require, "codewindow.window")
+      if ok_win and cw_win.is_minimap_open and cw_win.is_minimap_open() then
+        had_minimap = true
+        pcall(function()
+          require("codewindow").close_minimap()
+        end)
+      end
+      vim.g._wrap_saved_minimap_open = had_minimap
+      vim.g._wrap_ui_active = true
+    end
+    vim.opt.sidescrolloff = 8
+    vim.notify("折り返し: オン（ミニマップを一時オフ・余白を通常に）", vim.log.levels.INFO)
+  else
+    vim.wo.wrap = false
+    if not any_window_wrapped() and vim.g._wrap_ui_active then
+      if vim.g._wrap_saved_minimap_open then
+        pcall(function()
+          require("codewindow").open_minimap()
+        end)
+      end
+      if vim.g._wrap_saved_sidescrolloff ~= nil then
+        vim.opt.sidescrolloff = vim.g._wrap_saved_sidescrolloff
+      else
+        vim.opt.sidescrolloff = 25
+      end
+      vim.g._wrap_saved_minimap_open = nil
+      vim.g._wrap_saved_sidescrolloff = nil
+      vim.g._wrap_ui_active = nil
+      vim.notify("折り返し: オフ（レイアウトを復元）", vim.log.levels.INFO)
+    else
+      vim.notify("折り返し: オフ", vim.log.levels.INFO)
+    end
+  end
+end, { desc = "UI: Toggle wrap (minimap-aware)" })
+
 -- コード実行（フローティングウィンドウにフォーカスを移動）
 local function focus_floating_window()
   vim.defer_fn(function()
