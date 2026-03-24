@@ -704,6 +704,7 @@ return {
       wk.add({
         -- Buffer
         { "<leader>bc", desc = "Buffer: Close (バッファを閉じる)" },
+        { "<leader>ba", desc = "Buffer: Close all (バッファをすべて閉じる)" },
         { "<leader>bl", desc = "Buffer: List (バッファ一覧)" },
         -- Code
         { "<leader>cf", desc = "Code: Format (コードフォーマット)" },

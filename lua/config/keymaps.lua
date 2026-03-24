@@ -35,6 +35,17 @@ map("n", "<leader>bc", function()
   vim.cmd("bdelete #")
 end, { desc = "Buffer: Close" })
 
+-- 一覧バッファをすべて閉じる（bc と接頭辞が重ならない ba・未保存は bdelete 同様に保護）
+map("n", "<leader>ba", function()
+  vim.cmd("enew")
+  local keep = vim.api.nvim_get_current_buf()
+  for _, buf in ipairs(vim.api.nvim_list_bufs()) do
+    if vim.api.nvim_buf_is_valid(buf) and vim.bo[buf].buflisted and buf ~= keep then
+      pcall(vim.api.nvim_buf_delete, buf, { force = false })
+    end
+  end
+end, { desc = "Buffer: Close all" })
+
 -- ウィンドウ移動
 map("n", "<C-h>", "<C-w>h", { desc = "Move to left window" })
 map("n", "<C-j>", "<C-w>j", { desc = "Move to bottom window" })
