@@ -127,22 +127,51 @@ return {
   {
     "rmagatti/auto-session",
     lazy = false,
-    opts = {
-      auto_restore_enabled = true,
-      auto_save_enabled = true,
-      auto_session_suppress_dirs = { "~/", "~/Downloads", "/" },
-      -- ターミナルバッファをセッションに保存しない
-      auto_session_opts = {
-        -- バッファタイプでフィルタリング
-        buftypes_to_ignore = { "terminal" },
-        -- ファイルタイプでフィルタリング
-        filetypes_to_ignore = {},
-      },
-      -- セッションに保存する内容
-      session_lens = {
-        load_on_setup = true,
-      },
-    },
+    opts = function()
+      -- Claude Code / Cursor CLI は terminal 扱いのため auto-session が保存対象に含める。
+      -- 旧 auto_session_opts（buftypes_to_ignore）は現行 auto-session では未使用のため、
+      -- 保存直前・復元直後に該当バッファだけ閉じる。
+      local function close_ai_terminal_buffers()
+        local to_close = {}
+        for _, buf in ipairs(vim.api.nvim_list_bufs()) do
+          if vim.api.nvim_buf_is_valid(buf) and vim.api.nvim_buf_is_loaded(buf) then
+            local name = vim.api.nvim_buf_get_name(buf)
+            if name ~= "" then
+              local drop = false
+              if name:match("cursor%-agent") then
+                drop = true
+              elseif name:match("^term://") then
+                local lower = name:lower()
+                if lower:find("claude", 1, true) or lower:find("claudecode", 1, true) then
+                  drop = true
+                end
+              end
+              if drop then
+                to_close[#to_close + 1] = buf
+              end
+            end
+          end
+        end
+        for _, buf in ipairs(to_close) do
+          pcall(vim.api.nvim_buf_delete, buf, { force = true })
+        end
+      end
+
+      return {
+        auto_restore_enabled = true,
+        auto_save_enabled = true,
+        auto_session_suppress_dirs = { "~/", "~/Downloads", "/" },
+        pre_save_cmds = { close_ai_terminal_buffers },
+        post_restore_cmds = {
+          function()
+            vim.schedule(close_ai_terminal_buffers)
+          end,
+        },
+        session_lens = {
+          load_on_setup = true,
+        },
+      }
+    end,
   },
 
   -- コード折りたたみ
