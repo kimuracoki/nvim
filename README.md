@@ -788,7 +788,7 @@ Intelligence = AI（Claude Code / Cursor CLI）
 | `<leader>if` | フォーカス切り替え（Claude） | **I**ntelligence: **F**ocus |
 | `<leader>is` | 選択範囲を送信（ビジュアル・Claude） | **I**ntelligence: **S**end |
 | `<leader>im` | モデルを選択（Claude） | **I**ntelligence: **M**odel |
-| `<leader>ic` | Cursor CLIを開く（カレントディレクトリ） | **I**ntelligence: **C**ursor |
+| `<leader>ic` | Cursor CLIを開く（プロジェクトルート） | **I**ntelligence: **C**ursor |
 | `<leader>ir` | Cursor CLIを開く（プロジェクトルート） | **I**ntelligence: **R**oot |
 | `<leader>il` | Cursor CLI セッション一覧 | **I**ntelligence: **L**ist |
 
@@ -799,7 +799,7 @@ Intelligence = AI（Claude Code / Cursor CLI）
 
 ### 操作方法
 - **Claude**: `<leader>ii` で開く/閉じる。`<C-\>` で隠す。ターミナル内で通常操作可能
-- **Cursor CLI**: `<leader>ic` または `<leader>ir` で開く。`<C-f>` で幅トグル。`<Esc>` で隠す
+- **Cursor CLI**: `<leader>ic` または `<leader>ir` で開く（どちらもプロジェクトルート）。`<C-f>` で幅トグル。`<Esc>` で隠す
 
 ### 使い方の例（Claude Code）
 1. `<leader>ii`でClaude Codeを開く
@@ -808,7 +808,7 @@ Intelligence = AI（Claude Code / Cursor CLI）
 4. `<leader>ii`または`<C-\>`で閉じる
 
 ### 使い方の例（Cursor CLI）
-1. `<leader>ic`（cwd）または`<leader>ir`（プロジェクトルート）で開く
+1. `<leader>ic`または`<leader>ir`（どちらもプロジェクトルート）で開く
 2. プロンプトを入力して `<C-CR>` または `<C-s>` で送信
 3. 続きは `<leader>il` でセッション一覧から選択して再開可能
 

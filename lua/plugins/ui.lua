@@ -613,9 +613,19 @@ return {
     "Sarctiann/cursor-agent.nvim",
     dependencies = { "folke/snacks.nvim" },
     keys = {
-      { "<leader>ic", "<cmd>CursorAgent open_cwd<cr>", desc = "AI: Cursor CLI (cwd)" },
+      { "<leader>ic", "<cmd>CursorAgent open_root<cr>", desc = "AI: Cursor CLI (root)" },
       { "<leader>ir", "<cmd>CursorAgent open_root<cr>", desc = "AI: Cursor CLI (root)" },
-      { "<leader>il", "<cmd>CursorAgent session_list<cr>", desc = "AI: Cursor sessions" },
+      {
+        "<leader>il",
+        function()
+          local terminal = require("cursor-agent.terminal")
+          local base_dir = vim.fn.getcwd()
+          local git_dir = vim.fs.find({ ".git" }, { path = base_dir, upward = true })[1]
+          terminal.working_dir = git_dir and vim.fn.fnamemodify(git_dir, ":h") or base_dir
+          terminal.open_terminal("ls")
+        end,
+        desc = "AI: Cursor sessions",
+      },
     },
     opts = {
       use_default_mappings = false,
@@ -749,10 +759,10 @@ return {
         { "<leader>hc", desc = "Help: Checkhealth (Checkhealth)" },
         { "<leader>hm", desc = "Help: Messages (メッセージログ)" },
         -- AI (Claude Code / Cursor CLI)
-        { "<leader>ic", desc = "AI: Cursor CLI cwd (カレントディレクトリで開く)" },
+        { "<leader>ic", desc = "AI: Cursor CLI root (プロジェクトルートで開く)" },
         { "<leader>if", desc = "AI: Focus toggle (フォーカス切り替え)" },
         { "<leader>ii", desc = "AI: Claude Code (Claude Code を開く)" },
-        { "<leader>il", desc = "AI: Cursor sessions (セッション一覧)" },
+        { "<leader>il", desc = "AI: Cursor sessions root (ルートのセッション一覧)" },
         { "<leader>im", desc = "AI: Model select (モデル選択)" },
         { "<leader>ir", desc = "AI: Cursor CLI root (プロジェクトルートで開く)" },
         { "<leader>is", desc = "AI: Send selection (選択範囲を送信・Visual)" },
