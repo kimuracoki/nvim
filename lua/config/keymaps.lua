@@ -291,11 +291,11 @@ map("n", "<leader>uw", function()
     if not vim.g._wrap_ui_active then
       vim.g._wrap_saved_sidescrolloff = vim.o.sidescrolloff
       local had_minimap = false
-      local ok_win, cw_win = pcall(require, "codewindow.window")
-      if ok_win and cw_win.is_minimap_open and cw_win.is_minimap_open() then
+      local ok_cw, codewindow = pcall(require, "codewindow")
+      if ok_cw and type(codewindow.is_minimap_open) == "function" and codewindow.is_minimap_open() then
         had_minimap = true
         pcall(function()
-          require("codewindow").close_minimap()
+          codewindow.close_minimap()
         end)
       end
       vim.g._wrap_saved_minimap_open = had_minimap

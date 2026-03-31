@@ -68,6 +68,12 @@ return {
         position = "bottom",
         size = 10,
       },
+      modes = {
+        diagnostics = {
+          -- Problems には Warning / Error のみ表示（Hint/Info を除外）
+          filter = { severity = { min = vim.diagnostic.severity.WARN } },
+        },
+      },
     },
     keys = {
       { "<leader>xx", "<cmd>Trouble diagnostics toggle filter.buf=0<cr>", desc = "Diagnostics: Buffer" },

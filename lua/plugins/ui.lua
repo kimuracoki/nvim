@@ -651,7 +651,16 @@ return {
   },
 
   -- 通知システム（noice.nvimの依存として必要）
-  { "rcarriga/nvim-notify", lazy = true },
+  -- NotifyBackground に gui 背景がないテーマでは透過計算用の色を明示する
+  {
+    "rcarriga/nvim-notify",
+    lazy = true,
+    config = function()
+      require("notify").setup({
+        background_colour = "#000000",
+      })
+    end,
+  },
 
   -- リーダーキーの表示（スペースキーを打ったときに利用可能なキーマップを表示）
   {
@@ -835,6 +844,9 @@ return {
     config = function()
       require("noice").setup({
         lsp = {
+          -- 複数 LSP が付いていると、片方だけ空の hover を返すたびに
+          -- 「No information available」が出る（もう一方は正常に表示される）
+          hover = { silent = true },
           override = {
             ["vim.lsp.util.convert_input_to_markdown_lines"] = true,
             ["vim.lsp.util.stylize_markdown"] = true,
