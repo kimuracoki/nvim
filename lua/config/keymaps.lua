@@ -79,14 +79,35 @@ local function is_terminal_no_jk_mapping()
   return bufname:match("claude") or bufname:match("ClaudeCode") or bufname:match("cursor") or bufname:match("cursor%-agent") or bufname:match("lazygit")
 end
 
+-- Cursor CLI（cursor-agent.nvim）: Esc をそのまま送ると CLI が終了し Terminal exited -1 になる。
+-- Claude / lazygit のみ Esc を端末に透過する。
+local function is_terminal_esc_passthrough()
+  local bufname = vim.api.nvim_buf_get_name(0)
+  return bufname:match("claude") or bufname:match("ClaudeCode") or bufname:match("lazygit")
+end
+
+local function is_cursor_agent_terminal()
+  return vim.api.nvim_buf_get_name(0):match("cursor%-agent") ~= nil
+end
+
 map("t", "<Esc>", function()
-  if is_terminal_no_jk_mapping() then
-    -- Claude/Cursor CLI/lazygit などではそのまま<Esc>を送信
-    return "<Esc>"
-  else
-    return [[<C-\><C-n>]]
+  local t_esc = vim.api.nvim_replace_termcodes("<Esc>", true, false, true)
+  local t_leave = vim.api.nvim_replace_termcodes("<C-\\><C-n>", true, false, true)
+  if is_terminal_esc_passthrough() then
+    vim.api.nvim_feedkeys(t_esc, "t", false)
+    return
   end
-end, { expr = true, desc = "Terminal: Exit to normal mode (except Claude/lazygit)" })
+  if is_cursor_agent_terminal() then
+    vim.api.nvim_feedkeys(t_leave, "t", false)
+    vim.schedule(function()
+      if vim.api.nvim_buf_get_name(0):match("cursor%-agent") then
+        pcall(vim.cmd, "close")
+      end
+    end)
+    return
+  end
+  vim.api.nvim_feedkeys(t_leave, "t", false)
+end, { desc = "Terminal: Esc (cursor-agent hides; Claude/lazygit pass-through)" })
 
 -- jk は通常ターミナルのみバッファローカルで設定（Claude/Cursor CLI/lazygit では j の遅延を防ぐため設定しない）
 vim.api.nvim_create_autocmd("TermEnter", {
