@@ -90,6 +90,14 @@ local function is_cursor_agent_terminal()
   return vim.api.nvim_buf_get_name(0):match("cursor%-agent") ~= nil
 end
 
+-- Cursor CLI ターミナルにフォーカスしたときだけジョブモードで開始（全ターミナルへの startinsert は副作用が大きい）
+local function is_ai_terminal_buf(bufnr)
+  local name = vim.api.nvim_buf_get_name(bufnr)
+  return name:match("cursor%-agent")
+    or name:lower():find("claude", 1, true)
+    or name:match("ClaudeCode")
+end
+
 map("t", "<Esc>", function()
   local t_esc = vim.api.nvim_replace_termcodes("<Esc>", true, false, true)
   local t_leave = vim.api.nvim_replace_termcodes("<C-\\><C-n>", true, false, true)
@@ -98,16 +106,13 @@ map("t", "<Esc>", function()
     return
   end
   if is_cursor_agent_terminal() then
+    -- Esc を PTY に送ると cursor-agent が終了しやすいので、ジョブモードからは端末ノーマルへだけ出す。
+    -- ウィンドウを閉じる処理は入れない（連打で AI ペインが消える・本体の挙動と競合するため）。
     vim.api.nvim_feedkeys(t_leave, "t", false)
-    vim.schedule(function()
-      if vim.api.nvim_buf_get_name(0):match("cursor%-agent") then
-        pcall(vim.cmd, "close")
-      end
-    end)
     return
   end
   vim.api.nvim_feedkeys(t_leave, "t", false)
-end, { desc = "Terminal: Esc (cursor-agent hides; Claude/lazygit pass-through)" })
+end, { desc = "Terminal: Esc (cursor-agent: leave job mode only; Claude/lazygit pass-through)" })
 
 -- jk は通常ターミナルのみバッファローカルで設定（Claude/Cursor CLI/lazygit では j の遅延を防ぐため設定しない）
 vim.api.nvim_create_autocmd("TermEnter", {
@@ -119,14 +124,14 @@ vim.api.nvim_create_autocmd("TermEnter", {
   desc = "Set jk mapping only in normal terminals (not Claude/lazygit)",
 })
 
--- ic/ii（Cursor CLI / Claude Code）などターミナルにフォーカスしたら常に挿入モードにする（他画面移動やAI編集後にノーマルで止まらない）
+-- ic/ii（Cursor CLI / Claude）ターミナルに入ったらジョブモードへ（AI パネルだけ。ToggleTerm 等は汚染しない）
 vim.api.nvim_create_autocmd("BufEnter", {
   callback = function(args)
-    if vim.bo[args.buf].buftype == "terminal" then
+    if vim.bo[args.buf].buftype == "terminal" and is_ai_terminal_buf(args.buf) then
       vim.cmd("startinsert")
     end
   end,
-  desc = "Terminal: always start insert when focusing (ic/ii panels)",
+  desc = "Terminal: AI panels only — start job mode on focus",
 })
 
 -- ターミナルモードでもウィンドウ移動をノーマルモードと同じキーで行えるようにする
