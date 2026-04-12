@@ -147,27 +147,6 @@ map("t", "<leader>wl", [[<C-\><C-n><C-w>>]], { silent = true, desc = "Terminal: 
 map("t", "<leader>wk", [[<C-\><C-n><C-w>+]], { silent = true, desc = "Terminal: Resize increase height" })
 map("t", "<leader>wj", [[<C-\><C-n><C-w>-]], { silent = true, desc = "Terminal: Resize decrease height" })
 
-map("n", "<leader>tt", function()
-  require("toggleterm").toggle(1)
-end, { desc = "Terminal: Toggle" })
-
--- ターミナル個別切り替え
-map("n", "<leader>t1", function()
-  require("toggleterm").toggle(1)
-end, { desc = "Terminal: Toggle 1" })
-
-map("n", "<leader>t2", function()
-  require("toggleterm").toggle(2)
-end, { desc = "Terminal: Toggle 2" })
-
-map("n", "<leader>t3", function()
-  require("toggleterm").toggle(3)
-end, { desc = "Terminal: Toggle 3" })
-
--- ターミナル選択と一括操作
-map("n", "<leader>ts", ":TermSelect<CR>", { desc = "Terminal: Select" })
-map("n", "<leader>ta", ":ToggleTermToggleAll<CR>", { desc = "Terminal: Toggle all" })
-
 -- ウィンドウ（Window）
 map("n", "<leader>ww", function()
   require("config.startup").setup_layout()

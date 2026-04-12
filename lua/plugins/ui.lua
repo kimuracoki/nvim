@@ -776,13 +776,11 @@ return {
         { "<leader>rr", desc = "Run: Code (コードを実行)" },
         -- Search
         { "<leader>sw", desc = "Search: Workspace symbols (ワークスペースシンボル)" },
-        -- Terminal
-        { "<leader>ta", desc = "Terminal: Toggle all (ターミナル一括トグル)" },
-        { "<leader>t1", desc = "Terminal: 1 (ターミナル 1)" },
-        { "<leader>t2", desc = "Terminal: 2 (ターミナル 2)" },
-        { "<leader>t3", desc = "Terminal: 3 (ターミナル 3)" },
-        { "<leader>ts", desc = "Terminal: Select (ターミナル選択)" },
-        { "<leader>tt", desc = "Terminal: Toggle (ターミナルをトグル)" },
+        -- Translate
+        { "<leader>tj", desc = "Translate: → Japanese (日本語に翻訳)" },
+        { "<leader>te", desc = "Translate: → English (英語に翻訳)" },
+        { "<leader>tr", desc = "Translate: Replace with English (英訳に置換)" },
+        { "<leader>tp", desc = "Translate: Pantran (長文翻訳)" },
         -- UI
         { "<leader>um", desc = "UI: Minimap toggle (ミニマップのトグル)" },
         { "<leader>uo", desc = "UI: Transparency (透過のトグル)" },

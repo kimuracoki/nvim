@@ -264,7 +264,7 @@ brew install macism
 | `<leader>q` | Quit（終了） | **Q**uit |
 | `<leader>r` | Run（コード実行） | **R**un |
 | `<leader>s` | Search（グローバル検索） | **S**earch |
-| `<leader>t` | Terminal | **T**erminal |
+| `<leader>t` | Translate（翻訳） | **T**ranslate |
 | `<leader>u` | UI（テーマ・外観） | **U**I |
 | `<leader>w` | Window（ウィンドウ操作） | **W**indow |
 | `<leader>x` | Diagnostics（問題・診断） | e**X**amine / fi**X** |
@@ -283,7 +283,7 @@ brew install macism
 - [スニペット](#スニペット)
 - [Diagnostics](#diagnostics-leaderx)
 - [Git操作](#git操作-leaderg)
-- [Terminal](#terminal-leadert)
+- [Translate（翻訳）](#translate翻訳-leadert)
 - [Run（コード実行）](#run-leaderr)
 - [Debug](#debug-leaderd)
 - [Help/Health](#helphealth-leaderh)
@@ -672,54 +672,23 @@ PRやIssueを開いた後、以下のキーバインドが利用可能です。
 - 差分を見やすく表示
 - `:DiffviewFileHistory` で表示
 
-## Terminal (`<leader>t`)
+## Translate（翻訳） (`<leader>t`)
 
-Terminal = ターミナル
+Translate = 翻訳。コメントやコミットメッセージを書く際の英日翻訳に使用。
 
-### 基本操作
-
-| キー | 機能 | 由来 |
-|------|------|------|
-| `<leader>tt` | ターミナルをトグル | **T**erminal **T**oggle |
-| `<C-\>` | ターミナルをトグル | ToggleTermデフォルト |
-| `<Esc>` | ターミナルモードを終了 | 通常ターミナルのみ |
-| `<C-h/j/k/l>` | ターミナルからウィンドウ移動 | Vim慣例 |
-
-### 複数ターミナル管理
+### vim-translator（単語・フレーズ）
 
 | キー | 機能 | 由来 |
 |------|------|------|
-| `<leader>t1` | ターミナル1をトグル | **T**erminal **1** |
-| `<leader>t2` | ターミナル2をトグル | **T**erminal **2** |
-| `<leader>t3` | ターミナル3をトグル | **T**erminal **3** |
-| `<leader>ts` | ターミナル選択UI | **T**erminal **S**elect |
-| `<leader>ta` | 全ターミナル一括表示/非表示 | **T**erminal **A**ll |
+| `<leader>tj` | 日本語に翻訳（ポップアップ） | **T**ranslate → **J**apanese |
+| `<leader>te` | 英語に翻訳（ポップアップ） | **T**ranslate → **E**nglish |
+| `<leader>tr` | その場で英訳に置換 | **T**ranslate **R**eplace |
 
-### 表示設定
+### pantran.nvim（長文）
 
-- **フローティングウィンドウ表示**: ターミナルは画面中央のフローティングウィンドウで表示されます
-- **表示サイズ**: 画面の90%（lazygitと同じサイズ）
-- **ボーダー**: rounded（角丸）
-
-### バックグラウンドプロセス管理
-
-ターミナルウィンドウを閉じてもプロセスは継続します。
-
-**使用例**:
-```bash
-# 開発サーバーを起動してウィンドウを閉じる
-<leader>tt
-npm run dev
-<Esc> → :q  # サーバーはバックグラウンドで継続
-
-# 別のターミナルで作業
-<leader>t2
-npm run build
-```
-
-**プロセス終了方法**:
-- ターミナルを開く → `<Esc>` → `:bdelete!` でバッファごと削除（プロセスもkill）
-- または `<leader>ts` でTermSelectを開き、管理
+| キー | 機能 | 由来 |
+|------|------|------|
+| `<leader>tp` | 長文翻訳バッファを開く（モーション or ビジュアル） | **T**ranslate **P**antran |
 
 ## Run (`<leader>r`)
 
