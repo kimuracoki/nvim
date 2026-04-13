@@ -92,6 +92,23 @@ return {
     end,
   },
 
+  -- CSVを表形式で見やすく表示（VSCode Edit CSV に近い表示）
+  {
+    "hat0uma/csvview.nvim",
+    ft = { "csv", "tsv" },
+    config = function()
+      require("csvview").setup()
+      vim.api.nvim_create_autocmd("FileType", {
+        pattern = { "csv", "tsv" },
+        callback = function()
+          vim.schedule(function()
+            pcall(vim.cmd, "CsvViewEnable")
+          end)
+        end,
+      })
+    end,
+  },
+
   -- フォーマッター統合
   {
     "stevearc/conform.nvim",
