@@ -8,6 +8,10 @@ return {
       vim.g.translator_target_lang = "ja"
       vim.g.translator_source_lang = "auto"
       vim.g.translator_default_engines = { "google" }
+      vim.g.translator_window_type = "popup"
+      -- popup表示で右端付近だと見切れることがあるため、最大幅を固定して折り返しを優先
+      vim.g.translator_window_max_width = 56
+      vim.g.translator_window_max_height = 18
 
       local map = vim.keymap.set
 
