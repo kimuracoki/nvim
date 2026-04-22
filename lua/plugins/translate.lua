@@ -11,6 +11,13 @@ return {
 
       local map = vim.keymap.set
 
+      local function translate_current_sentence(cmd)
+        local view = vim.fn.winsaveview()
+        vim.cmd("normal! vis")
+        vim.cmd("'<,'>" .. cmd)
+        vim.fn.winrestview(view)
+      end
+
       -- 日本語に翻訳（ポップアップ）
       map("n", "<leader>tj", "<Plug>TranslateW", { desc = "Translate: → Japanese (popup)" })
       map("v", "<leader>tj", "<Plug>TranslateWV", { desc = "Translate: → Japanese (popup)" })
@@ -22,6 +29,17 @@ return {
       -- その場で英訳に置換
       map("n", "<leader>tr", ":TranslateR --target_lang=en<CR>", { desc = "Translate: Replace with English" })
       map("v", "<leader>tr", ":TranslateR --target_lang=en<CR>", { desc = "Translate: Replace with English" })
+
+      -- 現在文を翻訳（文頭〜句点/感嘆符などの sentence 終端）
+      map("n", "<leader>tsj", function()
+        translate_current_sentence("TranslateW")
+      end, { desc = "Translate: Sentence → Japanese (popup)" })
+      map("n", "<leader>tse", function()
+        translate_current_sentence("TranslateW --target_lang=en")
+      end, { desc = "Translate: Sentence → English (popup)" })
+      map("n", "<leader>tsr", function()
+        translate_current_sentence("TranslateR --target_lang=en")
+      end, { desc = "Translate: Sentence replace with English" })
     end,
   },
 

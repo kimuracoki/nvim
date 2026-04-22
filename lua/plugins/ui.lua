@@ -780,6 +780,9 @@ return {
         { "<leader>tj", desc = "Translate: → Japanese (日本語に翻訳)" },
         { "<leader>te", desc = "Translate: → English (英語に翻訳)" },
         { "<leader>tr", desc = "Translate: Replace with English (英訳に置換)" },
+        { "<leader>tsj", desc = "Translate: Sentence → Japanese (今いる文を日本語に翻訳)" },
+        { "<leader>tse", desc = "Translate: Sentence → English (今いる文を英語に翻訳)" },
+        { "<leader>tsr", desc = "Translate: Sentence replace (今いる文を英訳に置換)" },
         { "<leader>tp", desc = "Translate: Pantran (長文翻訳)" },
         -- UI
         { "<leader>um", desc = "UI: Minimap toggle (ミニマップのトグル)" },
