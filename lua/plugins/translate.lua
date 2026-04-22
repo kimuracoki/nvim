@@ -15,11 +15,50 @@ return {
 
       local map = vim.keymap.set
 
+      local function detect_sentence_range_current_line()
+        local row, col0 = unpack(vim.api.nvim_win_get_cursor(0)) -- col0: 0-based byte index
+        local line = vim.api.nvim_get_current_line()
+        local punct_pat = "\\v[.!?。！？]"
+
+        local function last_match_end(s, pat)
+          local start_at = 0
+          local last_end = nil
+          while true do
+            local m = vim.fn.matchstrpos(s, pat, start_at)
+            local m_start = m[2]
+            local m_end = m[3]
+            if m_start == -1 then
+              break
+            end
+            last_end = m_end
+            start_at = m_end
+          end
+          return last_end
+        end
+
+        local prev_part = string.sub(line, 1, col0)
+        local prev_end = last_match_end(prev_part, punct_pat)
+
+        local start_col = (prev_end or 0) + 1 -- 1-based byte col
+        local first_non_space = vim.fn.matchstrpos(line, [[\S]], start_col - 1)[2]
+        if first_non_space ~= -1 then
+          start_col = first_non_space + 1
+        end
+
+        local next_match = vim.fn.matchstrpos(line, punct_pat, col0)
+        local end_col = next_match[2] ~= -1 and next_match[3] or #line
+        if end_col < start_col then
+          end_col = start_col
+        end
+
+        return row, start_col, end_col
+      end
+
       local function translate_current_sentence(cmd)
-        local view = vim.fn.winsaveview()
-        vim.cmd("normal! vis")
+        local row, start_col, end_col = detect_sentence_range_current_line()
+        vim.fn.setpos("'<", { 0, row, start_col, 0 })
+        vim.fn.setpos("'>", { 0, row, end_col, 0 })
         vim.cmd("'<,'>" .. cmd)
-        vim.fn.winrestview(view)
       end
 
       -- 日本語に翻訳（ポップアップ）
