@@ -156,6 +156,11 @@ end, { desc = "Window: Setup layout" })
 map("n", "<leader>q", ":qa<CR>", { desc = "Quit: All" })
 
 -- LSP関連（K, grn, gra, grr, gri, grt, gO, Ctrl-S, [d, ]d は Neovim 0.11+ デフォルト）
+-- grl: カーソル行のコードレンズ実行（例: Haskell の「型シグネチャ追加」）。gra はその行にコードアクションが無いと効かない。
+map("n", "grl", function()
+  vim.lsp.codelens.run()
+end, { desc = "LSP: Run code lens (型レンズ等)" })
+
 -- grr: 参照をフローティング（Telescope）で表示
 map("n", "grr", function()
   require("telescope.builtin").lsp_references()

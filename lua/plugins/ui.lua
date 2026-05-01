@@ -853,6 +853,7 @@ return {
         { "gc", desc = "Comment: Toggle selection (選択範囲をコメント・Visual)" },
         { "grn", desc = "Rename / Node expand (リネーム / ノード拡張)" },
         { "gra", desc = "Code action (コードアクション)" },
+        { "grl", desc = "Code lens run (コードレンズ実行・Haskellの型など)" },
         { "grr", desc = "References (参照を検索・Telescope)" },
         { "gri", desc = "Go to implementation (実装へ移動)" },
         { "grt", desc = "Go to type definition (型定義へ移動)" },
