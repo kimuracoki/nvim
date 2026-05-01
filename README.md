@@ -201,6 +201,8 @@ brew install macism
    brew install ghc cabal-install haskell-language-server
    ```
 
+   Haskell Language Server が出す「型」を**行の上に灰色で表示する**見せ方や、ソースへ書き込む操作（**`grl`**）については、[Code操作（`leader`+`c`）の Haskell / HLS](#haskell--hls)を参照してください。
+
    **Common Lisp**:
    ```bash
    brew install sbcl  # Steel Bank Common Lisp
@@ -451,8 +453,20 @@ Code = コード（LSP機能）
 | `gcc` | 行コメントのトグル（コメントアウト/解除） | Comment.nvim（**g**o **c**omment **c**urrent） |
 | `gbc` | ブロックコメントのトグル | Comment.nvim（**g**o **b**lock **c**omment） |
 | `gc` | 選択範囲をコメントトグル（Visual モード） | Comment.nvim |
+| `grl` | コードレンズを実行（Haskell の型シグネチャ適用など） | **`gr`** + **l**ens |
 | `<leader>cf` | コードフォーマット（手動） | **C**ode: **F**ormat |
 | `<leader>ch` | インレイヒントの切り替え | **C**ode: **H**ints |
+
+### Haskell / HLS
+
+コードレンズによる**推論型・型ヒント**（`ghcide-type-lenses`）を扱います。この設定では、それらを **定義行の直上に灰色（`LspCodeLens`）の仮想行**で表示します（VSCode に近い見え方）。
+
+- **型シグネチャをソースに適用するとき**: ノーマルモードで、対象となる**定義行**（例: `main = do` と書いてある実体の行）にカーソルを置いて **`grl`**。複数レンズがあるときは一覧から選択します。
+- **`gra`（コードアクション）と違う**: 型ヒント適用がレンズだけのとき、`gra` では 「No code action available」になり得ます。インレイヒントのオンオフ **`leader`+`ch`** とは別の仕組みです。
+- **挿入モードの `Ctrl+Space` は nvim-cmp の手動補完**であり、この灰色の型ヒントをそのまま流し込む操作ではありません。
+- **表示の追随**: `BufWritePost`・`InsertLeave` に加え、編集後は `TextChanged` / `TextChangedI` でデバウンス付き更新します。実行したレンズ直後、`grl` 内部の処理と重なって薄いヒントが一瞬だけ二重になり得ますが、この設定側で組み込み側のコードレンズ表示との取り込み済み対策があります。
+
+関連実装は `lua/plugins/lsp.lua` の HLS (`hls`) 設定と `show_hls_type_sigs` です。
 
 ### インレイヒント（Inlay Hints）
 
