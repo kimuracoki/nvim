@@ -594,6 +594,25 @@ return {
         update_in_insert = false,
         severity_sort = true,
       })
+
+      -- VSCode風の波線（undercurl）
+      local function apply_undercurl()
+        local groups = {
+          { hl = "DiagnosticUnderlineError", src = "DiagnosticError", fb = "#f38ba8" },
+          { hl = "DiagnosticUnderlineWarn",  src = "DiagnosticWarn",  fb = "#f9e2af" },
+          { hl = "DiagnosticUnderlineInfo",  src = "DiagnosticInfo",  fb = "#89b4fa" },
+          { hl = "DiagnosticUnderlineHint",  src = "DiagnosticHint",  fb = "#a6e3a1" },
+        }
+        for _, g in ipairs(groups) do
+          local src = vim.api.nvim_get_hl(0, { name = g.src, link = false })
+          vim.api.nvim_set_hl(0, g.hl, {
+            undercurl = true,
+            sp = src.fg and string.format("#%06x", src.fg) or g.fb,
+          })
+        end
+      end
+      vim.api.nvim_create_autocmd("VimEnter", { once = true, callback = apply_undercurl })
+      vim.api.nvim_create_autocmd("ColorScheme", { callback = apply_undercurl })
     end,
   },
 
