@@ -2,6 +2,13 @@
 vim.g.mapleader = " "
 vim.g.maplocalleader = "\\"
 
+-- .env.dev / .env.local など（組み込みは .env のみ拡張子 env で sh 判定）
+vim.filetype.add({
+  pattern = {
+    ["%.env%.[%w_.-]+"] = "sh",
+  },
+})
+
 local opt = vim.opt
 
 -- ファイル読み込み時のエンコーディング候補（左から順に試し、最初に成功したら終了）
