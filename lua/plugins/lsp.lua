@@ -71,7 +71,12 @@ return {
       modes = {
         diagnostics = {
           -- Problems には Warning / Error のみ表示（Hint/Info を除外）
-          filter = { severity = { min = vim.diagnostic.severity.WARN } },
+          filter = {
+            any = {
+              { severity = vim.diagnostic.severity.ERROR },
+              { severity = vim.diagnostic.severity.WARN },
+            },
+          },
         },
       },
     },
