@@ -109,10 +109,25 @@ return {
     config = function()
       local capabilities = require("cmp_nvim_lsp").default_capabilities()
 
-      -- Mason-LSPConfig設定（v2.0）
-      require("mason-lspconfig").setup({
-        ensure_installed = {
-          "lua_ls",
+      -- ensure_installed を「そのマシンに必要なツールチェーンがある LSP だけ」に絞る。
+      -- こうすると、Go/Ruby/Haskell 等が未インストールのマシン（例: まっさらな Windows）で
+      -- Mason が延々とインストールに失敗して通知を出す問題を防げる。
+      -- Mac/Windows で同じ設定のまま、各マシンに入っている分だけ自動インストールされる。
+      local function has(bin)
+        return vim.fn.executable(bin) == 1
+      end
+
+      -- Mason がプリビルドバイナリを配布し、外部ツールチェーン不要でインストールできるもの
+      local servers = {
+        "lua_ls",
+        "rust_analyzer",
+        "marksman",
+        "clangd", -- C/C++
+      }
+
+      -- npm 経由でインストールされる LSP（Node.js が必要）
+      if has("node") then
+        vim.list_extend(servers, {
           "ts_ls",
           "html",
           "cssls",
@@ -120,20 +135,33 @@ return {
           "yamlls",
           "eslint",
           "pyright",
-          "rust_analyzer",
           "bashls",
           "dockerls",
-          "marksman",
-          "jdtls",        -- Java
-          "gopls",        -- Go
-          "clangd",       -- C/C++
           "intelephense", -- PHP
-          "ruby_lsp",     -- Ruby (Ruby LSP)
-          "hls",          -- Haskell
-          "clojure_lsp",  -- Clojure/Lisp
-          "omnisharp",    -- C#
           "prismals",     -- Prisma (.prisma)
-        },
+        })
+      end
+
+      -- 各言語のツールチェーンがある場合のみ追加
+      if has("go") then
+        table.insert(servers, "gopls")
+      end
+      if has("ruby") then
+        table.insert(servers, "ruby_lsp")
+      end
+      if has("cabal") or has("ghc") then
+        table.insert(servers, "hls") -- Haskell
+      end
+      if has("java") then
+        vim.list_extend(servers, { "jdtls", "clojure_lsp" }) -- Java / Clojure
+      end
+      if has("dotnet") then
+        table.insert(servers, "omnisharp") -- C#
+      end
+
+      -- Mason-LSPConfig設定（v2.0）
+      require("mason-lspconfig").setup({
+        ensure_installed = servers,
         -- automatic_enable = true（デフォルト）
       })
 
