@@ -12,11 +12,14 @@ VSCodeのような操作感を実現するためのNeovim設定です。
 - **AI機能**: Claude Code と Cursor CLI 統合（どちらも同じ右分割UIで利用可能）
 - **豊富なUI**: ミニマップ、アウトライン、問題パネル、通知システム
 - **多言語対応**: TypeScript/JavaScript、Python、Rust、Go、Java、C/C++、C#、Ruby、PHP、Haskell、Lispなど
-- **日本語入力（IME）**: ノーマルモードに戻ったときに半角（英数）に自動切り替え（macism 要インストール）
+- **日本語入力（IME）**: ノーマルモードに戻ったときに半角（英数）に自動切り替え（macOS は macism、Windows は im-select.exe を要インストール）
+- **クロスプラットフォーム**: macOS / Windows の両方で動作（IME切り替えはOSを自動判定）
 
 ## 目次
 
 - [セットアップ（初回インストール）](#セットアップ初回インストール)
+  - [macOS のセットアップ](#macos-のセットアップ)
+  - [Windows のセットアップ](#windows-のセットアップ)
 - [キーマップ一覧](#キーマップ一覧)
 - [プラグイン一覧](#プラグイン一覧)
 - [トラブルシューティング](#トラブルシューティング)
@@ -25,6 +28,15 @@ VSCodeのような操作感を実現するためのNeovim設定です。
 ---
 
 ## セットアップ（初回インストール）
+
+まっさらな環境から始める場合の完全な手順です。お使いのOSを選んでください。
+
+- **macOS の方** → [macOS のセットアップ](#macos-のセットアップ)
+- **Windows の方** → [Windows のセットアップ](#windows-のセットアップ)
+
+---
+
+## macOS のセットアップ
 
 まっさらなMacから始める場合の完全な手順です。
 
@@ -52,7 +64,7 @@ mkdir -p ~/.config
 [ -d ~/.config/nvim ] && mv ~/.config/nvim ~/.config/nvim.backup
 
 # この設定をクローン
-git clone https://github.com/kimuracoki/nvim.git ~/.config/
+git clone https://github.com/kimuracoki/nvim.git ~/.config/nvim
 ```
 
 ### 3. 必須ツールのインストール
@@ -222,6 +234,223 @@ brew install macism
 
 ---
 
+## Windows のセットアップ
+
+まっさらなWindows（10 / 11）から始める場合の完全な手順です。
+コマンドはすべて **PowerShell**（管理者不要。一部フォント設定のみ管理者推奨）で実行します。
+パッケージ管理には Windows 標準の **winget** を使います（`scoop` 派の人向けの代替コマンドも併記）。
+
+> **前提**: Windows 10 1809 以降 / Windows 11。winget は「アプリ インストーラー」（Microsoft Store）に含まれ、通常は最初から使えます。無い場合は Microsoft Store から「アプリ インストーラー」を入れてください。
+
+### 1. 基本環境のセットアップ
+
+1. **Windows Terminal のインストール**（推奨ターミナル）
+   ```powershell
+   winget install Microsoft.WindowsTerminal
+   ```
+
+2. **Git のインストール**
+   ```powershell
+   winget install Git.Git
+   ```
+   インストール後、**PowerShell を開き直す**と `git` が使えるようになります。
+
+3. **（任意）scoop を使う場合のセットアップ**
+   ```powershell
+   Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope CurrentUser
+   Invoke-RestMethod -Uri https://get.scoop.sh | Invoke-Expression
+   scoop bucket add extras
+   scoop bucket add nerd-fonts
+   ```
+
+### 2. このリポジトリをクローン
+
+Windows の Neovim 設定は `%LOCALAPPDATA%\nvim`（＝ `C:\Users\<ユーザー名>\AppData\Local\nvim`）に置きます。
+
+```powershell
+# 既存のNeovim設定・データがある場合はバックアップ
+if (Test-Path "$env:LOCALAPPDATA\nvim") { Rename-Item "$env:LOCALAPPDATA\nvim" "$env:LOCALAPPDATA\nvim.backup" }
+if (Test-Path "$env:LOCALAPPDATA\nvim-data") { Rename-Item "$env:LOCALAPPDATA\nvim-data" "$env:LOCALAPPDATA\nvim-data.backup" }
+
+# この設定をクローン
+git clone https://github.com/kimuracoki/nvim.git "$env:LOCALAPPDATA\nvim"
+```
+
+### 3. 必須ツールのインストール
+
+```powershell
+# Neovim（バージョン0.11以上が必要）
+winget install Neovim.Neovim
+
+# コマンドラインツール
+winget install BurntSushi.ripgrep.MSVC   # ripgrep（<leader>sg のグローバル検索に必須）
+winget install sharkdp.fd                 # fd（ファイル検索の高速化）
+winget install JesseDuffield.lazygit      # lazygit（<leader>gg のGit TUI）
+```
+
+scoop の場合:
+```powershell
+scoop install neovim ripgrep fd lazygit
+```
+
+> **PATH について**: winget / scoop でインストールしたツールは PATH に登録されます。反映のため **PowerShell を開き直して**ください。`nvim --version` / `rg --version` が動けばOKです。
+
+### 4. Nerd Font のインストール（アイコン表示に必須）
+
+**scoop を使う場合（簡単・推奨）**:
+```powershell
+scoop install Hack-NF
+```
+
+**手動でインストールする場合**:
+1. [Nerd Fonts のリリースページ](https://github.com/ryanoasis/nerd-fonts/releases/latest) から `Hack.zip` をダウンロード
+2. 展開して `.ttf` ファイルをすべて選択 → 右クリック → **「すべてのユーザーにインストール」**
+
+### 5. Windows Terminal のフォント設定
+
+1. Windows Terminal を開く → `Ctrl+,` で設定
+2. 「既定値」→「外観」→ **フォント フェイス**を **Hack Nerd Font** に変更
+3. お好みでフォントサイズを調整（推奨: 11-13pt）
+4. （オプション）「背景」から透過（アクリル）を有効化
+
+> アイコンが「□」や「?」で表示される場合はフォント未設定です。手順4・5を見直してください。
+
+### 6. Neovimの初回起動とLSPの自動インストール
+
+```powershell
+nvim
+```
+
+初回起動時に自動的に：
+- プラグインマネージャー（lazy.nvim）がインストールされます
+- すべてのプラグインがダウンロード・インストールされます
+- LSPサーバーが自動インストールされます（`:Mason` で確認可能）
+
+> **重要（構文ハイライトの前提）**: `nvim-treesitter` はパーサーを**Cコンパイラでビルド**します。Windows には標準でCコンパイラが無いため、最も手軽な **zig** を入れておくことを推奨します（無いと一部言語の構文ハイライトが効きません）。
+> ```powershell
+> winget install zig.zig     # または: scoop install zig
+> ```
+> インストール後、PowerShell を開き直してから `nvim` を再起動してください。treesitter が自動で zig を検出してパーサーをビルドします。
+
+### 7. オプションツールのインストール（必要に応じて）
+
+**GitHub CLI**（PR/Issue操作用・octo.nvim に必要）:
+```powershell
+winget install GitHub.cli
+gh auth login
+```
+
+**Claude Code CLI**（AI機能・Claude 用）:
+```powershell
+# 公式ドキュメントに従ってインストール
+# https://docs.claude.com/claude-code
+```
+
+**Cursor CLI**（AI機能・Cursor Agent 用）:
+```powershell
+# Cursor アプリから CLI を有効化するか、公式案内に従ってインストール
+# https://cursor.com
+```
+
+**im-select.exe**（ノーマルモード時に半角IMEへ自動切り替え用）:
+1. [im-select のリリースページ](https://github.com/daipeihust/im-select/releases) から `im-select.exe`（64bit）をダウンロード
+2. PATH の通ったフォルダに置く（例: `C:\Users\<ユーザー名>\bin` を作って PATH に追加し、そこへ配置）
+3. PowerShell を開き直して `im-select.exe` が実行できればOK
+
+未インストールでもNeovimは問題なく動作します（IME自動切り替えのみ無効になります）。
+なお、この設定は英数への切り替えに入力ソースID `1033`（英語・米国）を使います。日本語配列キーボードで英数に切り替わらない場合は `lua/plugins/im.lua` の `default_im` を `1041` に変更してください。
+
+### 8. 言語別ツールのインストール（開発する言語に応じて）
+
+   **Lua**（フォーマッター stylua）:
+   ```powershell
+   winget install JohnnyMorganz.StyLua   # または: scoop install stylua
+   ```
+
+   **JavaScript/TypeScript**:
+   ```powershell
+   winget install OpenJS.NodeJS
+   # PowerShell を開き直してから
+   npm install -g typescript tsx prettier eslint
+   ```
+
+   **Python**:
+   ```powershell
+   winget install Python.Python.3.12
+   # PowerShell を開き直してから
+   pip install black isort debugpy
+   ```
+
+   **Rust**:
+   ```powershell
+   winget install Rustlang.Rustup
+   rustup component add rustfmt rust-analyzer
+   ```
+
+   **Go**:
+   ```powershell
+   winget install GoLang.Go
+   go install golang.org/x/tools/cmd/goimports@latest
+   ```
+
+   **Java**:
+   ```powershell
+   winget install Microsoft.OpenJDK.17
+   ```
+
+   **C/C++**（treesitter や clangd 用のCコンパイラ）:
+   ```powershell
+   # 手軽な選択肢: zig（treesitterのビルドにも使えます）
+   winget install zig.zig
+   # 本格的に使うなら Visual Studio Build Tools（MSVC）
+   # winget install Microsoft.VisualStudio.2022.BuildTools
+   ```
+
+   **C#**（Unity や .NET 開発時。OmniSharp の動作に必要）:
+   ```powershell
+   winget install Microsoft.DotNet.SDK.8
+   ```
+
+   **Ruby**（Ruby LSP は **Ruby 3.0 以上**が必要）:
+   ```powershell
+   winget install RubyInstallerTeam.RubyWithDevKit.3.3
+   ```
+
+   **PHP**:
+   ```powershell
+   scoop install php   # winget にも各種ビルドあり
+   ```
+
+   **Haskell**（GHCup 経由）:
+   ```powershell
+   winget install Haskell.ghcup
+   # ghcup tui で GHC / cabal / haskell-language-server を選択してインストール
+   ```
+
+   **Common Lisp**:
+   ```powershell
+   scoop install sbcl
+   ```
+
+   **Clojure**:
+   ```powershell
+   scoop install clojure
+   ```
+
+   **Bash**（Git for Windows に付属の bash を利用可能）:
+   ```powershell
+   # 手順1で Git.Git を入れていれば "Git Bash" が使えます
+   ```
+
+### Windows 特有の注意点
+
+- **設定ファイルの場所**: macOS の `~/.config/nvim` は、Windows では `%LOCALAPPDATA%\nvim` です。プラグイン等のデータは `%LOCALAPPDATA%\nvim-data` に入ります。
+- **クリップボード**: `clipboard = "unnamedplus"` は最近の Neovim（Windows版）に組み込みのクリップボード連携で動くため、追加ツールは不要です。
+- **IME切り替え**: この設定はOSを自動判定し、Windows では `im-select.exe`、macOS では `macism` を呼び分けます（`lua/plugins/im.lua`）。どちらのCLIも無ければ、IME切り替えだけ静かにスキップされます。
+- **PATHの反映**: winget / scoop でツールを入れた直後は PowerShell を開き直さないと PATH が反映されません。「コマンドが見つからない」ときはまず開き直してください。
+
+---
+
 ## キーマップ一覧
 
 ### インストール後の確認
@@ -307,7 +536,7 @@ brew install macism
 - `jk`: 挿入モードからノーマルモードに戻る（Escの代わり）
 
 ### 日本語入力（IME）
-ノーマルモード・コマンドラインモードでは半角（英数）に自動で切り替わります。挿入モードやコマンドライン入力時には、直前の入力ソースが復元されます。利用には [macism](#7-オプションツールのインストール必要に応じて) のインストールが必要です。
+ノーマルモード・コマンドラインモードでは半角（英数）に自動で切り替わります。挿入モードやコマンドライン入力時には、直前の入力ソースが復元されます。利用には外部CLIが必要です（macOS は [macism](#7-オプションツールのインストール必要に応じて)、Windows は [im-select.exe](#7-オプションツールのインストール必要に応じて-1)）。OSは自動判定されます。
 
 ### 全選択
 - `<leader>a`: 全選択（**A**ll）
@@ -518,7 +747,7 @@ VSCode風のスニペット機能が利用可能です。定型文を素早く�
 
 ### カスタムスニペットの追加
 
-独自のスニペットを追加する場合は、`~/.config/nvim/snippets/` ディレクトリを作成してVSCode形式のJSONファイルを配置できます。
+独自のスニペットを追加する場合は、`~/.config/nvim/snippets/`（Windows: `%LOCALAPPDATA%\nvim\snippets\`）ディレクトリを作成してVSCode形式のJSONファイルを配置できます。
 
 例 (`~/.config/nvim/snippets/typescript.json`):
 ```json
@@ -898,7 +1127,7 @@ Window = ウィンドウ操作
 - `snacks.nvim` - ターミナル統合（Claude Code / Cursor CLI 共通）
 
 ### その他
-- `im-select.nvim` - 日本語入力の自動切り替え（ノーマル時に半角、挿入時に前のIMEを復元。macOS では macism が必要）
+- `im-select.nvim` - 日本語入力の自動切り替え（ノーマル時に半角、挿入時に前のIMEを復元。macOS では macism、Windows では im-select.exe が必要。OSは自動判定）
 - `vim-bookmarks` - ブックマーク
 - `toggleterm.nvim` - ターミナル管理
 - `code_runner.nvim` - コード実行
@@ -911,7 +1140,7 @@ Window = ウィンドウ操作
 
 **Q: プラグインのインストールが失敗する**
 - インターネット接続を確認
-- `~/.local/share/nvim`を削除して再インストール
+- プラグインデータを削除して再インストール（macOS: `~/.local/share/nvim` / Windows: `%LOCALAPPDATA%\nvim-data`）
 
 **Q: アイコンが文字化けする**
 - Nerd Fontがインストールされているか確認
@@ -947,8 +1176,10 @@ Window = ウィンドウ操作
 
 ## 設定ファイル構成
 
+> **設定ディレクトリ**: macOS は `~/.config/nvim/`、Windows は `%LOCALAPPDATA%\nvim\`（＝ `C:\Users\<ユーザー名>\AppData\Local\nvim\`）です。中身の構成は共通です。
+
 ```
-~/.config/nvim/
+~/.config/nvim/   (Windows: %LOCALAPPDATA%\nvim\)
 ├── init.lua                 # エントリーポイント
 ├── lua/
 │   ├── config/
