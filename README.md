@@ -237,31 +237,25 @@ brew install macism
 ## Windows のセットアップ
 
 まっさらなWindows（10 / 11）から始める場合の完全な手順です。
-コマンドはすべて **PowerShell**（管理者不要。一部フォント設定のみ管理者推奨）で実行します。
-パッケージ管理には Windows 標準の **winget** を使います（`scoop` 派の人向けの代替コマンドも併記）。
+コマンドはすべて **PowerShell**（管理者不要）で実行します。
+パッケージ管理は **scoop** に統一します（macOS の Homebrew に相当。フォントも言語ツールも `scoop install` で入ります）。
 
-> **前提**: Windows 10 1809 以降 / Windows 11。winget は「アプリ インストーラー」（Microsoft Store）に含まれ、通常は最初から使えます。無い場合は Microsoft Store から「アプリ インストーラー」を入れてください。
+### 1. scoop のインストールと基本環境のセットアップ
 
-### 1. 基本環境のセットアップ
+```powershell
+# scoop 本体をインストール
+Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope CurrentUser
+Invoke-RestMethod -Uri https://get.scoop.sh | Invoke-Expression
 
-1. **Windows Terminal のインストール**（推奨ターミナル）
-   ```powershell
-   winget install Microsoft.WindowsTerminal
-   ```
+# 必要なバケット（アプリのカタログ）を追加
+scoop bucket add extras
+scoop bucket add nerd-fonts
+scoop bucket add java
 
-2. **Git のインストール**
-   ```powershell
-   winget install Git.Git
-   ```
-   インストール後、**PowerShell を開き直す**と `git` が使えるようになります。
-
-3. **（任意）scoop を使う場合のセットアップ**
-   ```powershell
-   Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope CurrentUser
-   Invoke-RestMethod -Uri https://get.scoop.sh | Invoke-Expression
-   scoop bucket add extras
-   scoop bucket add nerd-fonts
-   ```
+# Git と Windows Terminal（推奨ターミナル）
+scoop install git
+scoop install windows-terminal
+```
 
 ### 2. このリポジトリをクローン
 
@@ -279,32 +273,19 @@ git clone https://github.com/kimuracoki/nvim.git "$env:LOCALAPPDATA\nvim"
 ### 3. 必須ツールのインストール
 
 ```powershell
-# Neovim（バージョン0.11以上が必要）
-winget install Neovim.Neovim
-
-# コマンドラインツール
-winget install BurntSushi.ripgrep.MSVC   # ripgrep（<leader>sg のグローバル検索に必須）
-winget install sharkdp.fd                 # fd（ファイル検索の高速化）
-winget install JesseDuffield.lazygit      # lazygit（<leader>gg のGit TUI）
+scoop install neovim    # Neovim（バージョン0.11以上）
+scoop install ripgrep   # <leader>sg のグローバル検索に必須
+scoop install fd        # ファイル検索の高速化
+scoop install lazygit   # <leader>gg のGit TUI
 ```
 
-scoop の場合:
-```powershell
-scoop install neovim ripgrep fd lazygit
-```
-
-> **PATH について**: winget / scoop でインストールしたツールは PATH に登録されます。反映のため **PowerShell を開き直して**ください。`nvim --version` / `rg --version` が動けばOKです。
+> **PATH について**: scoop でインストールしたツールは自動で PATH に登録されます。反映のため **PowerShell を開き直して**ください。`nvim --version` / `rg --version` が動けばOKです。
 
 ### 4. Nerd Font のインストール（アイコン表示に必須）
 
-**scoop を使う場合（簡単・推奨）**:
 ```powershell
 scoop install Hack-NF
 ```
-
-**手動でインストールする場合**:
-1. [Nerd Fonts のリリースページ](https://github.com/ryanoasis/nerd-fonts/releases/latest) から `Hack.zip` をダウンロード
-2. 展開して `.ttf` ファイルをすべて選択 → 右クリック → **「すべてのユーザーにインストール」**
 
 ### 5. Windows Terminal のフォント設定
 
@@ -326,9 +307,9 @@ nvim
 - すべてのプラグインがダウンロード・インストールされます
 - LSPサーバーが自動インストールされます（`:Mason` で確認可能）
 
-> **重要（構文ハイライトの前提）**: `nvim-treesitter` はパーサーを**Cコンパイラでビルド**します。Windows には標準でCコンパイラが無いため、最も手軽な **zig** を入れておくことを推奨します（無いと一部言語の構文ハイライトが効きません）。
+> **重要（構文ハイライトの前提）**: `nvim-treesitter` はパーサーを**Cコンパイラでビルド**します。Windows には標準でCコンパイラが無いため、最も手軽な **zig** を入れておいてください（無いと一部言語の構文ハイライトが効きません）。
 > ```powershell
-> winget install zig.zig     # または: scoop install zig
+> scoop install zig
 > ```
 > インストール後、PowerShell を開き直してから `nvim` を再起動してください。treesitter が自動で zig を検出してパーサーをビルドします。
 
@@ -336,7 +317,7 @@ nvim
 
 **GitHub CLI**（PR/Issue操作用・octo.nvim に必要）:
 ```powershell
-winget install GitHub.cli
+scoop install gh
 gh auth login
 ```
 
@@ -364,67 +345,63 @@ gh auth login
 
    **Lua**（フォーマッター stylua）:
    ```powershell
-   winget install JohnnyMorganz.StyLua   # または: scoop install stylua
+   scoop install stylua
    ```
 
    **JavaScript/TypeScript**:
    ```powershell
-   winget install OpenJS.NodeJS
+   scoop install nodejs
    # PowerShell を開き直してから
    npm install -g typescript tsx prettier eslint
    ```
 
    **Python**:
    ```powershell
-   winget install Python.Python.3.12
+   scoop install python
    # PowerShell を開き直してから
    pip install black isort debugpy
    ```
 
    **Rust**:
    ```powershell
-   winget install Rustlang.Rustup
+   scoop install rustup
    rustup component add rustfmt rust-analyzer
    ```
 
    **Go**:
    ```powershell
-   winget install GoLang.Go
+   scoop install go
    go install golang.org/x/tools/cmd/goimports@latest
    ```
 
    **Java**:
    ```powershell
-   winget install Microsoft.OpenJDK.17
+   scoop install temurin17-jdk
    ```
 
-   **C/C++**（treesitter や clangd 用のCコンパイラ）:
+   **C/C++**（構文ハイライトのCコンパイラ。手順6の zig がそのまま使えます）:
    ```powershell
-   # 手軽な選択肢: zig（treesitterのビルドにも使えます）
-   winget install zig.zig
-   # 本格的に使うなら Visual Studio Build Tools（MSVC）
-   # winget install Microsoft.VisualStudio.2022.BuildTools
+   scoop install zig
    ```
 
    **C#**（Unity や .NET 開発時。OmniSharp の動作に必要）:
    ```powershell
-   winget install Microsoft.DotNet.SDK.8
+   scoop install dotnet-sdk
    ```
 
    **Ruby**（Ruby LSP は **Ruby 3.0 以上**が必要）:
    ```powershell
-   winget install RubyInstallerTeam.RubyWithDevKit.3.3
+   scoop install ruby
    ```
 
    **PHP**:
    ```powershell
-   scoop install php   # winget にも各種ビルドあり
+   scoop install php
    ```
 
-   **Haskell**（GHCup 経由）:
+   **Haskell**（GHC / cabal / haskell-language-server）:
    ```powershell
-   winget install Haskell.ghcup
-   # ghcup tui で GHC / cabal / haskell-language-server を選択してインストール
+   scoop install ghc cabal haskell-language-server
    ```
 
    **Common Lisp**:
@@ -437,9 +414,9 @@ gh auth login
    scoop install clojure
    ```
 
-   **Bash**（Git for Windows に付属の bash を利用可能）:
+   **Bash**（scoop で入る Git に付属の Git Bash を利用可能）:
    ```powershell
-   # 手順1で Git.Git を入れていれば "Git Bash" が使えます
+   # 手順1で git を入れていれば "Git Bash" が使えます
    ```
 
 ### Windows 特有の注意点
@@ -447,7 +424,7 @@ gh auth login
 - **設定ファイルの場所**: macOS の `~/.config/nvim` は、Windows では `%LOCALAPPDATA%\nvim` です。プラグイン等のデータは `%LOCALAPPDATA%\nvim-data` に入ります。
 - **クリップボード**: `clipboard = "unnamedplus"` は最近の Neovim（Windows版）に組み込みのクリップボード連携で動くため、追加ツールは不要です。
 - **IME切り替え**: この設定はOSを自動判定し、Windows では `im-select.exe`、macOS では `macism` を呼び分けます（`lua/plugins/im.lua`）。どちらのCLIも無ければ、IME切り替えだけ静かにスキップされます。
-- **PATHの反映**: winget / scoop でツールを入れた直後は PowerShell を開き直さないと PATH が反映されません。「コマンドが見つからない」ときはまず開き直してください。
+- **PATHの反映**: scoop でツールを入れた直後は PowerShell を開き直さないと PATH が反映されません。「コマンドが見つからない」ときはまず開き直してください。
 
 ---
 
