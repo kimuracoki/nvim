@@ -21,9 +21,9 @@ return {
 
       -- VSCode風のスニペットをロード（friendly-snippets）
       require("luasnip.loaders.from_vscode").lazy_load()
-      -- 自作スニペット（snippets/package.json が言語別ファイルを指す）
-      require("luasnip.loaders.from_vscode").lazy_load({
-        paths = { vim.fn.stdpath("config") .. "/snippets" },
+      -- 自作スニペット（Lua 形式。展開時に定義をバッファ末尾へ足す副作用を持つため）
+      require("luasnip.loaders.from_lua").lazy_load({
+        paths = { vim.fn.stdpath("config") .. "/snippets/lua" },
       })
 
       cmp.setup({
