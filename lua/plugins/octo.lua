@@ -7,6 +7,17 @@ return {
       "nvim-telescope/telescope.nvim",
       "nvim-tree/nvim-web-devicons",
     },
+    -- 起動時ロードをやめ、Octo 系コマンド／octo バッファ／下記キー押下時にだけ読む。
+    cmd = { "Octo", "OctoMerge", "OctoSquashMerge", "OctoRebaseMerge", "OctoApprove" },
+    ft = "octo",
+    keys = {
+      { "<leader>go", "<cmd>Octo<cr>", desc = "Git: Octo menu" },
+      { "<leader>gpc", "<cmd>Octo pr create<cr>", desc = "Git: PR create" },
+      { "<leader>gpl", "<cmd>Octo pr list<cr>", desc = "Git: PR list" },
+      { "<leader>gps", "<cmd>Octo pr search<cr>", desc = "Git: PR search" },
+      { "<leader>gic", "<cmd>Octo issue create<cr>", desc = "Git: Issue create" },
+      { "<leader>gil", "<cmd>Octo issue list<cr>", desc = "Git: Issue list" },
+    },
     config = function()
       require("octo").setup({
         use_local_fs = false,
@@ -192,37 +203,9 @@ return {
         end, 500)
       end, { desc = "Quick approve PR" })
 
-      -- グローバルキーマップ
-      vim.keymap.set("n", "<leader>go", ":Octo<CR>", { desc = "Git: Octo menu" })
-      vim.keymap.set("n", "<leader>gpc", ":Octo pr create<CR>", { desc = "Git: PR create" })
-      vim.keymap.set("n", "<leader>gpl", ":Octo pr list<CR>", { desc = "Git: PR list" })
-      vim.keymap.set("n", "<leader>gps", ":Octo pr search<CR>", { desc = "Git: PR search" })
-      vim.keymap.set("n", "<leader>gic", ":Octo issue create<CR>", { desc = "Git: Issue create" })
-      vim.keymap.set("n", "<leader>gil", ":Octo issue list<CR>", { desc = "Git: Issue list" })
-
-      -- Hunk移動のキーバインド（グローバル設定）
-      -- diffモードでのhunk移動
-      vim.keymap.set("n", "]h", function()
-        if vim.wo.diff then
-          vim.cmd("normal! ]c")
-        else
-          -- 通常のファイルでは次の変更行へ（gitsignsのhunk移動を使用）
-          if package.loaded["gitsigns"] then
-            require("gitsigns").nav_hunk("next")
-          end
-        end
-      end, { desc = "Next hunk (次の変更箇所)" })
-
-      vim.keymap.set("n", "[h", function()
-        if vim.wo.diff then
-          vim.cmd("normal! [c")
-        else
-          -- 通常のファイルでは前の変更行へ（gitsignsのhunk移動を使用）
-          if package.loaded["gitsigns"] then
-            require("gitsigns").nav_hunk("prev")
-          end
-        end
-      end, { desc = "Previous hunk (前の変更箇所)" })
+      -- グローバルキーマップは spec の keys へ移した（遅延ロードのトリガーを兼ねる）。
+      -- ]h / [h（hunk 移動）は gitsigns の on_attach（terminal.lua）で定義済みのため、
+      -- ここにあった重複定義は削除した。
     end,
   }
 }
