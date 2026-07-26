@@ -432,7 +432,8 @@ return {
         },
         file_panel = {
           size = 10,
-          use_icons = true
+          -- 旧: use_icons = true（非対応になったため icons = false で無効化のみ指定可能）
+          icons = true,
         },
         mappings = {
           issue = {

@@ -75,18 +75,46 @@ return {
     end,
   },
 
-  -- インデントガイドの視覚化
+  -- 括弧のネスト色付け（虹色括弧）: () [] {} を深さごとに色分け（VSCode の Bracket Pair Colorization 相当）
+  -- Treesitter ベースなので言語ごとに正確にネストを判定する。
+  {
+    "HiPhish/rainbow-delimiters.nvim",
+    event = { "BufReadPre", "BufNewFile" },
+    dependencies = { "nvim-treesitter/nvim-treesitter" },
+    config = function()
+      -- 既定の RainbowDelimiter* ハイライト（Red/Yellow/Blue/Orange/Green/Violet/Cyan）を
+      -- そのまま使う。指定なしで全 filetype に適用される。
+      require("rainbow-delimiters.setup").setup({})
+    end,
+  },
+
+  -- インデントガイドの視覚化（ネストの深さを虹色で表示）
   {
     "lukas-reineke/indent-blankline.nvim",
     main = "ibl",
+    dependencies = { "HiPhish/rainbow-delimiters.nvim" },
     config = function()
+      -- 虹色括弧と同じ色でインデントガイドを塗り分け、ネストの深さを一目で分かるようにする。
+      -- rainbow-delimiters が定義する RainbowDelimiter* ハイライトを流用するため、
+      -- カラースキームを切り替えても各テーマの虹色に自動追従する。
+      local highlight = {
+        "RainbowDelimiterRed",
+        "RainbowDelimiterYellow",
+        "RainbowDelimiterBlue",
+        "RainbowDelimiterOrange",
+        "RainbowDelimiterGreen",
+        "RainbowDelimiterViolet",
+        "RainbowDelimiterCyan",
+      }
       require("ibl").setup({
         indent = {
           char = "│",
+          highlight = highlight,
         },
         scope = {
           enabled = true,
           show_start = true,
+          highlight = highlight,
         },
       })
     end,
