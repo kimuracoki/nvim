@@ -15,6 +15,7 @@ return {
   ---------------------------------------------------------------------------
   {
     "hrsh7th/nvim-cmp",
+    dependencies = { "onsails/lspkind.nvim" }, -- 確実に一緒にインストール／ロードさせる
     config = function()
       local cmp = require("cmp")
       local luasnip = require("luasnip")
@@ -62,6 +63,27 @@ return {
           { name = "buffer" },
           { name = "path" },
         }),
+        -- VSCode 風の見た目: 種別アイコン + ソース名 + 枠
+        formatting = {
+          format = require("lspkind").cmp_format({
+            mode = "symbol_text",
+            maxwidth = 50,
+            ellipsis_char = "…",
+            menu = {
+              nvim_lsp = "[LSP]",
+              luasnip = "[Snip]",
+              buffer = "[Buf]",
+              path = "[Path]",
+              spell = "[Spell]",
+            },
+          }),
+        },
+        window = {
+          completion = cmp.config.window.bordered(),
+          documentation = cmp.config.window.bordered(),
+        },
+        -- 確定前の候補を薄いインラインテキストで先読み表示（VSCode のゴーストテキスト相当）
+        experimental = { ghost_text = true },
       })
 
       -- Markdown用: 英単語補完を追加

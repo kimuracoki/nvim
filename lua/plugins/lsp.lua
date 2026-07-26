@@ -2,7 +2,7 @@ return {
   ---------------------------------------------------------------------------
   -- LSP 設定
   ---------------------------------------------------------------------------
-  { "neovim/nvim-lspconfig" },
+  { "neovim/nvim-lspconfig", lazy = true }, -- mason-lspconfig の依存としてのみ読む
 
   ---------------------------------------------------------------------------
   -- LSP UI 改善
@@ -30,6 +30,7 @@ return {
   ---------------------------------------------------------------------------
   {
     "williamboman/mason.nvim",
+    cmd = { "Mason", "MasonInstall", "MasonUpdate", "MasonUninstall", "MasonLog" },
     config = function()
       require("mason").setup()
     end,
@@ -40,6 +41,7 @@ return {
   ---------------------------------------------------------------------------
   {
     "williamboman/mason-lspconfig.nvim",
+    event = { "BufReadPre", "BufNewFile" }, -- ファイルを開くときに LSP をセットアップ（起動時ロードを避ける）
     dependencies = {
       "williamboman/mason.nvim",
       "neovim/nvim-lspconfig",
