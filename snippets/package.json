@@ -1,0 +1,13 @@
+{
+  "name": "my-snippets",
+  "version": "1.0.0",
+  "description": "自作スニペット（LuaSnip の VSCode 形式ローダで読み込む）",
+  "contributes": {
+    "snippets": [
+      {
+        "language": "haskell",
+        "path": "./haskell.json"
+      }
+    ]
+  }
+}

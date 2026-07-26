@@ -1,0 +1,42 @@
+{
+  "getIntTable": {
+    "prefix": "getIntTable",
+    "body": [
+      "getIntTable :: Int -> IO [[Int]]",
+      "getIntTable n = sequence (replicate n getInts)"
+    ],
+    "description": "競プロ: n 行それぞれに整数が並ぶ入力（クエリ・行列）"
+  },
+  "getGrid": {
+    "prefix": "getGrid",
+    "body": [
+      "getGrid :: Int -> IO [BS.ByteString]",
+      "getGrid n = sequence (replicate n BS.getLine)"
+    ],
+    "description": "競プロ: n 行の文字列（グリッド）"
+  },
+  "getRestTable": {
+    "prefix": "getRestTable",
+    "body": [
+      "getRestTable :: IO [[Int]]",
+      "getRestTable = map ints . BS.lines <$> BS.getContents"
+    ],
+    "description": "競プロ: 残り全部を行ごとの整数列として読む"
+  },
+  "putInts": {
+    "prefix": "putInts",
+    "body": [
+      "putInts :: [Int] -> IO ()",
+      "putInts = BS.putStrLn . BS.unwords . map (BS.pack . show)"
+    ],
+    "description": "競プロ: 空白区切りで 1 行に出力"
+  },
+  "putYesNo": {
+    "prefix": "putYesNo",
+    "body": [
+      "putYesNo :: Bool -> IO ()",
+      "putYesNo b = putStrLn (if b then \"Yes\" else \"No\")"
+    ],
+    "description": "競プロ: Yes / No で答える"
+  }
+}

@@ -101,6 +101,7 @@ return {
         { "<leader>rf", desc = "Run: File (ファイルを実行)" },
         { "<leader>rp", desc = "Run: Project (プロジェクトを実行)" },
         { "<leader>rr", desc = "Run: Code (コードを実行)" },
+        { "<leader>rt", desc = "Run: just t (競プロ サンプルテスト)" },
         -- Search
         { "<leader>sw", desc = "Search: Workspace symbols (ワークスペースシンボル)" },
         -- Translate

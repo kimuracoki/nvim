@@ -369,6 +369,28 @@ map("n", "<leader>rp", function()
 end, { desc = "Run: Project" })
 map("n", "<leader>rc", ":RunClose<CR>", { desc = "Run: Close" })
 
+-- 競プロ: サンプル全件テスト。ファイルの位置から上に justfile を探して `just t` を実行する。
+-- 対象の問題は justfile 側が「最後に編集した Main.hs」として決めるので、引数は要らない。
+map("n", "<leader>rt", function()
+  local dir = vim.fn.expand("%:p:h")
+  if dir == "" then
+    vim.notify("ファイルが開かれていません", vim.log.levels.WARN)
+    return
+  end
+  local justfile = vim.fs.find("justfile", { upward = true, path = dir })[1]
+  if not justfile then
+    vim.notify("justfile が見つかりません", vim.log.levels.WARN)
+    return
+  end
+  if vim.bo.modified and vim.bo.modifiable and vim.bo.buftype == "" then
+    vim.cmd("write")
+  end
+  vim.cmd(("TermExec cmd=%s dir=%s"):format(
+    vim.fn.shellescape("just t"),
+    vim.fn.fnameescape(vim.fs.dirname(justfile))
+  ))
+end, { desc = "Run: just t (サンプルテスト)" })
+
 -- Help/Health関連（診断・ログ）
 map("n", "<leader>hm", ":messages<CR>", { desc = "Help: Messages log" })
 map("n", "<leader>hc", ":checkhealth<CR>", { desc = "Help: Checkhealth" })

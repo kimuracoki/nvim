@@ -29,12 +29,10 @@ function M.setup()
       clear_hls_builtin_codelens_display(bufnr)
       vim.api.nvim_buf_clear_namespace(bufnr, hls_ns, 0, -1)
 
-      local client_id = ctx.client_id
-
-      --- 表示用とは別に、vim.lsp.codelens.run() が使えるようキャッシュへ載せる。
-      --- resolve 済み lens.command が result の各要素に入っている必要がある。
+      --- grl (vim.lsp.codelens.run) が使うレンズは組み込みの Provider が自前で保持している。
+      --- 以前ここで呼んでいた vim.lsp.codelens.save() は 0.12 で中身が空の deprecated 関数に
+      --- なっており（0.13 で削除予定）、呼んでも何も起きないので外した。
       local function finalize()
-        vim.lsp.codelens.save(result, bufnr, client_id)
         clear_hls_builtin_codelens_display(bufnr)
         for _, ms in ipairs({ 80, 250, 500 }) do
           vim.defer_fn(function()

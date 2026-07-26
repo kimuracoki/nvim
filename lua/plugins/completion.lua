@@ -19,8 +19,12 @@ return {
       local cmp = require("cmp")
       local luasnip = require("luasnip")
 
-      -- VSCode風のスニペットをロード
+      -- VSCode風のスニペットをロード（friendly-snippets）
       require("luasnip.loaders.from_vscode").lazy_load()
+      -- 自作スニペット（snippets/package.json が言語別ファイルを指す）
+      require("luasnip.loaders.from_vscode").lazy_load({
+        paths = { vim.fn.stdpath("config") .. "/snippets" },
+      })
 
       cmp.setup({
         snippet = {
