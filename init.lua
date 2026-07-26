@@ -19,6 +19,9 @@ vim.api.nvim_create_autocmd("ColorScheme", {
   end,
 })
 
+-- ネストの背景色ガイド（自作: インデント幅を深さごとに虹色の背景で塗る／<leader>ug でトグル）
+require("config.indent_guides").setup()
+
 -- 起動時にすべての分割画面を自動的に開く
 vim.api.nvim_create_autocmd("VimEnter", {
   callback = function()

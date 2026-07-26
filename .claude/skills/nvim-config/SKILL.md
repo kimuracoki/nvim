@@ -18,6 +18,7 @@ lua/config/
   lazy.lua               -- lazy.nvim ブートストラップ。lua/plugins/*.lua を一括 import
   highlight.lua          -- 透過（transparency）の一元管理。M.setup() / M.toggle_transparency()
   startup.lua            -- 起動レイアウト
+  indent_guides.lua      -- 自作: ネストの背景色ガイド（縦線でなく深さ別の背景ブロック）。<leader>ug でトグル
 lua/plugins/
   ui.lua                 -- カラースキーム / lualine / bufferline / neo-tree / telescope / which-key / noice など見た目
   editor.lua             -- treesitter / コメント / autopairs / インデント / rainbow / conform / session / ufo

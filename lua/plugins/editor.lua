@@ -88,37 +88,9 @@ return {
     end,
   },
 
-  -- インデントガイドの視覚化（ネストの深さを虹色で表示）
-  {
-    "lukas-reineke/indent-blankline.nvim",
-    main = "ibl",
-    dependencies = { "HiPhish/rainbow-delimiters.nvim" },
-    config = function()
-      -- 虹色括弧と同じ色でインデントガイドを塗り分け、ネストの深さを一目で分かるようにする。
-      -- rainbow-delimiters が定義する RainbowDelimiter* ハイライトを流用するため、
-      -- カラースキームを切り替えても各テーマの虹色に自動追従する。
-      local highlight = {
-        "RainbowDelimiterRed",
-        "RainbowDelimiterYellow",
-        "RainbowDelimiterBlue",
-        "RainbowDelimiterOrange",
-        "RainbowDelimiterGreen",
-        "RainbowDelimiterViolet",
-        "RainbowDelimiterCyan",
-      }
-      require("ibl").setup({
-        indent = {
-          char = "│",
-          highlight = highlight,
-        },
-        scope = {
-          enabled = true,
-          show_start = true,
-          highlight = highlight,
-        },
-      })
-    end,
-  },
+  -- インデントガイドは自作の「ネスト背景色ガイド」を使う（lua/config/indent_guides.lua）。
+  -- 縦線（│）だと本文の | と紛らわしいため、線ではなく深さごとの背景色ブロックで表示する。
+  -- 括弧のネスト色分けは上の rainbow-delimiters.nvim が担当。
 
   -- CSVを表形式で見やすく表示（VSCode Edit CSV に近い表示）
   {

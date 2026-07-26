@@ -826,6 +826,7 @@ return {
         { "<leader>tsr", desc = "Translate: Sentence replace (今いる文を英訳に置換)" },
         { "<leader>tp", desc = "Translate: Pantran (長文翻訳)" },
         -- UI
+        { "<leader>ug", desc = "UI: Indent guides toggle (ネスト背景ガイドのトグル)" },
         { "<leader>um", desc = "UI: Minimap toggle (ミニマップのトグル)" },
         { "<leader>uo", desc = "UI: Transparency (透過のトグル)" },
         { "<leader>ut", desc = "UI: Theme (カラースキーム切り替え)" },
