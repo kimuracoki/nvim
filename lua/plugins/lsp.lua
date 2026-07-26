@@ -214,6 +214,15 @@ return {
               ["ghcide-type-lenses"] = {
                 globalOn = true,
               },
+              -- HLS はデフォルトで補完候補をスニペット形式で返すが、
+              -- nvim-cmp のスニペット処理と噛み合わず、確定時に先頭文字が
+              -- 余計に挿入されてカーソル位置がずれる（"main" → "mainm"）。
+              -- スニペット補完を無効化して通常のテキスト挿入にする。
+              ["ghcide-completions"] = {
+                config = {
+                  snippetsOn = false,
+                },
+              },
             },
           },
         },
