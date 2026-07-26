@@ -19,16 +19,38 @@ lua/config/
   highlight.lua          -- 透過（transparency）の一元管理。M.setup() / M.toggle_transparency()
   startup.lua            -- 起動レイアウト
   indent_guides.lua      -- 自作: ネストの背景色ガイド（縦線でなく深さ別の背景ブロック）。<leader>ug でトグル
-lua/plugins/
-  ui.lua                 -- カラースキーム / lualine / bufferline / neo-tree / telescope / which-key / noice など見た目
-  editor.lua             -- treesitter / コメント / autopairs / インデント / rainbow / conform / session / ufo
-  lsp.lua                -- LSP / Mason / cmp / trouble / dap / code-runner
-  git.lua                -- gitsigns / diffview / octo / lazygit / gitgraph
+lua/plugins/                 -- 1ファイル=1関心事（lazy.lua が直下の全 .lua を自動 import）
+  -- 見た目
+  colorscheme.lua        -- カラースキーム（テーマ群）
+  statusline.lua         -- lualine / bufferline / devicons
+  highlight-colors.lua   -- カラーコードの色見本
+  explorer.lua           -- neo-tree（ファイラ）
+  finder.lua             -- telescope
+  outline.lua            -- aerial
+  minimap.lua            -- codewindow
+  whichkey.lua           -- which-key（leader/g のヘルプ登録）
+  noice.lua              -- noice / notify（コマンドライン・通知UI）
+  image.lua              -- snacks（画像インライン表示）
+  bookmarks.lua          -- vim-bookmarks
+  ai.lua                 -- claudecode / cursor-agent / ccusage
+  -- 編集
+  editor.lua             -- treesitter / コメント / autopairs / rainbow / conform / session / ufo
+  -- LSP・補完・診断・実行
+  lsp.lua                -- Mason / lspconfig / 各サーバ設定（HLS codelens 含む。最も大きい）
+  completion.lua         -- nvim-cmp と補完ソース / LuaSnip
+  schema.lua             -- SchemaStore / vim-prisma
+  diagnostics.lua        -- trouble（Problems パネル）
+  dap.lua                -- nvim-dap / dap-ui
+  runner.lua             -- code_runner
+  -- Git
+  gitsigns.lua / diffview.lua / gitgraph.lua / octo.lua / terminal.lua  -- terminal=toggleterm+lazygit
+  -- その他
   im.lua / translate.lua -- 日本語入力・翻訳
 ftplugin/                -- filetype 固有設定（現状ほぼ空）
 ```
 
-新しいプラグインは **役割が最も近い `lua/plugins/*.lua` に追記する**。新カテゴリのときだけ新ファイルを作る（lazy.lua が `import = "plugins"` で全 `.lua` を自動読み込みするので、追加設定は不要）。
+新しいプラグインは **役割が最も近いファイルに追記する**。近いものが無ければ**新規ファイルを作る**（`lua/plugins/` 直下に置けば追加設定なしで自動読み込みされる）。
+**1ファイル1関心事を守る**: 種類の違うプラグインを1ファイルに詰め込まない。肥大化したら関心事ごとに分割する（目安: 200行超で見直し、300行超は分割）。LSP サーバ設定だけは 1 機能として lsp.lua に集約（大きくても可）。分割は各エントリを丸ごと別ファイルへ移すだけ（`return {...}` で包む）で挙動は変わらない。移動後は必ずヘッドレスでロード確認する。
 
 ## プラグイン spec の書き方
 
