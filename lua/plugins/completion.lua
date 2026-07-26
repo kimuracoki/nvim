@@ -95,7 +95,17 @@ return {
       -- 診断の表示設定
       vim.diagnostic.config({
         virtual_text = false,
-        signs = true,
+        -- カーソル行の診断だけ、その場に展開表示する（0.11+）。<leader>ud でトグル可能。
+        virtual_lines = { current_line = true },
+        -- サイン列のアイコン（severity_sort で重要度順に表示される）
+        signs = {
+          text = {
+            [vim.diagnostic.severity.ERROR] = "",
+            [vim.diagnostic.severity.WARN] = "",
+            [vim.diagnostic.severity.INFO] = "",
+            [vim.diagnostic.severity.HINT] = "",
+          },
+        },
         underline = true,
         update_in_insert = false,
         severity_sort = true,

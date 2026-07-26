@@ -138,6 +138,7 @@ return {
         { "<leader>tsr", desc = "Translate: Sentence replace (今いる文を英訳に置換)" },
         { "<leader>tp", desc = "Translate: Pantran (長文翻訳)" },
         -- UI
+        { "<leader>ud", desc = "UI: Diagnostic lines toggle (診断のインライン展開)" },
         { "<leader>ug", desc = "UI: Indent guides toggle (ネスト背景ガイドのトグル)" },
         { "<leader>um", desc = "UI: Minimap toggle (ミニマップのトグル)" },
         { "<leader>uo", desc = "UI: Transparency (透過のトグル)" },
@@ -164,7 +165,7 @@ return {
         { "gcc", desc = "Comment: Toggle line (行コメントトグル)" },
         { "gbc", desc = "Comment: Toggle block (ブロックコメントトグル)" },
         { "gc", desc = "Comment: Toggle selection (選択範囲をコメント・Visual)" },
-        { "grn", desc = "Rename / Node expand (リネーム / ノード拡張)" },
+        { "grn", desc = "Rename (リネーム)" },
         { "gra", desc = "Code action (コードアクション)" },
         { "grl", desc = "Code lens run (コードレンズ実行・Haskellの型など)" },
         { "grr", desc = "References (参照を検索・Telescope)" },
@@ -172,9 +173,7 @@ return {
         { "grt", desc = "Go to type definition (型定義へ移動)" },
         { "gO", desc = "Document symbol (ドキュメントシンボル)" },
         { "gx", desc = "Open link (リンクを開く・ホバー内)" },
-        { "gnn", desc = "Selection: Init (選択開始・Treesitter)" },
-        { "grc", desc = "Selection: Scope expand (スコープ拡張・Treesitter)" },
-        { "grm", desc = "Selection: Node decrement (ノード縮小・Treesitter)" },
+        -- Treesitter 選択拡張は <C-space>（開始/拡張）・<BS>（縮小）。g 系から移動した。
         -- よく使うビルトインのみ
         { "g%", desc = "Match: Cycle backward (逆方向にマッチへ)" },
         { "g,", desc = "Changelist: Newer (変更リストで新しい方へ)" },

@@ -41,14 +41,15 @@ return {
           additional_vim_regex_highlighting = false,
         },
         indent = { enable = true },
-        -- インクリメンタル選択
+        -- インクリメンタル選択。node_incremental を grn にすると LSP 標準の rename(grn) と
+        -- 衝突するため、衝突しない <C-space>/<BS> を使う（LazyVim と同じ既定）。
         incremental_selection = {
           enable = true,
           keymaps = {
-            init_selection = "gnn",
-            node_incremental = "grn",
-            scope_incremental = "grc",
-            node_decremental = "grm",
+            init_selection = "<C-space>",
+            node_incremental = "<C-space>",
+            scope_incremental = false,
+            node_decremental = "<BS>",
           },
         },
       })
@@ -212,19 +213,9 @@ return {
       })
       vim.keymap.set("n", "zR", require("ufo").openAllFolds)
       vim.keymap.set("n", "zM", require("ufo").closeAllFolds)
-      
-      -- ファイルを開いたときにすべての折りたたみを開く
-      vim.api.nvim_create_autocmd({ "BufReadPost", "BufEnter", "FileType" }, {
-        callback = function()
-          -- UFOが読み込まれるまで待つ
-          vim.defer_fn(function()
-            local ok, ufo = pcall(require, "ufo")
-            if ok and ufo then
-              ufo.openAllFolds()
-            end
-          end, 150)
-        end,
-      })
+      -- 起動時に折りたたまれる問題は options.lua の foldlevelstart=99 で解決済み。
+      -- 以前は BufEnter 毎に openAllFolds を defer していたが、折りたたみが常に開いて
+      -- ufo の意味が無くなる＋バッファ切替のたびタイマーが走る無駄があったので削除した。
     end,
   },
 

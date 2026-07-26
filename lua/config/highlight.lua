@@ -29,12 +29,10 @@ function M.setup()
 
   -- NormalFloatの透過（フローティングウィンドウ）
   vim.api.nvim_set_hl(0, "NormalFloat", { bg = "none" })
-  -- FloatBorderは透過でもボーダーを見やすく
-  vim.api.nvim_set_hl(0, "FloatBorder", {
-    bg = "none",
-    fg = "#808080",
-    bold = true,
-  })
+  -- FloatBorder はテーマの枠色を活かしつつ背景だけ透過にする。
+  -- （固定のグレーだとテーマごとの色味を潰すため、現在の fg を引き継ぐ）
+  local fb = vim.api.nvim_get_hl(0, { name = "FloatBorder", link = false })
+  vim.api.nvim_set_hl(0, "FloatBorder", { bg = "none", fg = fb and fb.fg or nil })
 
   -- ステータスラインなど
   vim.api.nvim_set_hl(0, "StatusLine",   { bg = "none" })

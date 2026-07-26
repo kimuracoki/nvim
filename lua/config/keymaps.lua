@@ -283,6 +283,13 @@ map("n", "<leader>uo", function()
   require("config.highlight").toggle_transparency()
 end, { desc = "UI: Toggle transparency" })
 
+-- 診断のインライン展開（virtual_lines）をトグル（UI Diagnostics）
+map("n", "<leader>ud", function()
+  local shown = vim.diagnostic.config().virtual_lines
+  vim.diagnostic.config({ virtual_lines = shown and false or { current_line = true } })
+  vim.notify("診断のインライン展開: " .. (shown and "オフ" or "オン"), vim.log.levels.INFO)
+end, { desc = "UI: Toggle diagnostic virtual lines" })
+
 -- 行の折り返し（ウィンドウローカル）。いずれかのウィンドウで ON のあいだはミニマップを閉じ sidescrolloff=8（<leader>um と同趣旨）。全ウィンドウで OFF に戻したときだけ復元する
 map("n", "<leader>uw", function()
   local enable_wrap = not vim.wo.wrap

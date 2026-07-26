@@ -21,6 +21,7 @@ opt.tabstop = 2
 opt.shiftwidth = 2
 opt.expandtab = true
 opt.termguicolors = true
+opt.winborder = "rounded"  -- 全フロート（hover/signature 等）に丸枠。個別に border 指定したものは優先される
 opt.cursorline = true
 opt.swapfile = false
 opt.scrolloff = 4

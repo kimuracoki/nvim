@@ -323,40 +323,10 @@ return {
         end,
       })
 
-      -----------------------------------------------------------------------
-      -- LSPのホバーウィンドウにボーダーを追加（透過のままでも見やすく）
-      -----------------------------------------------------------------------
-      -- vim.lsp.util.open_floating_previewのデフォルトオプションを設定
-      local original_open_floating_preview = vim.lsp.util.open_floating_preview
-      vim.lsp.util.open_floating_preview = function(contents, syntax, opts)
-        opts = opts or {}
-        -- ボーダーを設定（透過のままでも見やすくするため）
-        opts.border = opts.border or "rounded" -- "single", "double", "rounded", "solid", "shadow" など
-        return original_open_floating_preview(contents, syntax, opts)
-      end
-
-      -- カラースキーム変更時にFloatBorderの色を再設定
-      vim.api.nvim_create_autocmd("ColorScheme", {
-        callback = function()
-          vim.defer_fn(function()
-            -- ボーダーを目立たせる（透過のままでも見やすく）
-            vim.api.nvim_set_hl(0, "FloatBorder", {
-              bg = "none",
-              fg = "#808080", -- グレーのボーダー
-              bold = true,
-            })
-          end, 50)
-        end,
-      })
-
-      -- 初回設定
-      vim.defer_fn(function()
-        vim.api.nvim_set_hl(0, "FloatBorder", {
-          bg = "none",
-          fg = "#808080",
-          bold = true,
-        })
-      end, 100)
+      -- フロートの枠は options.lua の winborder="rounded" で一元化した。
+      -- 枠色（FloatBorder ハイライト）と透過は config/highlight.lua が担当する。
+      -- 以前ここにあった open_floating_preview のモンキーパッチと #808080 の上書きは、
+      -- winborder 導入と役割重複の解消のため削除した。
 
       -- Haskell (HLS) の型シグネチャ codelens 表示（config/hls_codelens.lua に分離）
       require("config.hls_codelens").setup()
