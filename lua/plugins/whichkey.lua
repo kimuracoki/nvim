@@ -7,7 +7,8 @@ return {
     config = function()
       local wk = require("which-key")
       wk.setup({
-        delay = 200,
+        preset = "modern",
+        delay = 150, -- スペース押下からメニューが出るまで（速めに）
         plugins = {
           marks = false,
           registers = false,
@@ -22,28 +23,51 @@ return {
             g = false,
           },
         },
+        win = {
+          border = "rounded", -- 他フロート（noice 等）と枠を揃える
+          padding = { 1, 2 },
+        },
+        layout = {
+          width = { min = 24 }, -- 説明が途中で切れないよう最小幅を確保
+          spacing = 4,
+        },
+        icons = {
+          mappings = true,
+          colors = true,
+          keys = {
+            Space = "SPC ",
+            CR = "⏎ ",
+            Esc = "⎋ ",
+            BS = "⌫ ",
+            C = "C-",
+            S = "S-",
+          },
+        },
+        -- グループ→キー→アルファベット順で並べ、押すたびに並びが変わらないようにする
+        sort = { "group", "alphanum", "mod" },
       })
-      
-      -- グループ名を登録（<leader>プレフィックスの説明）
+
+      -- グループ名を登録（<leader>プレフィックスの説明）。icon は各カテゴリの識別用
       wk.add({
-        { "<leader>a", desc = "All (全選択)" },
-        { "<leader>b", group = "Buffer (バッファ)" },
-        { "<leader>c", group = "Code (コード)" },
-        { "<leader>d", group = "Debug (デバッグ)" },
-        { "<leader>e", desc = "Explorer (ファイルツリー)" },
-        { "<leader>f", group = "Find/File (検索/ファイル)" },
-        { "<leader>g", group = "Git" },
-        { "<leader>h", group = "Help/Health (ヘルプ)" },
-        { "<leader>i", group = "Intelligence/AI (Claude Code / Cursor CLI)" },
-        { "<leader>l", group = "Lazy (プラグイン)" },
-        { "<leader>o", desc = "Outline (シンボル)" },
-        { "<leader>q", desc = "Quit (終了)" },
-        { "<leader>r", group = "Run (実行)" },
-        { "<leader>s", group = "Search (検索)" },
-        { "<leader>t", group = "Terminal (ターミナル)" },
-        { "<leader>u", group = "UI (外観)" },
-        { "<leader>w", group = "Window (ウィンドウ)" },
-        { "<leader>x", group = "Diagnostics (診断)" },
+        { "<leader>?", icon = "", desc = "Keymap search (キーマップを日本語で検索)" },
+        { "<leader>a", icon = "", desc = "All (全選択)" },
+        { "<leader>b", icon = "", group = "Buffer (バッファ)" },
+        { "<leader>c", icon = "", group = "Code (コード)" },
+        { "<leader>d", icon = "", group = "Debug (デバッグ)" },
+        { "<leader>e", icon = "", desc = "Explorer (ファイルツリー)" },
+        { "<leader>f", icon = "", group = "Find/File (検索/ファイル)" },
+        { "<leader>g", icon = "", group = "Git" },
+        { "<leader>h", icon = "󰋖", group = "Help/Health (ヘルプ)" },
+        { "<leader>i", icon = "", group = "Intelligence/AI (Claude Code / Cursor CLI)" },
+        { "<leader>l", icon = "󰒲", group = "Lazy (プラグイン)" },
+        { "<leader>o", icon = "", desc = "Outline (シンボル)" },
+        { "<leader>q", icon = "", desc = "Quit (終了)" },
+        { "<leader>r", icon = "", group = "Run (実行)" },
+        { "<leader>s", icon = "", group = "Search (検索)" },
+        { "<leader>t", icon = "", group = "Terminal (ターミナル)" },
+        { "<leader>u", icon = "", group = "UI (外観)" },
+        { "<leader>w", icon = "", group = "Window (ウィンドウ)" },
+        { "<leader>x", icon = "", group = "Diagnostics (診断)" },
       })
 
       -- <leader> サブキー（英語 + 日本語、元のグループ表記に合わせる）
@@ -61,6 +85,7 @@ return {
         { "<leader>ff", desc = "Find: Files (ファイル検索)" },
         { "<leader>fb", desc = "Find: Buffers (バッファ一覧)" },
         { "<leader>fc", desc = "Find: Commands (コマンド一覧)" },
+        { "<leader>fk", desc = "Find: Keymap (キーマップを日本語で検索)" },
         { "<leader>fg", desc = "Find: Grep (ワークスペース検索)" },
         { "<leader>fr", desc = "File: Recent (最近開いたファイル)" },
         { "<leader>fs", desc = "Find: Symbols (シンボル検索・ファイル内)" },

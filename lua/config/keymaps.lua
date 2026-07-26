@@ -391,6 +391,11 @@ map("n", "<leader>rt", function()
   ))
 end, { desc = "Run: just t (サンプルテスト)" })
 
+-- キーマップを日本語であいまい検索（<leader>? / <leader>fk と同じ）
+map("n", "<leader>?", function()
+  require("config.cheatsheet").pick()
+end, { desc = "Help: Keymap search (キーマップを日本語で検索)" })
+
 -- Help/Health関連（診断・ログ）
 map("n", "<leader>hm", ":messages<CR>", { desc = "Help: Messages log" })
 map("n", "<leader>hc", ":checkhealth<CR>", { desc = "Help: Checkhealth" })

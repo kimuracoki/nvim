@@ -18,6 +18,11 @@ return {
       map("n", "<leader>fc", builtin.commands, { desc = "Find: Commands" })
       map("n", "<C-S-p>", builtin.commands, { desc = "Picker: Commands" })
 
+      -- キーマップを日本語で検索して実行（Find: Keymap）。「どのキーだっけ」を nvim 内で解決する
+      map("n", "<leader>fk", function()
+        require("config.cheatsheet").pick()
+      end, { desc = "Find: Keymap (キーマップを日本語で検索)" })
+
       -- 最近開いたファイル（File: recent）
       map("n", "<leader>fr", builtin.oldfiles, { desc = "File: Recent" })
       map("n", "<C-t>", builtin.oldfiles, { desc = "File: Recent" })

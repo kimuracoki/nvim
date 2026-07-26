@@ -20,7 +20,8 @@ return {
             modified,
           },
           lualine_x = { "ccusage", "encoding", "fileformat", "filetype" },
-          lualine_y = { "progress" },
+          -- searchcount=検索マッチ数 / selectioncount=選択中の行・文字数（VSCode の選択表示相当）
+          lualine_y = { "searchcount", "selectioncount", "progress" },
           lualine_z = { "location" },
         },
         -- ファイルの変更状態を表示

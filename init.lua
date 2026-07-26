@@ -29,7 +29,19 @@ vim.api.nvim_create_autocmd("VimEnter", {
     vim.defer_fn(function()
       highlight.setup()
     end, 100)
-    -- レイアウト設定
+    -- 引数なし起動時はメインにダッシュボード（snacks）を表示する。
+    -- ただし左のツリーは従来どおり出す。Trouble（問題パネル）は起動時に空で邪魔なので出さず、
+    -- ツリーを開いたあとフォーカスはダッシュボードへ戻して f/s/? をすぐ押せるようにする。
+    if vim.fn.argc() == 0 then
+      vim.defer_fn(function()
+        if vim.fn.exists(":Neotree") == 2 then
+          vim.cmd("Neotree show")
+          vim.cmd("wincmd p") -- ダッシュボードにフォーカスを戻す
+        end
+      end, 250)
+      return
+    end
+    -- ファイルを開いて起動したときは従来どおりツリー+問題を並べる
     vim.defer_fn(function()
       require("config.startup").setup_layout()
     end, 200)
