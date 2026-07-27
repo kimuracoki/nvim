@@ -2,58 +2,121 @@
 
 return {
   -- Treesitter (構文ハイライト)
+  -- NVIM 0.12 では nvim-treesitter は main ブランチを使う。旧 master は EOL で、
+  -- markdown インジェクション用ディレクティブ set-lang-from-info-string! が 0.11+ の
+  -- query match API 変更に追従しておらず node:range() で落ちる（render-markdown 経由で発症）。
+  -- main ではハイライト/インデント/インジェクションを nvim-treesitter が持たず、
+  -- Neovim 本体側 (vim.treesitter) を FileType ごとに有効化する構成になる。
   {
     "nvim-treesitter/nvim-treesitter",
+    branch = "main", -- 旧 master API (require('nvim-treesitter.configs')) は使わない
     build = ":TSUpdate",
     event = { "BufReadPre", "BufNewFile" }, -- ファイルを開くときに読む（起動時ロードを避ける）
     config = function()
-      require("nvim-treesitter.configs").setup({
-        ensure_installed = {
-          -- 基本言語
-          "lua",
-          "vim",
-          "bash",
-          -- フロントエンド
-          "typescript",
-          "tsx",
-          "javascript",
-          "html",
-          "css",
-          "json",
-          "yaml",
-          -- バックエンド・汎用言語
-          "python",
-          "rust",
-          "go",
-          "java",
-          "c",
-          "cpp",
-          "php",
-          "haskell", -- Haskellパーサーを追加
-          "commonlisp",
-          -- その他
-          "markdown",
-          "dockerfile",
-          "sql",
-        },
-        highlight = {
-          enable = true,
-          -- 追加の設定でハイライトを強化
-          additional_vim_regex_highlighting = false,
-        },
-        indent = { enable = true },
-        -- インクリメンタル選択。node_incremental を grn にすると LSP 標準の rename(grn) と
-        -- 衝突するため、衝突しない <C-space>/<BS> を使う（LazyVim と同じ既定）。
-        incremental_selection = {
-          enable = true,
-          keymaps = {
-            init_selection = "<C-space>",
-            node_incremental = "<C-space>",
-            scope_incremental = false,
-            node_decremental = "<BS>",
-          },
-        },
+      local ts = require("nvim-treesitter")
+      ts.setup({}) -- 既定の install_dir (stdpath('data')/site) を使う
+
+      -- 使うパーサ群。install は非同期・インストール済みは no-op。
+      ts.install({
+        -- 基本言語
+        "lua",
+        "vim",
+        "bash",
+        -- フロントエンド
+        "typescript",
+        "tsx",
+        "javascript",
+        "html",
+        "css",
+        "json",
+        "yaml",
+        -- バックエンド・汎用言語
+        "python",
+        "rust",
+        "go",
+        "java",
+        "c",
+        "cpp",
+        "php",
+        "haskell", -- Haskellパーサーを追加
+        "commonlisp",
+        -- その他
+        "markdown",
+        "markdown_inline", -- render-markdown のコードフェンス injection に必要
+        "dockerfile",
+        "sql",
       })
+
+      -- main はハイライト等を自動で有効化しない。パーサがある filetype で
+      -- Neovim 本体のハイライトと Treesitter インデントを起動する。
+      vim.api.nvim_create_autocmd("FileType", {
+        group = vim.api.nvim_create_augroup("user_treesitter", { clear = true }),
+        callback = function(args)
+          -- パーサが無い filetype (octo/codecompanion 等) では pcall で黙って抜ける
+          if not pcall(vim.treesitter.start, args.buf) then
+            return
+          end
+          -- Treesitter ベースのインデント（main では experimental 扱い）
+          vim.bo[args.buf].indentexpr = "v:lua.require'nvim-treesitter'.indentexpr()"
+        end,
+      })
+      -- config は BufReadPre で走るため、既に開いているバッファには FileType が
+      -- 発火済みのことがある。取りこぼし分を手動で起動する。
+      for _, buf in ipairs(vim.api.nvim_list_bufs()) do
+        if vim.api.nvim_buf_is_loaded(buf) and pcall(vim.treesitter.start, buf) then
+          vim.bo[buf].indentexpr = "v:lua.require'nvim-treesitter'.indentexpr()"
+        end
+      end
+
+      -- インクリメンタル選択。main には無いので vim.treesitter で最小実装する。
+      -- node_incremental を grn にすると LSP 標準 rename(grn) と衝突するため、
+      -- 衝突しない <C-space>(拡大)/<BS>(縮小) を使う（旧設定を踏襲）。
+      local sel = {} -- 選択したノードのスタック
+      local function ranges_equal(a, b)
+        local a1, a2, a3, a4 = a:range()
+        local b1, b2, b3, b4 = b:range()
+        return a1 == b1 and a2 == b2 and a3 == b3 and a4 == b4
+      end
+      local function select_node(node)
+        local srow, scol, erow, ecol = node:range()
+        vim.cmd("normal! \27") -- 一旦ノーマルへ
+        vim.api.nvim_win_set_cursor(0, { srow + 1, scol })
+        vim.cmd("normal! v")
+        vim.api.nvim_win_set_cursor(0, { erow + 1, ecol > 0 and ecol - 1 or 0 })
+      end
+      local function init_selection()
+        local node = vim.treesitter.get_node()
+        if not node then
+          return
+        end
+        sel = { node }
+        select_node(node)
+      end
+      local function node_incremental()
+        local cur = sel[#sel]
+        if not cur then
+          return init_selection()
+        end
+        local parent = cur:parent()
+        while parent and ranges_equal(parent, cur) do -- 範囲が広がる親まで登る
+          parent = parent:parent()
+        end
+        if parent then
+          sel[#sel + 1] = parent
+        end
+        select_node(sel[#sel])
+      end
+      local function node_decremental()
+        if #sel > 1 then
+          sel[#sel] = nil
+        end
+        if sel[#sel] then
+          select_node(sel[#sel])
+        end
+      end
+      vim.keymap.set("n", "<C-space>", init_selection, { desc = "TS: インクリメンタル選択を開始" })
+      vim.keymap.set("x", "<C-space>", node_incremental, { desc = "TS: 選択を親ノードへ拡大" })
+      vim.keymap.set("x", "<BS>", node_decremental, { desc = "TS: 選択を子ノードへ縮小" })
     end,
   },
 
