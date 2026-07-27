@@ -60,6 +60,7 @@ return {
         { "<leader>h", icon = "󰋖", group = "Help/Health (ヘルプ)" },
         { "<leader>i", icon = "", group = "Intelligence/AI (Claude Code / Cursor CLI)" },
         { "<leader>l", icon = "󰒲", group = "Lazy (プラグイン)" },
+        { "<leader>m", icon = "", desc = "Menu (コンテキストメニュー)", mode = { "n", "x" } },
         { "<leader>o", icon = "", desc = "Outline (シンボル)" },
         { "<leader>q", icon = "", desc = "Quit (終了)" },
         { "<leader>R", icon = "󰖟", group = "Rest (REST クライアント)" },
