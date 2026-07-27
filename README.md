@@ -251,7 +251,7 @@ pip3 install ruff               # Python（Go は golangci-lint、Haskell は hl
 **テスト（neotest。プロジェクトのテストランナーをそのまま使う）**:
 - Python: `pip3 install pytest`
 - JS/TS: `npm install -g jest`（vitest はプロジェクトの devDependencies を使用）
-- Go / Haskell: 標準の `go test` / `cabal test` を使うため追加インストール不要
+- Go / Haskell: 標準の `go test` / `cabal test`（hspec/tasty/sydtest）を使うため追加インストール不要
 
 **デバッガのアダプタ（nvim-dap）**: `codelldb`（Rust/C/C++）・`debugpy`（Python）・`js-debug`（JS/TS）・`delve`（Go）は **Mason が初回起動時に自動インストール**します（該当言語のツールチェーンがある場合のみ）。手動操作は不要です。
 

@@ -26,6 +26,43 @@ return {
       { "<leader>Tw", function() require("neotest").watch.toggle(vim.fn.expand("%")) end, desc = "Test: Watch (ファイルを監視実行)" },
     },
     config = function()
+      -- 【neotest 本体のバグ回避】subprocess.resolve_plugin_root は、関数の debug source が
+      -- 絶対パス（"@/...")でないと vim.fs.dirname が "." に収束して while ループが無限に回る。
+      -- 呼び出し側は pcall だが pcall は無限ループを止められないため、エディタごとフリーズし
+      -- Ctrl-C も効かなくなる。neotest-haskell.compat が vim.fs.joinpath を再公開しており
+      -- その source が "@vim/fs" になるためこれを踏む（他アダプタは踏まないので Haskell だけ発症）。
+      -- パスでない source は nil を返し、収束しない場合も打ち切る安全版で上書きする
+      -- （正常な入力に対する挙動は変えない）。upstream 修正までのローカル対策。
+      local ok_sp, sp = pcall(require, "neotest.lib.subprocess")
+      if ok_sp and sp and sp.resolve_plugin_root then
+        local sep = package.config:sub(1, 1)
+        local function is_root(p)
+          if sep == "\\" then
+            return p:match("^[A-Za-z]:\\?$") ~= nil
+          end
+          return p == "/"
+        end
+        sp.resolve_plugin_root = function(plugin_func)
+          local source = debug.getinfo(plugin_func).source
+          if not source or source:sub(1, 1) ~= "@" then
+            return nil -- C 関数・builtin などファイルパスでない source はスキップ
+          end
+          source = source:sub(2):gsub("[/\\]", sep)
+          local steps = 0
+          while not is_root(source) and vim.fs.basename(source) ~= "lua" do
+            source = vim.fs.dirname(source)
+            steps = steps + 1
+            if steps > 64 then
+              return nil -- 収束しないパスで無限ループしない保険
+            end
+          end
+          if not is_root(source) then
+            return vim.fs.dirname(source)
+          end
+          return nil
+        end
+      end
+
       local function has(bin)
         return vim.fn.executable(bin) == 1
       end
