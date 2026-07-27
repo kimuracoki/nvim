@@ -1,156 +1,96 @@
+-- markdown / text ではスペルチェックを有効化（blink の spell 補完と対で使う）。
+-- blink.cmp は InsertEnter 後に読まれるため、この FileType autocmd は
+-- プラグインの config ではなく import 時（起動時）に登録しておく。
+vim.api.nvim_create_autocmd("FileType", {
+  pattern = { "markdown", "text" },
+  callback = function()
+    vim.opt_local.spell = true
+    vim.opt_local.spelllang = "en"
+    vim.opt_local.spellsuggest = "best,20" -- spellsuggest の候補数を増やす
+  end,
+})
+
 return {
   ---------------------------------------------------------------------------
-  -- 補完まわり
+  -- スニペットエンジン（LuaSnip）と VSCode 風スニペット集。blink.cmp から利用する。
   ---------------------------------------------------------------------------
-  { "hrsh7th/nvim-cmp" },
-  { "hrsh7th/cmp-nvim-lsp" },
-  { "hrsh7th/cmp-buffer" },
-  { "hrsh7th/cmp-path" },
-  { "f3fora/cmp-spell" }, -- 英単語補完
   { "L3MON4D3/LuaSnip" },
-  { "saadparwaiz1/cmp_luasnip" },
-  { "rafamadriz/friendly-snippets" }, -- VSCode風のスニペット集
+  { "rafamadriz/friendly-snippets" }, -- VSCode 風のスニペット集
+
   ---------------------------------------------------------------------------
-  -- nvim-cmp 設定
+  -- 補完エンジン（VSCode の IntelliSense 相当）。旧 nvim-cmp から移行。
+  -- Rust 製ファジーマッチャで高速。スニペットは LuaSnip を継続利用する
+  -- （friendly-snippets + snippets/lua の自作スニペット）。
   ---------------------------------------------------------------------------
   {
-    "hrsh7th/nvim-cmp",
-    dependencies = { "onsails/lspkind.nvim" }, -- 確実に一緒にインストール／ロードさせる
-    config = function()
-      local cmp = require("cmp")
-      local luasnip = require("luasnip")
-
-      -- VSCode風のスニペットをロード（friendly-snippets）
+    "saghen/blink.cmp",
+    version = "*", -- リリースタグ = プリビルドバイナリを取得（Rust ツールチェーン不要）
+    event = { "InsertEnter", "CmdlineEnter" },
+    dependencies = {
+      "L3MON4D3/LuaSnip",
+      "rafamadriz/friendly-snippets",
+      -- markdown/text 用の英単語補完（旧 cmp-spell 相当。vim の spellsuggest を候補に出す）
+      "ribru17/blink-cmp-spell",
+    },
+    opts = {
+      snippets = { preset = "luasnip" }, -- LuaSnip に登録済みのスニペットを候補に出す
+      -- 種別アイコン用（VSCode 風の kind アイコン。Nerd Font 前提）
+      appearance = { nerd_font_variant = "mono" },
+      keymap = {
+        preset = "none",
+        ["<C-space>"] = { "show", "show_documentation", "hide_documentation" },
+        ["<CR>"] = { "accept", "fallback" },
+        -- Tab: 補完表示中は次候補 / スニペット展開中はジャンプ / それ以外は既定動作
+        ["<Tab>"] = { "select_next", "snippet_forward", "fallback" },
+        ["<S-Tab>"] = { "select_prev", "snippet_backward", "fallback" },
+        ["<C-e>"] = { "hide", "fallback" },
+      },
+      completion = {
+        -- 先頭候補をあらかじめ選択状態にする（旧 cmp の confirm({select=true}) 相当）。
+        -- auto_insert=false なので確定するまではバッファに挿入しない。
+        list = { selection = { preselect = true, auto_insert = false } },
+        -- 確定前の候補を薄いインラインで先読み（VSCode のゴーストテキスト相当）
+        ghost_text = { enabled = true },
+        menu = {
+          border = "rounded", -- 他フロートと枠を揃える
+          draw = {
+            -- 種別アイコン + ラベル + ソース名（旧 lspkind の menu 表示相当）
+            columns = {
+              { "kind_icon" },
+              { "label", "label_description", gap = 1 },
+              { "source_name" },
+            },
+          },
+        },
+        documentation = {
+          auto_show = true,
+          auto_show_delay_ms = 200,
+          window = { border = "rounded" },
+        },
+      },
+      sources = {
+        -- 既定ソース: LSP / パス / スニペット / バッファ
+        default = { "lsp", "path", "snippets", "buffer" },
+        -- markdown / text では英単語（spell）補完も足す（旧 cmp-spell の filetype 設定）
+        per_filetype = {
+          markdown = { "lsp", "path", "snippets", "buffer", "spell" },
+          text = { "lsp", "path", "snippets", "buffer", "spell" },
+        },
+        providers = {
+          spell = { name = "Spell", module = "blink-cmp-spell" },
+        },
+      },
+      -- ファジーマッチャは Rust 実装を使う（プリビルドバイナリ。無ければ警告して Lua 実装へ）
+      fuzzy = { implementation = "prefer_rust_with_warning" },
+    },
+    config = function(_, opts)
+      -- LuaSnip にスニペットをロード（blink の luasnip preset がここから候補を拾う）
       require("luasnip.loaders.from_vscode").lazy_load()
       -- 自作スニペット（Lua 形式。展開時に定義をバッファ末尾へ足す副作用を持つため）
       require("luasnip.loaders.from_lua").lazy_load({
         paths = { vim.fn.stdpath("config") .. "/snippets/lua" },
       })
-
-      cmp.setup({
-        snippet = {
-          expand = function(args)
-            luasnip.lsp_expand(args.body)
-          end,
-        },
-        mapping = cmp.mapping.preset.insert({
-          ["<C-Space>"] = cmp.mapping.complete(),
-          ["<CR>"] = cmp.mapping.confirm({ select = true }),
-          -- Tab: スニペット展開中はジャンプ、それ以外は補完候補選択
-          ["<Tab>"] = cmp.mapping(function(fallback)
-            if cmp.visible() then
-              cmp.select_next_item()
-            elseif luasnip.expand_or_jumpable() then
-              luasnip.expand_or_jump()
-            else
-              fallback()
-            end
-          end, { "i", "s" }),
-          -- Shift-Tab: スニペット展開中は前へジャンプ、それ以外は前の補完候補
-          ["<S-Tab>"] = cmp.mapping(function(fallback)
-            if cmp.visible() then
-              cmp.select_prev_item()
-            elseif luasnip.jumpable(-1) then
-              luasnip.jump(-1)
-            else
-              fallback()
-            end
-          end, { "i", "s" }),
-        }),
-        sources = cmp.config.sources({
-          { name = "nvim_lsp" },
-          { name = "luasnip" },
-          { name = "buffer" },
-          { name = "path" },
-        }),
-        -- VSCode 風の見た目: 種別アイコン + ソース名 + 枠
-        formatting = {
-          format = require("lspkind").cmp_format({
-            mode = "symbol_text",
-            maxwidth = 50,
-            ellipsis_char = "…",
-            menu = {
-              nvim_lsp = "[LSP]",
-              luasnip = "[Snip]",
-              buffer = "[Buf]",
-              path = "[Path]",
-              spell = "[Spell]",
-            },
-          }),
-        },
-        window = {
-          completion = cmp.config.window.bordered(),
-          documentation = cmp.config.window.bordered(),
-        },
-        -- 確定前の候補を薄いインラインテキストで先読み表示（VSCode のゴーストテキスト相当）
-        experimental = { ghost_text = true },
-      })
-
-      -- Markdown用: 英単語補完を追加
-      cmp.setup.filetype({ "markdown", "text" }, {
-        sources = cmp.config.sources({
-          {
-            name = "spell",
-            option = {
-              keep_all_entries = true, -- すべての候補を表示
-              enable_in_context = function()
-                return true            -- 常に有効
-              end,
-            },
-          },
-          { name = "buffer" },
-          { name = "path" },
-        }),
-      })
-
-      -- Markdownファイルでスペルチェックを有効化
-      vim.api.nvim_create_autocmd("FileType", {
-        pattern = { "markdown", "text" },
-        callback = function()
-          vim.opt_local.spell = true
-          vim.opt_local.spelllang = "en"
-          -- spellsuggestの候補数を増やす
-          vim.opt_local.spellsuggest = "best,20"
-        end,
-      })
-
-      -- 診断の表示設定
-      vim.diagnostic.config({
-        virtual_text = false,
-        -- カーソル行の診断だけ、その場に展開表示する（0.11+）。<leader>ud でトグル可能。
-        virtual_lines = { current_line = true },
-        -- サイン列のアイコン（severity_sort で重要度順に表示される）
-        signs = {
-          text = {
-            [vim.diagnostic.severity.ERROR] = "",
-            [vim.diagnostic.severity.WARN] = "",
-            [vim.diagnostic.severity.INFO] = "",
-            [vim.diagnostic.severity.HINT] = "",
-          },
-        },
-        underline = true,
-        update_in_insert = false,
-        severity_sort = true,
-      })
-
-      -- VSCode風の波線（undercurl）
-      local function apply_undercurl()
-        local groups = {
-          { hl = "DiagnosticUnderlineError", src = "DiagnosticError", fb = "#f38ba8" },
-          { hl = "DiagnosticUnderlineWarn",  src = "DiagnosticWarn",  fb = "#f9e2af" },
-          { hl = "DiagnosticUnderlineInfo",  src = "DiagnosticInfo",  fb = "#89b4fa" },
-          { hl = "DiagnosticUnderlineHint",  src = "DiagnosticHint",  fb = "#a6e3a1" },
-        }
-        for _, g in ipairs(groups) do
-          local src = vim.api.nvim_get_hl(0, { name = g.src, link = false })
-          vim.api.nvim_set_hl(0, g.hl, {
-            undercurl = true,
-            sp = src.fg and string.format("#%06x", src.fg) or g.fb,
-          })
-        end
-      end
-      vim.api.nvim_create_autocmd("VimEnter", { once = true, callback = apply_undercurl })
-      vim.api.nvim_create_autocmd("ColorScheme", { callback = apply_undercurl })
+      require("blink.cmp").setup(opts)
     end,
   },
 }

@@ -211,6 +211,12 @@ return {
         { "g;", desc = "Changelist: Older (変更リストで古い方へ)" },
       })
 
+      -- flash.nvim（高速ジャンプ移動）
+      wk.add({
+        { "s", desc = "Flash: Jump (2文字でジャンプ)" },
+        { "S", desc = "Flash: Treesitter (ノード選択)" },
+      })
+
       -- Register localleader groups for octo.nvim
       vim.api.nvim_create_autocmd("FileType", {
         pattern = "octo",

@@ -127,6 +127,8 @@ M.sections = {
   {
     title = "Edit / 基本",
     keys = {
+      { "s", "どこでもジャンプ（flash）" },
+      { "S", "Treesitterノード選択（flash）" },
       { "C-s", "保存" },
       { "jk", "ノーマルモードへ" },
       { "C-a", "全選択" },

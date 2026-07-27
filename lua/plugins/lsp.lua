@@ -47,7 +47,8 @@ return {
       "neovim/nvim-lspconfig",
     },
     config = function()
-      local capabilities = require("cmp_nvim_lsp").default_capabilities()
+      -- 補完（blink.cmp）が対応する LSP 機能を capabilities に反映する
+      local capabilities = require("blink.cmp").get_lsp_capabilities()
 
       -- ensure_installed を「そのマシンに必要なツールチェーンがある LSP だけ」に絞る。
       -- こうすると、Go/Ruby/Haskell 等が未インストールのマシン（例: まっさらな Windows）で
@@ -155,8 +156,8 @@ return {
                 globalOn = true,
               },
               -- HLS はデフォルトで補完候補をスニペット形式で返すが、
-              -- nvim-cmp のスニペット処理と噛み合わず、確定時に先頭文字が
-              -- 余計に挿入されてカーソル位置がずれる（"main" → "mainm"）。
+              -- 補完側のスニペット処理と噛み合わず、確定時に先頭文字が
+              -- 余計に挿入されてカーソル位置がずれることがある（"main" → "mainm"）。
               -- スニペット補完を無効化して通常のテキスト挿入にする。
               ["ghcide-completions"] = {
                 config = {
