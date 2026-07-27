@@ -62,8 +62,10 @@ return {
         { "<leader>l", icon = "󰒲", group = "Lazy (プラグイン)" },
         { "<leader>o", icon = "", desc = "Outline (シンボル)" },
         { "<leader>q", icon = "", desc = "Quit (終了)" },
+        { "<leader>R", icon = "󰖟", group = "Rest (REST クライアント)" },
         { "<leader>r", icon = "", group = "Run (実行)" },
         { "<leader>s", icon = "", group = "Search (検索)" },
+        { "<leader>T", icon = "", group = "Test (テスト)" },
         { "<leader>t", icon = "", group = "Terminal (ターミナル)" },
         { "<leader>u", icon = "", group = "UI (外観)" },
         { "<leader>w", icon = "", group = "Window (ウィンドウ)" },
@@ -79,8 +81,19 @@ return {
         -- Code
         { "<leader>cf", desc = "Code: Format (コードフォーマット)" },
         { "<leader>ch", desc = "Code: Inlay hints (インレイヒントの切り替え)" },
+        { "<leader>cl", desc = "Code: Lint now (今すぐ lint 実行)" },
+        { "<leader>cr", desc = "Code: Refactor menu (リファクタリングメニュー)" },
+        { "<leader>ce", desc = "Code: Extract function (関数を抽出・Visual)" },
+        { "<leader>cv", desc = "Code: Extract variable (変数を抽出・Visual)" },
+        { "<leader>ci", desc = "Code: Inline variable (変数をインライン化)" },
         -- Debug
         { "<leader>db", desc = "Debug: Breakpoint toggle (ブレークポイントのトグル)" },
+        { "<leader>dB", desc = "Debug: Conditional breakpoint (条件付きブレークポイント)" },
+        { "<leader>dc", desc = "Debug: Start/Continue (開始/継続)" },
+        { "<leader>dr", desc = "Debug: REPL toggle (REPL のトグル)" },
+        { "<leader>dl", desc = "Debug: Run last (前回の構成で実行)" },
+        { "<leader>du", desc = "Debug: UI toggle (デバッグ UI のトグル)" },
+        { "<leader>dt", desc = "Debug: Terminate (デバッグを終了)" },
         -- Find/File
         { "<leader>ff", desc = "Find: Files (ファイル検索)" },
         { "<leader>fb", desc = "Find: Buffers (バッファ一覧)" },
@@ -127,6 +140,22 @@ return {
         { "<leader>rp", desc = "Run: Project (プロジェクトを実行)" },
         { "<leader>rr", desc = "Run: Code (コードを実行)" },
         { "<leader>rt", desc = "Run: just t (競プロ サンプルテスト)" },
+        -- Rest (REST クライアント)
+        { "<leader>Rs", desc = "Rest: Send request (リクエストを送信)" },
+        { "<leader>Ra", desc = "Rest: Send all (全リクエストを送信)" },
+        { "<leader>Rp", desc = "Rest: Previous request (前のリクエストへ)" },
+        { "<leader>Rn", desc = "Rest: Next request (次のリクエストへ)" },
+        { "<leader>Rc", desc = "Rest: Copy as curl (curl としてコピー)" },
+        { "<leader>Ri", desc = "Rest: Inspect (リクエスト内容を確認)" },
+        -- Test (テスト)
+        { "<leader>Tt", desc = "Test: Nearest (最寄りのテストを実行)" },
+        { "<leader>TT", desc = "Test: File (ファイル全体を実行)" },
+        { "<leader>Td", desc = "Test: Debug nearest (最寄りをデバッグ実行)" },
+        { "<leader>TS", desc = "Test: Stop (実行を停止)" },
+        { "<leader>Ts", desc = "Test: Summary (サマリーをトグル)" },
+        { "<leader>To", desc = "Test: Output (出力を表示)" },
+        { "<leader>Tp", desc = "Test: Output panel (出力パネルをトグル)" },
+        { "<leader>Tw", desc = "Test: Watch (ファイルを監視実行)" },
         -- Search
         { "<leader>sw", desc = "Search: Workspace symbols (ワークスペースシンボル)" },
         -- Translate
@@ -142,6 +171,7 @@ return {
         { "<leader>ug", desc = "UI: Indent guides toggle (ネスト背景ガイドのトグル)" },
         { "<leader>um", desc = "UI: Minimap toggle (ミニマップのトグル)" },
         { "<leader>uo", desc = "UI: Transparency (透過のトグル)" },
+        { "<leader>ur", desc = "UI: Markdown render toggle (Markdown 描画のトグル)" },
         { "<leader>ut", desc = "UI: Theme (カラースキーム切り替え)" },
         -- Window
         { "<leader>wh", desc = "Window: Decrease width (幅を狭く)" },
@@ -175,6 +205,7 @@ return {
         { "gx", desc = "Open link (リンクを開く・ホバー内)" },
         -- Treesitter 選択拡張は <C-space>（開始/拡張）・<BS>（縮小）。g 系から移動した。
         -- よく使うビルトインのみ
+        { "gS", desc = "Split/Join: Toggle (一行⇄複数行トグル・mini.splitjoin)" },
         { "g%", desc = "Match: Cycle backward (逆方向にマッチへ)" },
         { "g,", desc = "Changelist: Newer (変更リストで新しい方へ)" },
         { "g;", desc = "Changelist: Older (変更リストで古い方へ)" },

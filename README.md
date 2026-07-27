@@ -11,6 +11,10 @@ VSCodeのような操作感を実現するためのNeovim設定です。
 - **Git統合**: lazygit、GitHub PR/Issue管理（octo.nvim）、Gitグラフ表示
 - **AI機能**: Claude Code と Cursor CLI 統合（どちらも同じ右分割UIで利用可能）
 - **豊富なUI**: ミニマップ、アウトライン、問題パネル、通知システム
+- **テスト・デバッグ・Lint**: neotest（エディタ内でテスト実行/監視）、nvim-dap（多言語デバッグ）、nvim-lint（保存時に自動リント）
+- **リファクタリング**: 関数抽出・変数抽出・インライン化（refactoring.nvim）
+- **REST クライアント**: `.http` ファイルで API を実行（kulala。`tree-sitter` CLI が必要）
+- **Markdown 描画**: 見出し・表・チェックボックスを本文上に整形表示（render-markdown）
 - **多言語対応**: TypeScript/JavaScript、Python、Rust、Go、Java、C/C++、C#、Ruby、PHP、Haskell、Lispなど
 - **日本語入力（IME）**: ノーマルモードに戻ったときに半角（英数）に自動切り替え（macOS は macism、Windows は im-select.exe を要インストール）
 - **クロスプラットフォーム**: macOS / Windows の両方で動作（IME切り替えはOSを自動判定）
@@ -232,6 +236,31 @@ brew install macism
    brew install bash
    ```
 
+### 9. リンタ・テスト・REST クライアント用ツール（すべて任意）
+
+これらは後から追加した機能で使う外部ツールです。**入っていない分は自動的に無効化される**ため（`vim.fn.executable()` でガード）、未インストールでも設定は壊れません。使う言語・機能の分だけ入れてください。
+
+**リンタ（nvim-lint。保存時に自動実行。`<leader>cl` で手動実行）**:
+```bash
+brew install shellcheck hadolint yamllint golangci-lint hlint
+brew install markdownlint-cli   # markdownlint
+npm install -g jsonlint
+pip3 install ruff               # Python（Go は golangci-lint、Haskell は hlint、Lua は selene/luacheck）
+```
+
+**テスト（neotest。プロジェクトのテストランナーをそのまま使う）**:
+- Python: `pip3 install pytest`
+- JS/TS: `npm install -g jest`（vitest はプロジェクトの devDependencies を使用）
+- Go / Haskell: 標準の `go test` / `cabal test` を使うため追加インストール不要
+
+**デバッガのアダプタ（nvim-dap）**: `codelldb`（Rust/C/C++）・`debugpy`（Python）・`js-debug`（JS/TS）・`delve`（Go）は **Mason が初回起動時に自動インストール**します（該当言語のツールチェーンがある場合のみ）。手動操作は不要です。
+
+**REST クライアント（kulala。`.http` ファイルで API を実行）**:
+```bash
+brew install tree-sitter   # kulala が HTTP パーサのビルドに使う CLI
+```
+`tree-sitter` CLI が無い環境では kulala 自体が読み込まれず（無効化）、エラーも出ません。
+
 ---
 
 ## Windows のセットアップ
@@ -419,6 +448,27 @@ gh auth login
    # 手順1で git を入れていれば "Git Bash" が使えます
    ```
 
+### 9. リンタ・テスト・REST クライアント用ツール（すべて任意）
+
+macOS の手順9と同じ機能用の外部ツールです。**入っていない分は自動的に無効化される**ため、未インストールでも設定は壊れません。
+
+**リンタ（nvim-lint。保存時に自動実行。`<leader>cl` で手動実行）**:
+```powershell
+scoop install shellcheck golangci-lint
+npm install -g markdownlint-cli jsonlint
+pip install ruff                # Python
+# hadolint / yamllint / hlint はプロジェクトや言語のツールチェーンに応じて導入
+```
+
+**テスト（neotest）**: macOS と同様、プロジェクトのテストランナー（pytest / jest / vitest / `go test` / `cabal test`）を使います。
+
+**デバッガのアダプタ（nvim-dap）**: `codelldb` / `debugpy` / `js-debug` / `delve` は **Mason が初回起動時に自動インストール**します（該当言語のツールチェーンがある場合のみ）。
+
+**REST クライアント（kulala）**:
+```powershell
+scoop install tree-sitter   # 無い場合は kulala が無効化される（エラーは出ない）
+```
+
 ### Windows 特有の注意点
 
 - **設定ファイルの場所**: macOS の `~/.config/nvim` は、Windows では `%LOCALAPPDATA%\nvim` です。プラグイン等のデータは `%LOCALAPPDATA%\nvim-data` に入ります。
@@ -493,7 +543,9 @@ gh auth login
 - [Git操作](#git操作-leaderg)
 - [Translate（翻訳）](#translate翻訳-leadert)
 - [Run（コード実行）](#run-leaderr)
+- [Rest（REST クライアント）](#rest-leaderr)
 - [Debug](#debug-leaderd)
+- [Test（テスト）](#test-leadert)
 - [Help/Health](#helphealth-leaderh)
 - [Lazy（プラグイン管理）](#lazy-leaderl)
 - [UI](#ui-leaderu)
@@ -662,6 +714,28 @@ Code = コード（LSP機能）
 | `grl` | コードレンズを実行（Haskell の型シグネチャ適用など） | **`gr`** + **l**ens |
 | `<leader>cf` | コードフォーマット（手動） | **C**ode: **F**ormat |
 | `<leader>ch` | インレイヒントの切り替え | **C**ode: **H**ints |
+| `<leader>cl` | 今すぐ Lint 実行 | **C**ode: **L**int |
+| `<leader>cr` | リファクタリングメニュー（Normal/Visual） | **C**ode: **R**efactor |
+| `<leader>ce` | 関数を抽出（Visual） | **C**ode: **E**xtract function |
+| `<leader>cv` | 変数を抽出（Visual） | **C**ode: extract **V**ariable |
+| `<leader>ci` | 変数をインライン化 | **C**ode: **I**nline variable |
+
+### リント（nvim-lint）
+
+保存時（`BufWritePost` / `InsertLeave`）に自動でリンタが走ります。conform（整形）とは別に、LSP 外のリンタを実行します。
+
+- **対応リンタ（インストールされている分だけ有効）**: ruff (Python), golangci-lint (Go), hlint (Haskell), shellcheck (sh/bash), markdownlint (Markdown), yamllint (YAML), hadolint (Dockerfile), jsonlint (JSON), selene/luacheck (Lua)
+- **手動実行**: `<leader>cl`
+- eslint は LSP 側でカバーしているため、ここでは JS/TS を扱いません。
+
+### リファクタリング（refactoring.nvim）
+
+言語横断のリファクタリング操作。Visual で範囲を選んでから使います。
+
+- **メニューから選ぶ**: `<leader>cr`（抽出系を一覧から選択）
+- **関数を抽出**: Visual で選択して `<leader>ce`
+- **変数を抽出**: Visual で選択して `<leader>cv`
+- **変数をインライン化**: `<leader>ci`
 
 ### Haskell / HLS
 
@@ -924,6 +998,19 @@ Run = コード実行
 ### 対応言語
 - Python, Java, C/C++, C#, Rust, Go, JavaScript, TypeScript, HTML, Bash, Lua, Ruby, PHP, Haskell
 
+## Rest (`<leader>R`)
+
+Rest = REST クライアント（kulala）。`.http` / `.rest` ファイルを開いて API を実行します。`tree-sitter` CLI が必要です（未インストール時は無効）。
+
+| キー | 機能 | 由来 |
+|------|------|------|
+| `<leader>Rs` | カーソル位置のリクエストを送信 | **R**est: **S**end |
+| `<leader>Ra` | ファイル内の全リクエストを送信 | **R**est: send **A**ll |
+| `<leader>Rp` | 前のリクエストへ移動 | **R**est: **P**revious |
+| `<leader>Rn` | 次のリクエストへ移動 | **R**est: **N**ext |
+| `<leader>Rc` | curl としてコピー | **R**est: **C**opy |
+| `<leader>Ri` | リクエスト内容を確認 | **R**est: **I**nspect |
+
 ## Debug (`<leader>d`)
 
 Debug = デバッグ
@@ -931,10 +1018,33 @@ Debug = デバッグ
 | キー | 機能 | 由来 |
 |------|------|------|
 | `<leader>db` | ブレークポイントをトグル | **D**ebug: **B**reakpoint |
+| `<leader>dB` | 条件付きブレークポイント | **D**ebug: conditional **B**reakpoint |
+| `<leader>dc` | デバッグ開始/続行 | **D**ebug: **C**ontinue |
+| `<leader>dr` | REPL をトグル | **D**ebug: **R**EPL |
+| `<leader>dl` | 前回の構成で実行 | **D**ebug: run **L**ast |
+| `<leader>du` | デバッグ UI をトグル | **D**ebug: **U**I |
+| `<leader>dt` | デバッグを終了 | **D**ebug: **T**erminate |
 | `<F5>` | デバッグ開始/続行 | VSCode準拠 |
 | `<F1>` | ステップイン | - |
 | `<F2>` | ステップオーバー | - |
 | `<F3>` | ステップアウト | - |
+
+デバッガのアダプタ（`codelldb` / `debugpy` / `js-debug` / `delve`）は Mason が初回起動時に自動インストールします（該当言語のツールチェーンがある場合のみ）。
+
+## Test (`<leader>T`)
+
+Test = テスト（neotest）。プロジェクトのテストランナー（pytest / jest / vitest / `go test` / `cabal test`）をエディタ内から実行します。
+
+| キー | 機能 | 由来 |
+|------|------|------|
+| `<leader>Tt` | 最寄りのテストを実行 | **T**est: nearest |
+| `<leader>TT` | ファイル全体を実行 | **T**est: file |
+| `<leader>Td` | 最寄りをデバッグ実行（nvim-dap 連携） | **T**est: **D**ebug |
+| `<leader>TS` | 実行を停止 | **T**est: **S**top |
+| `<leader>Ts` | サマリーをトグル | **T**est: **s**ummary |
+| `<leader>To` | テスト出力を表示 | **T**est: **o**utput |
+| `<leader>Tp` | 出力パネルをトグル | **T**est: output **p**anel |
+| `<leader>Tw` | ファイルを監視実行 | **T**est: **w**atch |
 
 ## Help/Health (`<leader>h`)
 
@@ -963,6 +1073,7 @@ UI = ユーザーインターフェース（外観）
 | `<leader>ut` | カラースキームを切り替え | **U**I: **T**heme |
 | `<leader>uo` | 背景透過のオン/オフを切り替え | **U**I: **O**pacity |
 | `<leader>um` | ミニマップをトグル | **U**I: **M**inimap |
+| `<leader>ur` | Markdown 描画のトグル | **U**I: **R**ender markdown |
 
 ## AI (`<leader>i`)
 
@@ -1075,8 +1186,12 @@ Window = ウィンドウ操作
 - `indent-blankline.nvim` - インデントガイド
 - `nvim-ufo` - コード折りたたみ
 - `conform.nvim` - フォーマッター
+- `nvim-lint` - LSP 外のリンタ（保存時に自動実行）
 - `nvim-autopairs` - 自動ペア補完
 - `Comment.nvim` - コメント機能
+- `mini.nvim` - surround / ai（テキストオブジェクト）/ move（行移動）/ splitjoin（一行⇄複数行）
+- `refactoring.nvim` - リファクタリング（関数抽出・変数抽出・インライン化）
+- `render-markdown.nvim` - Markdown のインライン整形描画
 
 ### LSP・補完
 - `nvim-lspconfig` - LSP設定
@@ -1087,9 +1202,16 @@ Window = ウィンドウ操作
 - `LuaSnip` - スニペットエンジン
 - `friendly-snippets` - VSCode風スニペット集（HTML、TSX、JS/TS等）
 
+### テスト
+- `neotest` - テストランナー（python / jest / vitest / go / haskell アダプタ）
+
 ### デバッグ
 - `nvim-dap` - デバッガー
 - `nvim-dap-ui` - デバッガーUI
+- `mason-nvim-dap.nvim` - DAP アダプタの自動インストール（codelldb / debugpy / js-debug / delve）
+
+### REST クライアント
+- `kulala.nvim` - `.http` / `.rest` ファイルで API を実行（`tree-sitter` CLI が必要）
 
 ### Git
 - `gitsigns.nvim` - Git差分表示（ハンクナビゲーション/ステージング）
