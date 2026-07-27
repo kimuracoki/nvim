@@ -1,27 +1,38 @@
 -- コンテキストメニュー（VSCode の右クリックメニュー相当）
--- vim.ui.select ベース。telescope-ui-select 経由で telescope のドロップダウンUIに出る。
+-- vim-quickui の context メニューで出す。j/k で移動・Enter で決定・右端の (&x) で 1 キー選択。
 -- 「操作対象（カーソル位置 / 選択範囲）に紐づく操作」だけをここに置く。
 -- 広域のコマンドパレットは which-key（<leader>/g）が担うので重複させない。
 -- 呼び出し先は既存機能（LSP / conform / gitsigns / telescope）をそのまま使う。
 local M = {}
 
--- vim.ui.select で items を出し、選ばれたら run を実行する共通ヘルパ。
--- items = { { icon = "", label = "...", run = function() ... end }, ... }
-local function open(items, prompt)
-  vim.ui.select(items, {
-    prompt = prompt,
-    format_item = function(it)
-      return (it.icon ~= "" and (it.icon .. "  ") or "") .. it.label
-    end,
-  }, function(choice)
-    if choice then
-      choice.run()
-    end
-  end)
+-- quickui の項目は Ex コマンド文字列しか持てないので、実処理は Lua 側に置き、
+-- インデックス経由で _run() から呼ぶ。open() のたびに _actions を作り直す。
+M._actions = {}
+
+function M._run(i)
+  local fn = M._actions[i]
+  if fn then
+    fn()
+  end
 end
 
--- Visual 選択を \V（very nomagic）のリテラル検索パターンに変換する。
--- 複数行は改行を \n に畳む。/ と \ はエスケープ。
+-- items = { { label = "...", run = function() end }, "sep", ... }
+local function open(items)
+  M._actions = {}
+  local content = {}
+  for _, it in ipairs(items) do
+    if it == "sep" then
+      table.insert(content, { "--", "" })
+    else
+      local idx = #M._actions + 1
+      M._actions[idx] = it.run
+      table.insert(content, { it.label, ("lua require('config.context_menu')._run(%d)"):format(idx) })
+    end
+  end
+  vim.fn["quickui#context#open"](content, vim.empty_dict())
+end
+
+-- Visual 選択を \V（very nomagic）のリテラル検索パターンに変換する（/ と \ をエスケープ、改行は \n）。
 local function to_pattern(text)
   local lines = vim.split(text, "\n", { plain = true })
   for i, l in ipairs(lines) do
@@ -31,39 +42,41 @@ local function to_pattern(text)
 end
 
 -- ── Normal: カーソル位置に対する操作 ────────────────────────────────
+-- ラベルは "表示名\tカテゴリ &キー" 形式。\t 以降が右寄せの2カラム、&x で 1 キー選択。
 function M.open_normal()
   open({
-    { icon = "", label = "定義へ移動", run = function() require("telescope.builtin").lsp_definitions() end },
-    { icon = "", label = "参照を検索", run = function() require("telescope.builtin").lsp_references() end },
-    { icon = "", label = "ホバー", run = function() vim.lsp.buf.hover() end },
-    { icon = "", label = "リネーム", run = function() vim.lsp.buf.rename() end },
-    { icon = "", label = "コードアクション", run = function() vim.lsp.buf.code_action() end },
-    { icon = "", label = "整形", run = function() require("conform").format({ lsp_fallback = true, timeout_ms = 500 }) end },
-    { icon = "", label = "行の Blame", run = function() require("gitsigns").blame_line({ full = true }) end },
-    { icon = "", label = "Hunk プレビュー", run = function() require("gitsigns").preview_hunk() end },
-    { icon = "", label = "診断を表示", run = function() vim.diagnostic.open_float() end },
-    { icon = "", label = "カーソル位置を検査", run = function() vim.show_pos() end },
-  }, "カーソル位置の操作")
+    { label = "定義を見る\tLSP &d", run = function() require("telescope.builtin").lsp_definitions() end },
+    { label = "参照を探す\tPicker &r", run = function() require("telescope.builtin").lsp_references() end },
+    { label = "実装を見る\tPicker &i", run = function() require("telescope.builtin").lsp_implementations() end },
+    { label = "ドキュメントを見る\tLSP &K", run = function() vim.lsp.buf.hover() end },
+    { label = "名前を変える\tLSP &n", run = function() vim.lsp.buf.rename() end },
+    { label = "Code Action\tLSP &a", run = function() vim.lsp.buf.code_action() end },
+    { label = "整形する\tLSP &f", run = function() require("conform").format({ lsp_fallback = true, timeout_ms = 500 }) end },
+    "sep",
+    { label = "診断を見る\t&e", run = function() vim.diagnostic.open_float() end },
+    { label = "現在行のblame\tGit &b", run = function() require("gitsigns").blame_line({ full = true }) end },
+    { label = "hunk preview\tGit &p", run = function() require("gitsigns").preview_hunk() end },
+    { label = "hunk stage\tGit &s", run = function() require("gitsigns").stage_hunk() end },
+    { label = "hunk reset\tGit &u", run = function() require("gitsigns").reset_hunk() end },
+  })
 end
 
 -- ── Visual: 選択範囲に対する操作 ────────────────────────────────────
--- vim.ui.select はピッカーを開く際に Visual を抜ける。抜けると '<,'> マークが
--- 確定するので、整形/コメントはマークを、検索/置換は起動時に取得したテキストを使う。
+-- quickui を開く前に Visual を抜ける。抜けると '<,'> マークが確定するので、
+-- 整形/コメントはマーク（gv で復元）を、検索/置換は起動時に取得したテキストを使う。
 function M.open_visual()
   local mode = vim.fn.mode()
-  -- Visual 継続中に選択テキストと範囲を確定させておく
   local p1 = vim.fn.getpos("v")
   local p2 = vim.fn.getpos(".")
   local text = table.concat(vim.fn.getregion(p1, p2, { type = mode }), "\n")
 
-  -- 抜けてマークを立ててからピッカーを出す
+  -- <Esc> で Visual を抜けて '<,'> を確定させてから開く（feedkeys は非同期なので schedule で待つ）
   vim.api.nvim_feedkeys(vim.api.nvim_replace_termcodes("<Esc>", true, false, true), "n", false)
 
   vim.schedule(function()
     open({
       {
-        icon = "",
-        label = "選択語を検索",
+        label = "選択語を検索\tSel &s",
         run = function()
           vim.fn.setreg("/", to_pattern(text))
           vim.o.hlsearch = true
@@ -71,8 +84,7 @@ function M.open_visual()
         end,
       },
       {
-        icon = "",
-        label = "選択語を置換",
+        label = "選択語を置換\tSel &r",
         run = function()
           -- 置換文字列の入力位置（// の間）にカーソルを置いた状態で cmdline を開く
           local keys = ":%s/" .. to_pattern(text) .. "//g<Left><Left>"
@@ -80,16 +92,14 @@ function M.open_visual()
         end,
       },
       {
-        icon = "",
-        label = "コメント切替",
+        label = "コメント切替\tSel &c",
         run = function()
           -- gv で選択を復元し、Comment.nvim の Visual マッピング gc を発火（remap 有効で feedkeys）
           vim.api.nvim_feedkeys(vim.api.nvim_replace_termcodes("gvgc", true, false, true), "m", false)
         end,
       },
       {
-        icon = "",
-        label = "選択を整形",
+        label = "選択を整形\tSel &f",
         run = function()
           local s = vim.api.nvim_buf_get_mark(0, "<") -- {行(1始点), 列(0始点)}
           local e = vim.api.nvim_buf_get_mark(0, ">")
@@ -100,7 +110,7 @@ function M.open_visual()
           })
         end,
       },
-    }, "選択範囲の操作")
+    })
   end)
 end
 

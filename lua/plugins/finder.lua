@@ -2,19 +2,8 @@ return {
   -- ファジーファインダ (Ctrl+P 的)
   {
     "nvim-telescope/telescope.nvim",
-    dependencies = {
-      "nvim-lua/plenary.nvim",
-      -- vim.ui.select を telescope のドロップダウンUIで出す（コンテキストメニュー・コードアクション選択等）
-      "nvim-telescope/telescope-ui-select.nvim",
-    },
+    dependencies = { "nvim-lua/plenary.nvim" },
     config = function()
-      require("telescope").setup({
-        extensions = {
-          ["ui-select"] = require("telescope.themes").get_dropdown({}),
-        },
-      })
-      require("telescope").load_extension("ui-select")
-
       local builtin = require("telescope.builtin")
       local map = vim.keymap.set
       
