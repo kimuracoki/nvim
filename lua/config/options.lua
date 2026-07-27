@@ -79,6 +79,12 @@ opt.foldlevel = 99  -- デフォルトで折りたたみを開く（99はほぼ�
 opt.foldlevelstart = 99  -- ファイルを開いたときに折りたたみを開く
 -- UFOが有効な場合は自動的にfoldmethodが設定されるため、ここでは設定しない
 
+-- セッション保存内容（auto-session が使う）。
+-- localoptions を含めないと、treesitter/LSP が設定するバッファローカル設定
+-- （filetype 等）がセッションに保存・復元されず、復元後にシンタックスハイライトが
+-- 効かなくなる（auto-session 公式が明記する既知の注意点）。デフォルトに localoptions を追加。
+opt.sessionoptions = { "blank", "buffers", "curdir", "folds", "help", "tabpages", "winsize", "winpos", "terminal", "localoptions" }
+
 -- HTML/XML の charset / encoding を先頭から検出し、あればそのエンコーディングで開き直す（全探索しない）
 local function charset_to_vim_enc(name)
   if not name or name == "" then return nil end

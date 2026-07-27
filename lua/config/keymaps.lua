@@ -21,18 +21,30 @@ map("n", "<S-l>", function()
   end
 end, { desc = "Buffer: Next" })
 map("n", "<leader>bc", function()
-  -- 他にバッファがあれば前のバッファに移動してから削除
-  local buf_count = 0
-  for _, buf in ipairs(vim.api.nvim_list_bufs()) do
-    if vim.api.nvim_buf_is_valid(buf) and vim.api.nvim_buf_get_option(buf, "buflisted") then
-      buf_count = buf_count + 1
-    end
+  -- 「今のバッファ」を確実に閉じる。以前は bdelete # で代替バッファを消していたため、
+  -- 最後の1つ（代替が無名/ツリー等）だと実ファイルが消えず「閉じられない」状態になっていた。
+  local cur = vim.api.nvim_get_current_buf()
+
+  -- 未保存なら閉じない（bdelete の保護と同じ挙動を明示）
+  if vim.bo[cur].modified then
+    vim.notify("未保存の変更があります（:w で保存してから閉じてください）", vim.log.levels.WARN)
+    return
   end
 
-  if buf_count > 1 then
-    vim.cmd("bprevious")
+  -- 他に listed バッファがあるか
+  local listed = vim.tbl_filter(function(b)
+    return vim.api.nvim_buf_is_valid(b) and vim.bo[b].buflisted
+  end, vim.api.nvim_list_bufs())
+
+  if #listed > 1 then
+    vim.cmd("bprevious") -- ウィンドウを別の listed バッファへ退避
+  else
+    vim.cmd("enew") -- 最後の1つ: 空バッファに置き換えてから削除
   end
-  vim.cmd("bdelete #")
+
+  if vim.api.nvim_buf_is_valid(cur) then
+    vim.cmd("bdelete " .. cur)
+  end
 end, { desc = "Buffer: Close" })
 
 -- 一覧バッファをすべて閉じる（bc と接頭辞が重ならない ba・未保存は bdelete 同様に保護）
