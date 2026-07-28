@@ -209,7 +209,9 @@ function M.toggle()
 end
 
 function M.setup()
-  M.enabled = true
+  -- デフォルトは OFF（起動時は塗らない）。<leader>ug で必要なときだけ有効化する。
+  -- autocmd は登録しておくが、コールバックは M.enabled を見て無効時は描画しない。
+  M.enabled = false
   setup_highlights()
 
   local grp = vim.api.nvim_create_augroup("IndentBgGuides", { clear = true })

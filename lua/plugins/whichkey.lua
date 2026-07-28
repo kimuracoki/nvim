@@ -168,6 +168,7 @@ return {
         { "<leader>tsr", desc = "Translate: Sentence replace (今いる文を英訳に置換)" },
         { "<leader>tp", desc = "Translate: Pantran (長文翻訳)" },
         -- UI
+        { "<leader>uc", desc = "UI: Context toggle (親スコープのピン留め)" },
         { "<leader>ud", desc = "UI: Diagnostic lines toggle (診断のインライン展開)" },
         { "<leader>ug", desc = "UI: Indent guides toggle (ネスト背景ガイドのトグル)" },
         { "<leader>um", desc = "UI: Minimap toggle (ミニマップのトグル)" },
