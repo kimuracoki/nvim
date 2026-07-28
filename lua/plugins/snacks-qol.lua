@@ -4,13 +4,18 @@ return {
   -- scroll: スムーズスクロール / dim: 集中していない範囲を暗く（zen と併用）
   -- scratch: 使い捨てバッファ（VSCode の Scratchpad 相当）。プロジェクト＋filetype ごとに
   --   ~/.local/share/nvim/ 配下へ自動永続化されるので、閉じても再度開けば内容が残る。
+  --   グローバルは wrap=false（ミニマップ対策）だが、スクラッチはメモ用途で長文を書くので
+  --   このウィンドウだけ wo で折り返しを有効化する（linebreak=単語境界で折り返し）。
   {
     "folke/snacks.nvim",
     opts = {
       words = { enabled = true },
       scroll = { enabled = true },
       dim = {},
-      scratch = { enabled = true },
+      scratch = {
+        enabled = true,
+        win = { wo = { wrap = true, linebreak = true } },
+      },
       -- gutter（行番号＋診断/mark sign＋git＋折りたたみ）を1列に統合描画する statuscolumn。
       -- 診断アイコンが行番号のすぐ左に出る VSCode 風 gutter。実際の適用は options.lua で
       -- vim.opt.statuscolumn を設定して行う（enabled だけでは自動適用されない仕様）。

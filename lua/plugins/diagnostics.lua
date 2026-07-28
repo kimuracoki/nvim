@@ -11,11 +11,13 @@ vim.diagnostic.config({
   -- snacks.statuscolumn が拾って行番号のすぐ左に統合表示する（VSCode 風 gutter）。
   -- 行番号自体の色染め（numhl）は VSCode もやらないので付けない。sign アイコンで示す。
   signs = {
+    -- アイコンは nerd font グリフを \u{} エスケープで指定する。リテラルのグリフはツール/
+    -- コピペを通ると空文字に潰れて sign が「配置されるが不可視」になるため（実害があった）。
     text = {
-      [vim.diagnostic.severity.ERROR] = "",
-      [vim.diagnostic.severity.WARN] = "",
-      [vim.diagnostic.severity.INFO] = "",
-      [vim.diagnostic.severity.HINT] = "",
+      [vim.diagnostic.severity.ERROR] = "\u{f057}", -- times-circle
+      [vim.diagnostic.severity.WARN]  = "\u{f071}", -- warning
+      [vim.diagnostic.severity.INFO]  = "\u{f05a}", -- info-circle
+      [vim.diagnostic.severity.HINT]  = "\u{f0eb}", -- lightbulb
     },
   },
   underline = true,
