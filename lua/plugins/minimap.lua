@@ -4,12 +4,43 @@ return {
   {
     "gorbit99/codewindow.nvim",
     config = function()
-      -- codewindow.lua は読み込み時（require 時）に highlight.lua を require し、
-      -- highlight.lua はその時点の config.use_treesitter を見て
-      -- nvim-treesitter.ts_utils を require する。nvim-treesitter main ブランチには
-      -- ts_utils が無いため、require("codewindow") より前に false にしておく必要がある
-      -- （setup() 内の指定では highlight.lua の読み込みに間に合わず落ちる）。
-      require("codewindow.config").setup({ use_treesitter = false })
+      -- ミニマップのシンタックス色は codewindow/highlight.lua の extract_highlighting
+      -- （＝treesitter 経由）でしか付かない。use_lsp は診断マーカー列を足すだけで色付けはしない。
+      -- 一方 highlight.lua は require 時に nvim-treesitter.ts_utils を require するが、
+      -- nvim-treesitter main ブランチには ts_utils が無いためそのままでは落ちる。
+      -- codewindow が使うのは ts_utils.get_vim_range 一つだけなので、旧実装相当の
+      -- シムを package.preload に登録して色付けを復活させる（他の内部 API は
+      -- Neovim コアの vim.treesitter.highlighter にそのまま残っている）。
+      if not package.loaded["nvim-treesitter.ts_utils"] then
+        package.preload["nvim-treesitter.ts_utils"] = function()
+          local M = {}
+          -- 旧 nvim-treesitter の get_vim_range 相当。treesitter の 0 始まり・
+          -- end 排他的レンジを、Vim の 1 始まりレンジへ変換する。
+          function M.get_vim_range(range, buf)
+            local srow, scol, erow, ecol = unpack(range)
+            srow = srow + 1
+            scol = scol + 1
+            erow = erow + 1
+            if ecol == 0 then
+              -- 末尾が行頭を指す場合は前の行の最終桁に丸める。
+              erow = erow - 1
+              if not buf or buf == 0 then
+                ecol = vim.fn.col({ erow, "$" }) - 1
+              else
+                ecol = #(vim.api.nvim_buf_get_lines(buf, erow - 1, erow, false)[1] or "")
+              end
+              ecol = math.max(ecol, 1)
+            end
+            return srow, scol, erow, ecol
+          end
+          return M
+        end
+      end
+
+      -- highlight.lua は require 時（＝require("codewindow") 内）に config.use_treesitter を
+      -- 見て ts_utils を require するので、codewindow より前に true にしておく必要がある
+      -- （setup() 内の指定では読み込みに間に合わない）。
+      require("codewindow.config").setup({ use_treesitter = true })
 
       local codewindow = require("codewindow")
       codewindow.setup({
@@ -20,10 +51,8 @@ return {
         max_lines = nil,
         minimap_width = 20,
         use_lsp = true,
-        -- nvim-treesitter main ブランチには ts_utils が無く、true にすると
-        -- codewindow/highlight.lua が require('nvim-treesitter.ts_utils') で落ちる。
-        -- ミニマップの色付けは LSP 側 (use_lsp) に任せる。
-        use_treesitter = false,
+        -- ts_utils シムを入れてあるので treesitter でのシンタックス色付けを有効化する。
+        use_treesitter = true,
         width_multiplier = 4,
         z_index = 1,
         window_border = "none",
