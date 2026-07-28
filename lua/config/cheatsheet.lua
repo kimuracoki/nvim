@@ -127,6 +127,8 @@ M.sections = {
   {
     title = "Edit / 基本",
     keys = {
+      { "SPC .", "スクラッチをトグル（使い捨てバッファ）" },
+      { "SPC S", "スクラッチ一覧（C-x で削除）" },
       { "s", "どこでもジャンプ（flash）" },
       { "S", "Treesitterノード選択（flash）" },
       { "C-s", "保存" },
