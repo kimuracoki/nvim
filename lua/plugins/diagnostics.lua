@@ -3,8 +3,10 @@
 -- 波線が出るよう、ここ（trouble は lazy=false）の import 時＝起動時に設定しておく。
 vim.diagnostic.config({
   virtual_text = false,
-  -- カーソル行の診断だけ、その場に展開表示する（0.11+）。<leader>ud でトグル可能。
-  virtual_lines = { current_line = true },
+  -- カーソル行の診断表示は tiny-inline-diagnostic（下の spec）に委譲する。ネイティブの
+  -- virtual_text / virtual_lines は両方 off にして二重表示を防ぐ。<leader>ud で tiny-inline を
+  -- トグルする（表示のオン/オフ）。長文メッセージも tiny-inline 側の multilines で全文出る。
+  virtual_lines = false,
   -- サイン列のアイコン（severity_sort で重要度順に表示される）
   signs = {
     text = {
@@ -12,6 +14,14 @@ vim.diagnostic.config({
       [vim.diagnostic.severity.WARN] = "",
       [vim.diagnostic.severity.INFO] = "",
       [vim.diagnostic.severity.HINT] = "",
+    },
+    -- VSCode 風に、診断のある行は「行番号そのもの」を重要度色で染める。
+    -- サインアイコン（左）＋行番号の色で、その行にエラー/警告があると一目で分かる。
+    numhl = {
+      [vim.diagnostic.severity.ERROR] = "DiagnosticSignError",
+      [vim.diagnostic.severity.WARN] = "DiagnosticSignWarn",
+      [vim.diagnostic.severity.INFO] = "DiagnosticSignInfo",
+      [vim.diagnostic.severity.HINT] = "DiagnosticSignHint",
     },
   },
   underline = true,
@@ -39,6 +49,31 @@ vim.api.nvim_create_autocmd("VimEnter", { once = true, callback = apply_undercur
 vim.api.nvim_create_autocmd("ColorScheme", { callback = apply_undercurl })
 
 return {
+  ---------------------------------------------------------------------------
+  -- tiny-inline-diagnostic（カーソル行の診断を、行の右側に整形ボックスでインライン表示）。
+  -- ネイティブの virtual_lines（診断を行の「下」に複数行展開）の代わりに、行をずらさず
+  -- 右側に矢印付きで出す表示に置き換える。長文は multilines で折り返して全文表示。
+  ---------------------------------------------------------------------------
+  {
+    "rachartier/tiny-inline-diagnostic.nvim",
+    event = "LspAttach",
+    priority = 1000, -- 診断の描画を握るので他の診断系より先に初期化する
+    config = function()
+      require("tiny-inline-diagnostic").setup({
+        preset = "modern",
+        options = {
+          show_source = false,                    -- ソース名（LSP 名）は出さず簡潔に
+          use_icons_from_diagnostic = true,
+          -- カーソル行の診断「だけ」出す。multilines を有効にするとカーソル行に診断が無い
+          -- ときに他行のエラーを表示してしまう（out-of-cursor 表示）ため、それを止める。
+          -- 長文は既定の overflow=wrap で折り返すので multilines なしでも全文見える。
+          show_diags_only_under_cursor = true,
+          show_all_diags_on_cursorline = true,    -- 同じ行に複数診断があればまとめて出す
+        },
+      })
+    end,
+  },
+
   ---------------------------------------------------------------------------
   -- Trouble.nvim（VSCodeのProblemsパネル風）
   ---------------------------------------------------------------------------

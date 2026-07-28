@@ -110,6 +110,13 @@ return {
             },
             opts = { skip = true },
           },
+          {
+            -- HLS が内部プラグイン（importLens / explicit-fields など）の失敗を
+            -- "hls: -32803: <plugin>: Rule Failed: ..." というエラー通知として編集のたびに
+            -- 吐くが、コードの正誤とは無関係の実害ないノイズ。文言でまとめて抑制する。
+            filter = { find = "Rule Failed" },
+            opts = { skip = true },
+          },
         },
       })
     end,

@@ -17,6 +17,7 @@ opt.fileencodings = "ucs-bom,utf-8,cp932,default,latin1"
 
 opt.number = true            -- 行番号
 opt.relativenumber = true    -- 相対行番号
+opt.signcolumn = "yes"       -- サイン列を常時確保（診断アイコン出現時の横ずれを防ぐ。VSCode 相当）
 opt.tabstop = 2
 opt.shiftwidth = 2
 opt.expandtab = true

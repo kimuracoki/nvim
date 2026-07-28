@@ -164,6 +164,12 @@ return {
                   snippetsOn = false,
                 },
               },
+              -- import を明示形に変換するコードレンズ。競プロ用途では使わない上、ImportActions
+              -- ルールが編集のたびに "hls: -32803: importLens: Rule Failed" 通知を吐くノイズ源
+              -- なので無効化する（右上に定期的に出ていた Error 通知の原因）。
+              importLens = {
+                globalOn = false,
+              },
             },
           },
         },
