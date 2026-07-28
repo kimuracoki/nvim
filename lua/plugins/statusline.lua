@@ -103,13 +103,13 @@ return {
             italic = false,
           },
           modified = {
-            fg = "#f7768e",
+            fg = "#ffffff",
           },
           modified_visible = {
-            fg = "#f7768e",
+            fg = "#ffffff",
           },
           modified_selected = {
-            fg = "#f7768e",
+            fg = "#ffffff",
           },
         },
       })
