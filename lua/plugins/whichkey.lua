@@ -50,6 +50,8 @@ return {
       -- グループ名を登録（<leader>プレフィックスの説明）。icon は各カテゴリの識別用
       wk.add({
         { "<leader>?", icon = "", desc = "Keymap search (キーマップを日本語で検索)" },
+        { "<leader>.", icon = "", desc = "Scratch: Toggle (スクラッチをトグル)" },
+        { "<leader>S", icon = "", desc = "Scratch: Select (スクラッチ一覧)" },
         { "<leader>a", icon = "", desc = "All (全選択)" },
         { "<leader>b", icon = "", group = "Buffer (バッファ)" },
         { "<leader>c", icon = "", group = "Code (コード)" },

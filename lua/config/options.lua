@@ -18,6 +18,10 @@ opt.fileencodings = "ucs-bom,utf-8,cp932,default,latin1"
 opt.number = true            -- 行番号
 opt.relativenumber = true    -- 相対行番号
 opt.signcolumn = "yes"       -- サイン列を常時確保（診断アイコン出現時の横ずれを防ぐ。VSCode 相当）
+-- gutter を snacks.statuscolumn で1列に統合描画（行番号＋診断/mark sign＋git＋fold）。
+-- モダンな作法。文字列は描画時に遅延評価されるので snacks ロード前に設定して問題ない。
+-- 有効化フラグは snacks 側（snacks-qol.lua の statuscolumn = { enabled = true }）にある。
+opt.statuscolumn = [[%!v:lua.require'snacks.statuscolumn'.get()]]
 opt.tabstop = 2
 opt.shiftwidth = 2
 opt.expandtab = true
