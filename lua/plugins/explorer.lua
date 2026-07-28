@@ -104,6 +104,17 @@ return {
           },
         },
       })
+      -- 未ステージ(unstaged)の git アイコンが既定で赤(#f38ba8)＝診断エラーの赤と紛らわしいので、
+      -- 「変更あり・未ステージ」を示す落ち着いた peach に上書きする。ColorScheme 変更後も維持
+      -- するため、テーマ再適用の後（schedule）に効かせる。
+      local function fix_git_hl()
+        vim.api.nvim_set_hl(0, "NeoTreeGitUnstaged", { fg = "#fab387" })
+      end
+      fix_git_hl()
+      vim.api.nvim_create_autocmd("ColorScheme", {
+        callback = function() vim.schedule(fix_git_hl) end,
+      })
+
       -- キーマップ
       vim.keymap.set("n", "<leader>e", "<cmd>Neotree toggle<cr>", { desc = "Explorer: Toggle" })
       vim.keymap.set("n", "<leader>ge", "<cmd>Neotree git_status toggle<cr>", { desc = "Git: Explorer (changed files)" })
