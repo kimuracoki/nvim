@@ -42,12 +42,22 @@ return {
           vim.cmd("startinsert!")
           -- lazygit内でESCが効くように、ターミナルモードのマッピングを無効化
           vim.api.nvim_buf_set_keymap(term.bufnr, "t", "<Esc>", "<Esc>", { noremap = true, silent = true })
-          -- プロセスが終了したら自動的にバッファを閉じる。
+          -- プロセスが終了したら自動的にウィンドウとバッファを閉じる。
+          --
+          -- 【重要】バッファ削除だけでは不十分。表示先に回せる通常バッファが 1 つも無いとき
+          -- （引数なし起動でダッシュボードだけ = listed バッファ 0 の状態）、Neovim はフロートを
+          -- 閉じずに新しい空バッファを割り当てるため、lazygit を q で閉じたあとに「空のフロート」が
+          -- 残ってしまう（検証済み）。先に term:close() でウィンドウを畳んでから削除する。
           -- toggleterm 側が先に片付けている場合があるので、必ず有効性を見てから消す（E5108 を防ぐ）
           vim.api.nvim_create_autocmd("TermClose", {
             buffer = term.bufnr,
             callback = function()
               vim.schedule(function()
+                if term:is_open() then
+                  pcall(function()
+                    term:close()
+                  end)
+                end
                 if vim.api.nvim_buf_is_valid(term.bufnr) then
                   pcall(vim.api.nvim_buf_delete, term.bufnr, { force = true })
                 end
