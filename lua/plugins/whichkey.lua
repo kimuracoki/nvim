@@ -125,7 +125,7 @@ return {
         { "<leader>gg", desc = "Git: Lazygit (Lazygit)" },
         -- Help
         { "<leader>hc", desc = "Help: Checkhealth (Checkhealth)" },
-        { "<leader>hm", desc = "Help: Messages (メッセージログ)" },
+        { "<leader>hm", desc = "Help: Messages (通知・メッセージ履歴／コピー可)" },
         -- AI (Claude Code / Cursor CLI)
         { "<leader>ic", desc = "AI: Cursor CLI root (プロジェクトルートで開く)" },
         { "<leader>if", desc = "AI: Focus toggle (フォーカス切り替え)" },
@@ -142,7 +142,9 @@ return {
         { "<leader>rf", desc = "Run: File (ファイルを実行)" },
         { "<leader>rp", desc = "Run: Project (プロジェクトを実行)" },
         { "<leader>rr", desc = "Run: Code (コードを実行)" },
-        { "<leader>rt", desc = "Run: just t (競プロ サンプルテスト)" },
+        { "<leader>rt", desc = "Run: just t (競プロ サンプル全件テスト)" },
+        { "<leader>rs", desc = "Run: just s (競プロ AtCoder へ提出)" },
+        { "<leader>rd", desc = "Run: just doc (競プロ doctest)" },
         -- Rest (REST クライアント)
         { "<leader>Rs", desc = "Rest: Send request (リクエストを送信)" },
         { "<leader>Ra", desc = "Rest: Send all (全リクエストを送信)" },
@@ -174,6 +176,7 @@ return {
         { "<leader>ud", desc = "UI: Inline diagnostic toggle (カーソル行診断の表示切替)" },
         { "<leader>ug", desc = "UI: Indent guides toggle (ネスト背景ガイドのトグル)" },
         { "<leader>um", desc = "UI: Minimap toggle (ミニマップのトグル)" },
+        { "<leader>un", desc = "UI: Dismiss notifications (通知をすべて消す)" },
         { "<leader>uo", desc = "UI: Transparency (透過のトグル)" },
         { "<leader>ur", desc = "UI: Markdown render toggle (Markdown 描画のトグル)" },
         { "<leader>ut", desc = "UI: Theme (カラースキーム切り替え)" },

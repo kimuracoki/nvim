@@ -70,6 +70,15 @@ return {
               winhighlight = { Normal = "NormalFloat", FloatBorder = "FloatBorder" },
             },
           },
+          -- 通知の実体。右上のトーストではなく画面右下隅に1行だけ出す。
+          -- 編集中のコードの上に大きく被らせないのが狙い（row = -2 は
+          -- cmdheight = 0 で最下行を占めている lualine の1つ上）
+          mini = {
+            timeout = 3000,
+            position = { row = -2, col = "100%" },
+            size = { width = "auto", height = "auto", max_width = 60 },
+            win_options = { winblend = 30 },
+          },
           popupmenu = {
             relative = "editor",
             position = {
@@ -91,11 +100,18 @@ return {
         },
         messages = {
           enabled = true,
-          view = "notify",
-          view_error = "notify",
-          view_warn = "notify",
+          -- 右上のトースト（notify）だと編集中のコードの上に大きく被るので、
+          -- 右下隅に1行出る mini に落とす。見逃しても view_history で後から読める
+          view = "mini",
+          view_error = "mini",
+          view_warn = "mini",
           view_history = "messages",
           view_search = "virtualtext",
+        },
+        -- vim.notify() 経由の通知（自作キーマップや各プラグインのもの）も同じ扱いにする
+        notify = {
+          enabled = true,
+          view = "mini",
         },
         popupmenu = {
           enabled = true,

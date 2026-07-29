@@ -300,6 +300,16 @@ map("n", "<leader>ud", function()
   require("tiny-inline-diagnostic").toggle()
 end, { desc = "UI: Toggle inline diagnostic" })
 
+-- 表示中の通知をすべて消す（タイムアウトを待たずに手動で払う）
+map("n", "<leader>un", function()
+  local ok = pcall(vim.cmd, "NoiceDismiss")
+  if not ok then
+    pcall(function()
+      require("notify").dismiss({ silent = true, pending = true })
+    end)
+  end
+end, { desc = "UI: Dismiss notifications" })
+
 -- 行の折り返し（ウィンドウローカル）。いずれかのウィンドウで ON のあいだはミニマップを閉じ sidescrolloff=8（<leader>um と同趣旨）。全ウィンドウで OFF に戻したときだけ復元する
 map("n", "<leader>uw", function()
   local enable_wrap = not vim.wo.wrap
@@ -386,9 +396,9 @@ map("n", "<leader>rp", function()
 end, { desc = "Run: Project" })
 map("n", "<leader>rc", ":RunClose<CR>", { desc = "Run: Close" })
 
--- 競プロ: サンプル全件テスト。ファイルの位置から上に justfile を探して `just t` を実行する。
+-- 競プロ: ファイルの位置から上に justfile を探して just のレシピを実行する。
 -- 対象の問題は justfile 側が「最後に編集した Main.hs」として決めるので、引数は要らない。
-map("n", "<leader>rt", function()
+local function run_just(recipe)
   local dir = vim.fn.expand("%:p:h")
   if dir == "" then
     vim.notify("ファイルが開かれていません", vim.log.levels.WARN)
@@ -403,10 +413,24 @@ map("n", "<leader>rt", function()
     vim.cmd("write")
   end
   vim.cmd(("TermExec cmd=%s dir=%s"):format(
-    vim.fn.shellescape("just t"),
+    vim.fn.shellescape("just " .. recipe),
     vim.fn.fnameescape(vim.fs.dirname(justfile))
   ))
-end, { desc = "Run: just t (サンプルテスト)" })
+end
+
+map("n", "<leader>rt", function()
+  run_just("t")
+end, { desc = "Run: just t (サンプル全件テスト)" })
+
+-- 提出。oj 自身が確認を出すので、ここでは聞かない（開いたターミナルでそのまま答える）。
+map("n", "<leader>rs", function()
+  run_just("s")
+end, { desc = "Run: just s (AtCoder へ提出)" })
+
+-- doctest。`-- |` の中に書いた >>> を走らせる。
+map("n", "<leader>rd", function()
+  run_just("doc")
+end, { desc = "Run: just doc (doctest)" })
 
 -- キーマップを日本語であいまい検索（<leader>? / <leader>fk と同じ）
 map("n", "<leader>?", function()
@@ -414,7 +438,14 @@ map("n", "<leader>?", function()
 end, { desc = "Help: Keymap search (キーマップを日本語で検索)" })
 
 -- Help/Health関連（診断・ログ）
-map("n", "<leader>hm", ":messages<CR>", { desc = "Help: Messages log" })
+-- 見逃した通知を後から読む。:messages だと vim.notify() 経由の通知が残らないので
+-- noice の履歴を使う。view_history = "messages" なので split の通常バッファで開き、そのまま yank できる
+map("n", "<leader>hm", function()
+  local ok = pcall(vim.cmd, "Noice history")
+  if not ok then
+    vim.cmd("messages")
+  end
+end, { desc = "Help: Messages log" })
 map("n", "<leader>hc", ":checkhealth<CR>", { desc = "Help: Checkhealth" })
 
 -- Lazy（プラグイン管理）
