@@ -17,7 +17,6 @@
 local ls = require("luasnip")
 local s = ls.snippet
 local t = ls.text_node
-local i = ls.insert_node
 local f = ls.function_node
 
 local OVERLOADED = "{-# LANGUAGE OverloadedStrings #-}"
@@ -180,25 +179,6 @@ return {
       'putYesNo b = putStrLn (if b then "Yes" else "No")',
     },
   }, "競プロ: Yes / No で答える"),
-
-  ---------------------------------------------------------------------------
-  -- 考える
-  ---------------------------------------------------------------------------
-  -- main は「読む -> 呼ぶ -> 書く」に留め、考える部分は引数を取る純粋関数にする。
-  -- そうすると doctest が `solve 3 2 [1,2,3]` と読める形で書ける。
-  -- doctest が拾うのは Haddock コメントの中だけなので `-- |` が要る（無いと Examples: 0）。
-  s({ trig = "solve", desc = "競プロ: ロジックを純粋関数に切り出す（doctest 付き）" }, {
-    t({ "-- |", "-- >>> solve " }),
-    i(1, "1 2"),
-    t({ "", "-- " }),
-    i(2, "3"),
-    t({ "", "solve :: " }),
-    i(3, "Int -> Int -> Int"),
-    t({ "", "solve " }),
-    i(4, "a b"),
-    t(" = "),
-    i(0, "undefined"),
-  }),
 
   ---------------------------------------------------------------------------
   -- 覗く

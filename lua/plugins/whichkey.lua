@@ -105,6 +105,7 @@ return {
         { "<leader>fg", desc = "Find: Grep (ワークスペース検索)" },
         { "<leader>fr", desc = "File: Recent (最近開いたファイル)" },
         { "<leader>fs", desc = "Find: Symbols (シンボル検索・ファイル内)" },
+        { "<leader>ft", desc = "Find: Todo comments (TODO コメント検索)" },
         -- Git
         { "<leader>gb", desc = "Git: Blame (行の Blame 表示)" },
         { "<leader>gD", desc = "Git: Diff close (Diff を閉じる)" },
@@ -124,6 +125,7 @@ return {
         { "<leader>gv", desc = "Git: View hunk (ハンクのプレビュー)" },
         { "<leader>gg", desc = "Git: Lazygit (Lazygit)" },
         -- Help
+        { "<leader>ha", desc = "Help: Keymap audit (ラベル未登録のキーマップ一覧)" },
         { "<leader>hc", desc = "Help: Checkhealth (Checkhealth)" },
         { "<leader>hm", desc = "Help: Messages (通知・メッセージ履歴／コピー可)" },
         -- AI (Claude Code / Cursor CLI)
@@ -162,6 +164,7 @@ return {
         { "<leader>Tp", desc = "Test: Output panel (出力パネルをトグル)" },
         { "<leader>Tw", desc = "Test: Watch (ファイルを監視実行)" },
         -- Search
+        { "<leader>sr", desc = "Search: Replace in project (プロジェクト全体を置換)", mode = { "n", "x" } },
         { "<leader>sw", desc = "Search: Workspace symbols (ワークスペースシンボル)" },
         -- Translate
         { "<leader>tj", desc = "Translate: → Japanese (日本語に翻訳)" },
@@ -180,6 +183,8 @@ return {
         { "<leader>uo", desc = "UI: Transparency (透過のトグル)" },
         { "<leader>ur", desc = "UI: Markdown render toggle (Markdown 描画のトグル)" },
         { "<leader>ut", desc = "UI: Theme (カラースキーム切り替え)" },
+        { "<leader>uw", desc = "UI: Wrap toggle (折り返しのトグル・ミニマップ連動)" },
+        { "<leader>uz", desc = "UI: Zen mode (集中表示のトグル)" },
         -- Window
         { "<leader>wh", desc = "Window: Decrease width (幅を狭く)" },
         { "<leader>wj", desc = "Window: Decrease height (高さを狭く)" },
@@ -222,6 +227,39 @@ return {
       wk.add({
         { "s", desc = "Flash: Jump (2文字でジャンプ)" },
         { "S", desc = "Flash: Treesitter (ノード選択)" },
+        { "r", desc = "Flash: Remote (遠隔テキストオブジェクト)", mode = "o" },
+        { "R", desc = "Flash: Treesitter search (ノード検索)", mode = { "o", "x" } },
+      })
+
+      -- m プレフィックス（vim-bookmarks）。which-key の marks プラグインは無効にしてあるのでここで説明する
+      wk.add({
+        { "m", group = "Bookmark (ブックマーク)" },
+        { "mm", desc = "Bookmark: Toggle (ブックマークをトグル)" },
+        { "mi", desc = "Bookmark: Annotate (注釈を付ける)" },
+        { "mn", desc = "Bookmark: Next (次のブックマークへ)" },
+        { "mp", desc = "Bookmark: Prev (前のブックマークへ)" },
+        { "ma", desc = "Bookmark: List all (一覧)" },
+        { "mc", desc = "Bookmark: Clear (この行を削除)" },
+        { "mx", desc = "Bookmark: Clear all (すべて削除)" },
+        { "mg", desc = "Bookmark: Go to line (指定行へ移動)" },
+        { "mjj", desc = "Bookmark: Move down (下へ移動)" },
+        { "mkk", desc = "Bookmark: Move up (上へ移動)" },
+      })
+
+      -- [ / ] プレフィックス（前後移動）。この設定で足したものだけ説明する
+      wk.add({
+        { "[", group = "Prev (前へ移動)" },
+        { "]", group = "Next (次へ移動)" },
+        { "[d", desc = "Diagnostic: Prev (前の診断へ)" },
+        { "]d", desc = "Diagnostic: Next (次の診断へ)" },
+        { "[t", desc = "Todo: Prev (前の TODO へ)" },
+        { "]t", desc = "Todo: Next (次の TODO へ)" },
+        { "[n", desc = "Node: Prev (前のノードへ)", mode = { "o", "x" } },
+        { "]n", desc = "Node: Next (次のノードへ)", mode = { "o", "x" } },
+        { "[N", desc = "Node: Prev sibling (前の兄弟ノードへ)", mode = { "o", "x" } },
+        { "]N", desc = "Node: Next sibling (次の兄弟ノードへ)", mode = { "o", "x" } },
+        { "[<Space>", desc = "Line: Add above (上に空行を追加)" },
+        { "]<Space>", desc = "Line: Add below (下に空行を追加)" },
       })
 
       -- Register localleader groups for octo.nvim

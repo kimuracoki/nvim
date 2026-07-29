@@ -74,8 +74,9 @@ map("n", "<leader>wj", "<C-w>-", { desc = "Resize: Decrease height" })
 map("i", "jk", "<Esc>", { noremap = true })
 
 -- 全選択（All）
+-- <C-a> は dial.nvim（数値インクリメント）が持っているので割り当てない。以前ここでも ggVG に
+-- していたが dial 側に上書きされて死にマップになっていた。全選択は <leader>a に一本化する。
 map("n", "<leader>a", "ggVG", { desc = "All: Select all" })
-map("n", "<C-a>", "ggVG", { desc = "All: Select all" })
 
 -- コピー・ペースト
 map("v", "<C-c>", '"+y', { desc = "Copy" })
@@ -447,6 +448,16 @@ map("n", "<leader>hm", function()
   end
 end, { desc = "Help: Messages log" })
 map("n", "<leader>hc", ":checkhealth<CR>", { desc = "Help: Checkhealth" })
+
+-- キーマップ棚卸し: 実マップのうち cheatsheet に日本語ラベルが無いものを一覧する。
+-- キーマップを足したあとここが 0 件になっていれば、キーマップ検索に漏れが無い。
+map("n", "<leader>ha", function()
+  require("config.cheatsheet").audit()
+end, { desc = "Help: Keymap audit (ラベル未登録のキーマップ一覧)" })
+
+vim.api.nvim_create_user_command("KeymapAudit", function()
+  require("config.cheatsheet").audit()
+end, { desc = "キーマップ検索に載っていないキーマップを一覧する" })
 
 -- Lazy（プラグイン管理）
 map("n", "<leader>ll", ":Lazy<CR>", { desc = "Lazy: Status" })

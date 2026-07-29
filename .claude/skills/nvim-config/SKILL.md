@@ -15,6 +15,8 @@ init.lua                 -- エントリ。require 順とグローバル autocmd
 lua/config/
   options.lua            -- vim.opt / leader / エンコーディング / filetype 検出
   keymaps.lua            -- グローバルキーマップ（プラグイン非依存のもの）
+  cheatsheet.lua         -- キーマップ検索（<leader>? / <leader>fk）。日本語ラベル + 実マップの自動収集・棚卸し
+  context_menu.lua       -- <leader>m のコンテキストメニュー定義
   lazy.lua               -- lazy.nvim ブートストラップ。lua/plugins/*.lua を一括 import
   highlight.lua          -- 透過（transparency）の一元管理。M.setup() / M.toggle_transparency()
   startup.lua            -- 起動レイアウト
@@ -73,12 +75,29 @@ lazy.nvim の標準 spec を使う。各エントリの直前に **日本語一�
 - ハイライト群を他プラグインが参照する場合は **`dependencies` でロード順を保証**する（例: indent-blankline は rainbow-delimiters の `RainbowDelimiter*` を使うので依存に入れる）。
 - バージョン固定が要るものは `version` / `commit` / `branch` を明示。
 
-## キーマップを足すときは which-key も更新（重要）
+## キーマップを足したら 3 点セットで登録する（最重要・漏らさない）
 
-このリポジトリの `<leader>` 系と `g` 系のキーは **`ui.lua` の which-key `wk.add(...)` に説明を登録している**。キーマップを追加・変更したら、必ず対応する which-key エントリも更新する。ズレるとスペース押下時のヘルプが実態と食い違う。
+キーマップは **必ず 3 箇所すべて**を同時に更新する。機能追加・プラグイン追加でキーが増えたときも例外なし。
+「機能を足したがキーマップ検索に出てこない」は過去に繰り返し起きた不具合なので、ここは手を抜かない。
 
-- `desc` は英語ラベル + 日本語補足の形式にそろえる（例: `"Buffer: Close (バッファを閉じる)"`）。
-- グループ接頭辞（`<leader>g` = Git など）は既存の `group` 定義に合わせる。
+1. **定義**: `lua/config/keymaps.lua` か、プラグイン spec の `keys = {...}`。`desc` は必須（英語ラベル + 日本語補足。例: `"Buffer: Close (バッファを閉じる)"`）。
+2. **which-key**: `lua/plugins/whichkey.lua` の `wk.add(...)`。押下時のヘルプ用。グループ接頭辞（`<leader>g` = Git など）は既存の `group` 定義に合わせる。
+3. **キーマップ検索**: `lua/config/cheatsheet.lua` の `M.sections` に日本語ラベルを 1 行。`<leader>?` / `<leader>fk` のピッカーの表示元。
+
+cheatsheet は保険として、**実際に登録されている全キーマップ（`nvim_get_keymap` + バッファローカル）を走査し、`M.sections` に載っていないものを「未分類（自動収集）」として自動で出す**。
+つまり 3 の書き忘れでも検索からは消えないが、日本語ラベルが付かず英語 desc のまま出る。ラベル未整備は下のコマンドで検出できる。
+
+- 複合表記（`"SPC gp*"` や `"C-h/j/k/l"`）でまとめる行には `cover = { "<leader>gpc", ... }` を書き、実キーを明示する（未分類への二重掲載を防ぐ）。
+
+### 変更後に必ず走らせる棚卸し（0 件になるまで直す）
+
+```bash
+nvim --headless -c 'lua vim.defer_fn(function() print(require("config.cheatsheet").audit_report()); vim.cmd("qa") end, 1500)'
+# → uncovered=0 なら漏れなし。nvim 内では :KeymapAudit / <leader>ha でも同じ結果を見られる
+```
+
+キー衝突（別プラグインに上書きされて死にマップになる）もこの棚卸しで気づけるので、
+`uncovered` に見覚えのない desc が出たら、意図した割り当てか確認する。
 
 ## LSP（NVIM 0.11+ の新 API）
 
@@ -89,7 +108,7 @@ lazy.nvim の標準 spec を使う。各エントリの直前に **日本語一�
 ## 透過・カラースキーム
 
 - 透過は `lua/config/highlight.lua` に一元化。`ColorScheme` autocmd（init.lua）で再適用される。新しく透過させたい UI 要素が出たら **highlight.lua の `M.setup()` にハイライト群を足す**。個別プラグインの config に散らさない。
-- カラースキーム切り替えは `keymaps.lua` の `<leader>ut`。新テーマを足したら `ui.lua`（spec）と `keymaps.lua` の `colorschemes` / `plugin_map` の両方に追加する。
+- カラースキーム切り替えは `keymaps.lua` の `<leader>ut`。新テーマを足したら `colorscheme.lua`（spec）と `keymaps.lua` の `colorschemes` / `plugin_map` の両方に追加する。
 
 ## クロスプラットフォーム
 
