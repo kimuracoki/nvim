@@ -256,6 +256,30 @@ return {
         end
       end
 
+      -- セッション復元だと「コードの色が全部消える」ことがある問題への対処。
+      --
+      -- 原因: 復元は VimEnter の autocmd 連鎖の中で session ファイルを :source して行われる。
+      -- その連鎖の中で既にどれかのバッファの FileType が発火していると did_filetype() が真になり、
+      -- Vim は以降の :edit で filetype 検出を丸ごと省略する（同じ連鎖で二重に検出しないための仕様）。
+      -- 結果、復元されたファイルは ft が空のまま = syntax も treesitter も起動せず色が付かない。
+      -- 実測: 復元直後の Main.hs は ft 空 / treesitter 無効、その場で filetype detect すると
+      -- ft=haskell・ハイライト復活。ダッシュボードやミニマップなど復元より前に
+      -- FileType を出すバッファがあると再現する。
+      local function redetect_filetypes()
+        for _, buf in ipairs(vim.api.nvim_list_bufs()) do
+          if
+            vim.api.nvim_buf_is_loaded(buf)
+            and vim.bo[buf].filetype == ""
+            and vim.bo[buf].buftype == ""
+            and vim.api.nvim_buf_get_name(buf) ~= ""
+          then
+            vim.api.nvim_buf_call(buf, function()
+              pcall(vim.cmd, "filetype detect")
+            end)
+          end
+        end
+      end
+
       return {
         auto_restore_enabled = true,
         auto_save_enabled = true,
@@ -264,6 +288,7 @@ return {
         post_restore_cmds = {
           function()
             vim.schedule(close_ai_terminal_buffers)
+            vim.schedule(redetect_filetypes)
           end,
         },
         session_lens = {
