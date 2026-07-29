@@ -9,6 +9,10 @@ return {
   {
     "folke/snacks.nvim",
     opts = {
+      -- 巨大ファイル（既定 1.5MB 超）を開いたときに Treesitter / LSP / 各種装飾を切って固まらせない。
+      -- ミニファイされた js やログを開くと、本体のパースだけで数秒〜数十秒フリーズしていた。
+      -- 発動したバッファは filetype=bigfile になる（editor.lua の treesitter 起動は pcall で抜ける）
+      bigfile = { enabled = true },
       words = { enabled = true },
       scroll = { enabled = true },
       dim = {},

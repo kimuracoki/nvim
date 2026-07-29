@@ -410,6 +410,15 @@ local function run_just(recipe)
     vim.notify("justfile が見つかりません", vim.log.levels.WARN)
     return
   end
+  -- 未インストール環境（素の Windows など）でターミナルだけ開いて即エラーになるのを防ぐ
+  if vim.fn.executable("just") ~= 1 then
+    vim.notify("just が見つかりません（インストールして PATH を通してください）", vim.log.levels.WARN)
+    return
+  end
+  if vim.fn.exists(":TermExec") ~= 2 then
+    vim.notify("toggleterm が読み込まれていません", vim.log.levels.WARN)
+    return
+  end
   if vim.bo.modified and vim.bo.modifiable and vim.bo.buftype == "" then
     vim.cmd("write")
   end

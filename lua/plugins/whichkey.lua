@@ -215,6 +215,18 @@ return {
         { "grt", desc = "Go to type definition (型定義へ移動)" },
         { "gO", desc = "Document symbol (ドキュメントシンボル)" },
         { "gx", desc = "Open link (リンクを開く・ホバー内)" },
+        -- mini.surround（s 単独は flash に譲っているので gs 接頭辞）
+        { "gs", group = "Surround (囲み操作)" },
+        { "gsa", desc = "Surround: Add (囲みを追加)" },
+        { "gsd", desc = "Surround: Delete (囲みを削除)" },
+        { "gsr", desc = "Surround: Replace (囲みを置換)" },
+        { "gsf", desc = "Surround: Find right (右の囲みへ)" },
+        { "gsF", desc = "Surround: Find left (左の囲みへ)" },
+        { "gsh", desc = "Surround: Highlight (囲みをハイライト)" },
+        -- Comment.nvim の追加マップ
+        { "gco", desc = "Comment: Insert below (下にコメント行)" },
+        { "gcO", desc = "Comment: Insert above (上にコメント行)" },
+        { "gcA", desc = "Comment: Insert end of line (行末にコメント)" },
         -- Treesitter 選択拡張は <C-space>（開始/拡張）・<BS>（縮小）。g 系から移動した。
         -- よく使うビルトインのみ
         { "gS", desc = "Split/Join: Toggle (一行⇄複数行トグル・mini.splitjoin)" },
@@ -254,6 +266,9 @@ return {
         { "]d", desc = "Diagnostic: Next (次の診断へ)" },
         { "[t", desc = "Todo: Prev (前の TODO へ)" },
         { "]t", desc = "Todo: Next (次の TODO へ)" },
+        { "[c", desc = "Git: Prev hunk (前の変更ハンクへ)" },
+        { "]c", desc = "Git: Next hunk (次の変更ハンクへ)" },
+        { "[C", desc = "Context: Parent scope (親スコープへジャンプ)" },
         { "[n", desc = "Node: Prev (前のノードへ)", mode = { "o", "x" } },
         { "]n", desc = "Node: Next (次のノードへ)", mode = { "o", "x" } },
         { "[N", desc = "Node: Prev sibling (前の兄弟ノードへ)", mode = { "o", "x" } },

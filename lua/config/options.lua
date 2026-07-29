@@ -29,6 +29,10 @@ opt.termguicolors = true
 opt.winborder = "rounded"  -- 全フロート（hover/signature 等）に丸枠。個別に border 指定したものは優先される
 opt.cursorline = true
 opt.swapfile = false
+-- swapfile を切っているぶん、undo は永続化しておく（FocusLost 自動保存で上書きした内容も
+-- 再起動後に u で戻せる。保存先は stdpath("state")/undo で自動生成される）
+opt.undofile = true
+opt.undolevels = 10000
 opt.scrolloff = 4
 opt.sidescrolloff = 25  -- ミニマップ分の余白を確保
 opt.cursorline = true
@@ -63,9 +67,16 @@ opt.ttimeoutlen = 0    -- エスケープシーケンス（キーコード）の
 opt.autoread = true  -- ファイルが外部で変更された場合に自動的に読み込む
 
 -- autoreadを確実に動作させるためのautocmd
+-- コマンドラインウィンドウ（q: / q/）では checktime が E11 になるので必ず除外する。
+-- mode() は cmdwin 内でも "n" を返すため、mode() だけのガードでは弾けない。
 vim.api.nvim_create_autocmd({ "FocusGained", "BufEnter", "CursorHold", "CursorHoldI" }, {
   pattern = "*",
-  command = "if mode() != 'c' | checktime | endif",
+  callback = function()
+    if vim.fn.mode() == "c" or vim.fn.getcmdwintype() ~= "" then
+      return
+    end
+    pcall(vim.cmd, "checktime")
+  end,
   desc = "Check if file was changed externally",
 })
 

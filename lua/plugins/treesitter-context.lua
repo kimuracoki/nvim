@@ -13,8 +13,11 @@ return {
         mode = "cursor",          -- カーソル位置基準でコンテキストを決める
         separator = nil,          -- 本文との境界線は引かない（背景差だけで十分）
       })
-      -- コンテキスト行をクリック相当でジャンプ（上部の親スコープ行へカーソルを飛ばす）
-      vim.keymap.set("n", "[c", function()
+      -- コンテキスト行をクリック相当でジャンプ（上部の親スコープ行へカーソルを飛ばす）。
+      -- [c は gitsigns がバッファローカルで「前のハンクへ」に使っており（差分移動の vim 慣習）、
+      -- バッファローカルが優先されるため git 管理下のファイルではこちらが完全に死んでいた。
+      -- 衝突しない [C に移す。
+      vim.keymap.set("n", "[C", function()
         require("treesitter-context").go_to_context(vim.v.count1)
       end, { desc = "Context: 親スコープへジャンプ" })
     end,

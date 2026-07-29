@@ -42,12 +42,15 @@ return {
           vim.cmd("startinsert!")
           -- lazygit内でESCが効くように、ターミナルモードのマッピングを無効化
           vim.api.nvim_buf_set_keymap(term.bufnr, "t", "<Esc>", "<Esc>", { noremap = true, silent = true })
-          -- プロセスが終了したら自動的にバッファを閉じる
+          -- プロセスが終了したら自動的にバッファを閉じる。
+          -- toggleterm 側が先に片付けている場合があるので、必ず有効性を見てから消す（E5108 を防ぐ）
           vim.api.nvim_create_autocmd("TermClose", {
             buffer = term.bufnr,
             callback = function()
               vim.schedule(function()
-                vim.api.nvim_buf_delete(term.bufnr, { force = true })
+                if vim.api.nvim_buf_is_valid(term.bufnr) then
+                  pcall(vim.api.nvim_buf_delete, term.bufnr, { force = true })
+                end
               end)
             end,
             once = true,
@@ -55,13 +58,18 @@ return {
         end,
       })
 
-      -- Lazygitをトグルする関数（グローバルに定義）
-      _lazygit_toggle = function()
+      -- Lazygitをトグルする（以前はグローバル変数 _lazygit_toggle に入れていたが、
+      -- グローバル空間を汚すだけで参照箇所が無かったのでローカルにした）
+      local function lazygit_toggle()
+        if vim.fn.executable("lazygit") ~= 1 then
+          vim.notify("lazygit が見つかりません（インストールして PATH を通してください）", vim.log.levels.WARN)
+          return
+        end
         lazygit:toggle()
       end
 
       -- キーマップ設定
-      vim.keymap.set("n", "<leader>gg", _lazygit_toggle, { desc = "Git: Lazygit" })
+      vim.keymap.set("n", "<leader>gg", lazygit_toggle, { desc = "Git: Lazygit" })
     end,
   },
 }

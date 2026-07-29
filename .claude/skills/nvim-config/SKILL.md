@@ -92,7 +92,10 @@ cheatsheet は保険として、**実際に登録されている全キーマッ�
 ### 変更後に必ず走らせる棚卸し（0 件になるまで直す）
 
 ```bash
-nvim --headless -c 'lua vim.defer_fn(function() print(require("config.cheatsheet").audit_report()); vim.cmd("qa") end, 1500)'
+# 必ず「実ファイルを開いた状態」で走らせる。空バッファだと遅延ロードのプラグインや
+# バッファローカルのマップ（mini.surround / gitsigns / LSP など）が登録されておらず、漏れを見逃す
+nvim --headless lua/config/keymaps.lua \
+  -c 'lua vim.defer_fn(function() print(require("config.cheatsheet").audit_report()); vim.cmd("qa!") end, 2500)'
 # → uncovered=0 なら漏れなし。nvim 内では :KeymapAudit / <leader>ha でも同じ結果を見られる
 ```
 
