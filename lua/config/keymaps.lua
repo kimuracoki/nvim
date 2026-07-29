@@ -303,12 +303,7 @@ end, { desc = "UI: Toggle inline diagnostic" })
 
 -- 表示中の通知をすべて消す（タイムアウトを待たずに手動で払う）
 map("n", "<leader>un", function()
-  local ok = pcall(vim.cmd, "NoiceDismiss")
-  if not ok then
-    pcall(function()
-      require("notify").dismiss({ silent = true, pending = true })
-    end)
-  end
+  pcall(vim.cmd, "NoiceDismiss")
 end, { desc = "UI: Dismiss notifications" })
 
 -- 行の折り返し（ウィンドウローカル）。いずれかのウィンドウで ON のあいだはミニマップを閉じ sidescrolloff=8（<leader>um と同趣旨）。全ウィンドウで OFF に戻したときだけ復元する

@@ -1,23 +1,16 @@
 return {
-  -- 通知システム（noice.nvimの依存として必要）
-  -- NotifyBackground に gui 背景がないテーマでは透過計算用の色を明示する
-  {
-    "rcarriga/nvim-notify",
-    lazy = true,
-    config = function()
-      require("notify").setup({
-        background_colour = "#000000",
-      })
-    end,
-  },
-
   -- コマンドラインをフローティングウィンドウで表示（中央に表示）
+  -- 【通知の出口は noice だけ】nvim-notify は意図的に入れていない。
+  -- noice は自分自身の警告・エラー（noice.util.notify）だけ routes を通さず、
+  -- "notify" モジュールがあれば require("notify") を直接叩く実装のため、
+  -- 依存に入れると noice 側の view 設定では消せない右上トーストが混ざる。
+  -- 入れなければ vim.notify にフォールバックし、他のメッセージと同じく
+  -- routes を通って右下の mini に出る（＝通知の見た目と位置が一箇所に揃う）。
   {
     "folke/noice.nvim",
     event = "VeryLazy",
     dependencies = {
       "MunifTanjim/nui.nvim",
-      "rcarriga/nvim-notify",
     },
     config = function()
       require("noice").setup({
@@ -25,6 +18,9 @@ return {
           -- 複数 LSP が付いていると、片方だけ空の hover を返すたびに
           -- 「No information available」が出る（もう一方は正常に表示される）
           hover = { silent = true },
+          -- LSP サーバからの window/showMessage は既定が notify ビュー（右上トースト）なので
+          -- 他のメッセージと同じ右下の mini に寄せる
+          message = { enabled = true, view = "mini" },
           override = {
             ["vim.lsp.util.convert_input_to_markdown_lines"] = true,
             ["vim.lsp.util.stylize_markdown"] = true,
