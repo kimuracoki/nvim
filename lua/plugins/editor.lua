@@ -47,6 +47,21 @@ return {
         "sql",
       })
 
+      -- Treesitter ベースのインデント（main では experimental 扱い）。
+      -- パーサがあっても indents.scm クエリが無い言語 (haskell / dockerfile / commonlisp 等) が
+      -- あり、そこで indentexpr を設定すると計算結果が常に 0 になり、改行するたびに
+      -- インデントが左端へ落ちる。クエリがある言語だけ有効にし、無い言語は Neovim 組み込みの
+      -- indent / autoindent（前行のインデントを引き継ぐ）に任せる。
+      local function enable_ts_indent(buf)
+        local ft = vim.bo[buf].filetype
+        local lang = vim.treesitter.language.get_lang(ft) or ft
+        local ok, query = pcall(vim.treesitter.query.get, lang, "indents")
+        if not ok or not query then
+          return
+        end
+        vim.bo[buf].indentexpr = "v:lua.require'nvim-treesitter'.indentexpr()"
+      end
+
       -- main はハイライト等を自動で有効化しない。パーサがある filetype で
       -- Neovim 本体のハイライトと Treesitter インデントを起動する。
       vim.api.nvim_create_autocmd("FileType", {
@@ -56,15 +71,14 @@ return {
           if not pcall(vim.treesitter.start, args.buf) then
             return
           end
-          -- Treesitter ベースのインデント（main では experimental 扱い）
-          vim.bo[args.buf].indentexpr = "v:lua.require'nvim-treesitter'.indentexpr()"
+          enable_ts_indent(args.buf)
         end,
       })
       -- config は BufReadPre で走るため、既に開いているバッファには FileType が
       -- 発火済みのことがある。取りこぼし分を手動で起動する。
       for _, buf in ipairs(vim.api.nvim_list_bufs()) do
         if vim.api.nvim_buf_is_loaded(buf) and pcall(vim.treesitter.start, buf) then
-          vim.bo[buf].indentexpr = "v:lua.require'nvim-treesitter'.indentexpr()"
+          enable_ts_indent(buf)
         end
       end
 
