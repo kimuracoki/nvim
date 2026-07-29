@@ -33,7 +33,14 @@ return {
       "ribru17/blink-cmp-spell",
     },
     opts = {
-      snippets = { preset = "luasnip" }, -- LuaSnip に登録済みのスニペットを候補に出す
+      snippets = {
+        preset = "luasnip", -- LuaSnip に登録済みのスニペットを候補に出す
+        -- blink の既定は -3。これは「Snippet 種別の候補すべて」に効くペナルティで、
+        -- さらに snippets プロバイダ自体の既定 -1 と合算されて実質 -4 になる。
+        -- HLS のように似た候補を大量に返す LSP があると、スニペットが
+        -- 候補リストの最下層（40番目以降）に沈んで事実上見えなくなるため 0 にする。
+        score_offset = 0,
+      },
       -- 種別アイコン用（VSCode 風の kind アイコン。Nerd Font 前提）
       appearance = { nerd_font_variant = "mono" },
       keymap = {
@@ -43,6 +50,12 @@ return {
         -- Tab: 補完表示中は次候補 / スニペット展開中はジャンプ / それ以外は既定動作
         ["<Tab>"] = { "select_next", "snippet_forward", "fallback" },
         ["<S-Tab>"] = { "select_prev", "snippet_backward", "fallback" },
+        -- 矢印上下でも候補を選べるようにする（VSCode 相当）。preset="none" なので
+        -- ここで明示しないと矢印はカーソル移動に素通りして補完が閉じてしまう。
+        ["<Down>"] = { "select_next", "fallback" },
+        ["<Up>"] = { "select_prev", "fallback" },
+        ["<C-n>"] = { "select_next", "fallback" },
+        ["<C-p>"] = { "select_prev", "fallback" },
         ["<C-e>"] = { "hide", "fallback" },
       },
       completion = {
@@ -53,6 +66,7 @@ return {
         ghost_text = { enabled = true },
         menu = {
           border = "rounded", -- 他フロートと枠を揃える
+          max_height = 15,    -- blink 既定は 10。旧 nvim-cmp はもっと長く出ていたので広げる
           draw = {
             -- 種別アイコン + ラベル + ソース名（旧 lspkind の menu 表示相当）
             columns = {
@@ -78,6 +92,15 @@ return {
         },
         providers = {
           spell = { name = "Spell", module = "blink-cmp-spell" },
+          -- スニペットを LSP（score_offset=0）より少しだけ上に置く。
+          -- 既定の -1 のままだと LSP の候補に埋もれて表示範囲外になる。
+          snippets = { score_offset = 1 },
+          -- blink の既定は lsp.fallbacks = { "buffer" }、つまり LSP が1件でも
+          -- 候補を返すとバッファ補完が丸ごと抑制される。旧 nvim-cmp は
+          -- cmp.config.sources({lsp, luasnip, buffer, path}) で4ソースを常に
+          -- 併用していたため、コメント中の単語など LSP が知らない語も出ていた。
+          -- その挙動に戻すためフォールバック指定を空にする。
+          lsp = { fallbacks = {} },
         },
       },
       -- ファジーマッチャは Rust 実装を使う（プリビルドバイナリ。無ければ警告して Lua 実装へ）
