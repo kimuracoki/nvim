@@ -20,5 +20,28 @@ return {
     opts = {
       global_keymaps = false, -- キーは上の keys で明示登録する
     },
+    config = function(_, opts)
+      -- kulala は grammar を別リポジトリから取ってくる（git init → remote add → fetch）。
+      -- 途中でこけると .git だけ残って origin 未設定のディレクトリができ、以降は
+      -- 「.git があるので fetch する」経路に入り続けて
+      -- "Failed to fetch tree-sitter grammar: fatal: 'origin' does not appear to be a git repository"
+      -- を毎回出す（実際にこの状態になっていた）。読み込み時に検出して直す。
+      local dir = vim.fs.joinpath(vim.fn.stdpath("data"), "kulala.nvim", "tree-sitter-kulala-http")
+      if vim.fn.isdirectory(dir .. "/.git") == 1 then
+        local f = io.open(dir .. "/.git/config", "r")
+        local conf = f and f:read("*a") or ""
+        if f then
+          f:close()
+        end
+        if not conf:find('[remote "origin"]', 1, true) then
+          vim.fn.system({
+            "git", "-C", dir, "remote", "add", "origin",
+            "https://github.com/mistweaverco/tree-sitter-kulala-http",
+          })
+          vim.notify("kulala: grammar 取得先(origin)が未設定だったので復旧しました", vim.log.levels.INFO)
+        end
+      end
+      require("kulala").setup(opts)
+    end,
   },
 }

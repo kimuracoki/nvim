@@ -448,14 +448,21 @@ map("n", "<leader>?", function()
 end, { desc = "Help: Keymap search (キーマップを日本語で検索)" })
 
 -- Help/Health関連（診断・ログ）
--- 見逃した通知を後から読む。:messages だと vim.notify() 経由の通知が残らないので
--- noice の履歴を使う。view_history = "messages" なので split の通常バッファで開き、そのまま yank できる
+-- 見逃した通知を後から読む。以前は "Noice history" に投げていたが、noice を経由しない通知や
+-- noice のロード前・フロート表示のまま消えるものが履歴に入らず取りこぼしていた
+-- （kulala の grammar 取得エラーがこれで追えなかった）。自前で vim.notify を包んだログ
+-- （config/msglog.lua）と :messages をまとめて、通常バッファで yank できる形で開く。
 map("n", "<leader>hm", function()
+  require("config.msglog").open()
+end, { desc = "Help: Messages log (通知ログ・コピー可)" })
+
+-- noice 自身の履歴も見たいとき用（メッセージの分類やフィルタの確認に使う）
+map("n", "<leader>hn", function()
   local ok = pcall(vim.cmd, "Noice history")
   if not ok then
     vim.cmd("messages")
   end
-end, { desc = "Help: Messages log" })
+end, { desc = "Help: Noice history (noice の履歴)" })
 map("n", "<leader>hc", ":checkhealth<CR>", { desc = "Help: Checkhealth" })
 
 -- キーマップ棚卸し: 実マップのうち cheatsheet に日本語ラベルが無いものを一覧する。

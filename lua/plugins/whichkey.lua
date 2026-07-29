@@ -127,7 +127,8 @@ return {
         -- Help
         { "<leader>ha", desc = "Help: Keymap audit (ラベル未登録のキーマップ一覧)" },
         { "<leader>hc", desc = "Help: Checkhealth (Checkhealth)" },
-        { "<leader>hm", desc = "Help: Messages (通知・メッセージ履歴／コピー可)" },
+        { "<leader>hm", desc = "Help: Messages (通知ログ／コピー可)" },
+        { "<leader>hn", desc = "Help: Noice history (noice の履歴)" },
         -- AI (Claude Code / Cursor CLI)
         { "<leader>ic", desc = "AI: Cursor CLI root (プロジェクトルートで開く)" },
         { "<leader>if", desc = "AI: Focus toggle (フォーカス切り替え)" },

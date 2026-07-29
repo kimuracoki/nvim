@@ -1,6 +1,9 @@
 -- オプション（mapleader など含む）
 require("config.options")
 
+-- 通知ログ（vim.notify を包んで履歴に残す）。プラグインが vim.notify を差し替える前に仕込む
+require("config.msglog").setup()
+
 -- キーマップ
 require("config.keymaps")
 

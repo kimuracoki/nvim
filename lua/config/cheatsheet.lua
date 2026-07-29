@@ -253,7 +253,8 @@ M.sections = {
     title = "Misc",
     keys = {
       { "SPC hc", "Checkhealth" },
-      { "SPC hm", "メッセージログ" },
+      { "SPC hm", "通知ログ（見逃した通知を読む・コピーできる）" },
+      { "SPC hn", "noice の履歴" },
       { "SPC ha", "キーマップ棚卸し（日本語ラベル未登録の一覧）" },
       { "SPC ll", "Lazy（プラグイン状態）" },
       { "SPC ls", "Lazy 同期" },
@@ -371,9 +372,15 @@ function M.uncovered()
     end
   end
 
+  -- バッファローカルは「実ファイルのバッファ」だけ見る。telescope や通知ログのような
+  -- プラグイン UI バッファには q / <Esc> といったその場限りのキーが張られていて、
+  -- 一覧に入れても意味が無いうえ棚卸しのノイズになる。
+  local is_file_buf = vim.bo.buftype == ""
   for _, mode in ipairs({ "n", "x", "v", "o", "i", "t" }) do
     collect(vim.api.nvim_get_keymap(mode), "global")
-    collect(vim.api.nvim_buf_get_keymap(0, mode), "buffer")
+    if is_file_buf then
+      collect(vim.api.nvim_buf_get_keymap(0, mode), "buffer")
+    end
   end
   table.sort(out, function(a, b)
     return a.key < b.key
