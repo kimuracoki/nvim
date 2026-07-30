@@ -7,6 +7,9 @@ require("config.msglog").setup()
 -- キーマップ
 require("config.keymaps")
 
+-- gitflow 初期化（:GitFlowInit / <leader>gf、lazygit を開くときの初期化提案）
+require("config.gitflow").setup()
+
 -- プラグイン（lazy.nvim）
 require("config.lazy")
 

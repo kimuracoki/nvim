@@ -97,7 +97,8 @@ M.sections = {
   {
     title = "Git",
     keys = {
-      { "SPC gg", "Lazygit を開く" },
+      { "SPC gg", "Lazygit を開く（未初期化なら gitflow 初期化を提案）" },
+      { "SPC gf", "gitflow で初期化（main + develop）" },
       { "SPC gs", "ハンクをステージ" },
       { "SPC gr", "ハンクをリセット" },
       { "SPC gv", "ハンクをプレビュー" },

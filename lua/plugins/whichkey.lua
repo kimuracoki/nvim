@@ -111,6 +111,7 @@ return {
         { "<leader>gD", desc = "Git: Diff close (Diff を閉じる)" },
         { "<leader>gd", desc = "Git: Diff open (Diff を開く)" },
         { "<leader>ge", desc = "Git: Explorer (変更ファイル一覧)" },
+        { "<leader>gf", desc = "Git: Flow init (gitflow で初期化)" },
         { "<leader>gh", desc = "Git: History (ファイル履歴)" },
         { "<leader>gic", desc = "Git: Issue create (Issue を作成)" },
         { "<leader>gil", desc = "Git: Issue list (Issue 一覧)" },
