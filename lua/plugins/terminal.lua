@@ -70,12 +70,19 @@ return {
 
       -- Lazygitをトグルする（以前はグローバル変数 _lazygit_toggle に入れていたが、
       -- グローバル空間を汚すだけで参照箇所が無かったのでローカルにした）
+      --
+      -- 未初期化ディレクトリでは lazygit の素の「git init」ではなく gitflow 構成
+      -- （main + develop）で初期化するか先に聞く。初期化を lazygit より前に済ませておくのが重要で、
+      -- toggleterm は初回 open 時に dir = "git_dir" を実パスへ解決してキャッシュするため、
+      -- 先にリポジトリが無いと lazygit がワークツリー外で起動してしまう。
       local function lazygit_toggle()
         if vim.fn.executable("lazygit") ~= 1 then
           vim.notify("lazygit が見つかりません（インストールして PATH を通してください）", vim.log.levels.WARN)
           return
         end
-        lazygit:toggle()
+        require("config.gitflow").ensure(nil, function()
+          lazygit:toggle()
+        end)
       end
 
       -- キーマップ設定
