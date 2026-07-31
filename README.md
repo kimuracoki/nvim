@@ -796,6 +796,26 @@ VSCode風のスニペット機能が利用可能です。定型文を素早く�
 - `imp` → import statement
 - `exp` → export statement
 
+### Haskell（自作スニペット）
+
+`snippets/lua/haskell/` に置いた自作スニペット。**名前を補完するだけで、必要な定義・`import`・`LANGUAGE` プラグマが自動で生える**のが特徴です。
+
+- 定義はファイル末尾、`import` は既存の import 群の直後、プラグマは先頭コメントの直後（＝プラグマとして有効な位置）へ入る
+- 依存も一緒に付いてくる（`getInts` を出すと `ints` と `readInt` も生える）
+- 同じ定義・同じ import・同じ拡張は二重に生えない。同じモジュールの `import` は 1 行にまとまる
+
+| ファイル | 内容 | 例 |
+|----------|------|-----|
+| `atcoder.lua` | 競プロの入出力・デバッグ | `getInts` `getInt2` `getIntTable` `getGrid` `putInts` `putIntsLines` `putYesNo` `dbg` |
+| `pragma.lua` | `LANGUAGE` / `OPTIONS_GHC`（トリガは拡張名そのもの） | `LambdaCase` `OverloadedStrings` `RecordWildCards` `StrictData` `DerivingStrategies` `optWall` |
+| `imports.lua` | 定番 import（トリガは `imp` + モジュール名） | `impBS` `impText` `impMap` `impVector` `impMonad` `impBits` |
+| `general.lua` | アプリ開発向け（Text 変換・deriving 戦略） | `tshow` `bsToText` `derivingStock` `derivingNewtype` |
+
+`pragma.lua` / `imports.lua` はカーソル位置に何も残さず、正しい場所にだけ行を足します。
+共通の仕組みは `lua/config/haskell_snippets.lua`。新しい定義を足すときは `def` / `imports` / `pragmas` / `deps` を書くだけです。
+
+なお `data record` / `new` / `inst` / `mods` などの構文そのものは friendly-snippets が持っているので、自作側では重複させていません。
+
 ### カスタムスニペットの追加
 
 独自のスニペットを追加する場合は、`~/.config/nvim/snippets/`（Windows: `%LOCALAPPDATA%\nvim\snippets\`）ディレクトリを作成してVSCode形式のJSONファイルを配置できます。
