@@ -394,6 +394,11 @@ map("n", "<leader>rc", ":RunClose<CR>", { desc = "Run: Close" })
 
 -- 競プロ: ファイルの位置から上に justfile を探して just のレシピを実行する。
 -- 対象の問題は justfile 側が「最後に編集した Main.hs」として決めるので、引数は要らない。
+--
+-- 実行先は <leader>rr/rf/rp と同じ code_runner のフロート。以前は toggleterm の
+-- :TermExec を使っていたが、あれは <C-\> の汎用ターミナル（#1）の永続シェルへ
+-- コマンド文字列を流し込むだけなので、前回の出力が残るうえ汎用ターミナルも汚れていた。
+-- <leader>r 系はすべて「実行ごとに使い捨てのフロート」で統一する。
 local function run_just(recipe)
   local dir = vim.fn.expand("%:p:h")
   if dir == "" then
@@ -410,17 +415,22 @@ local function run_just(recipe)
     vim.notify("just が見つかりません（インストールして PATH を通してください）", vim.log.levels.WARN)
     return
   end
-  if vim.fn.exists(":TermExec") ~= 2 then
-    vim.notify("toggleterm が読み込まれていません", vim.log.levels.WARN)
+  local ok, code_runner = pcall(require, "code_runner")
+  if not ok then
+    vim.notify("code_runner が読み込まれていません", vim.log.levels.WARN)
     return
   end
   if vim.bo.modified and vim.bo.modifiable and vim.bo.buftype == "" then
     vim.cmd("write")
   end
-  vim.cmd(("TermExec cmd=%s dir=%s"):format(
-    vim.fn.shellescape("just " .. recipe),
-    vim.fn.fnameescape(vim.fs.dirname(justfile))
+  -- 末尾の $end は空文字に展開される抑止トークン。これが無いと code_runner は
+  -- 「$ 変数を含まないコマンド」とみなして現在ファイルのパスを引数として付け足すため、
+  -- `just t /path/to/Main.hs` になってレシピ引数エラーになる。
+  code_runner.run_from_fn(("cd %s && just %s $end"):format(
+    vim.fn.shellescape(vim.fs.dirname(justfile)),
+    recipe
   ))
+  focus_floating_window()
 end
 
 map("n", "<leader>rt", function()
