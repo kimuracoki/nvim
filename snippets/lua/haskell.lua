@@ -17,7 +17,7 @@
 local ls = require("luasnip")
 local s = ls.snippet
 local t = ls.text_node
-local f = ls.function_node
+local events = require("luasnip.util.events")
 
 local OVERLOADED = "{-# LANGUAGE OverloadedStrings #-}"
 local BS = "import qualified Data.ByteString.Char8 as BS"
@@ -84,31 +84,42 @@ local function ensure_header(buf, spec)
   end
 end
 
--- 展開時の副作用として、足りないものをバッファに書き足す。
+-- 足りないものをバッファに書き足す。
 -- 展開の最中にバッファを触ると LuaSnip の位置追跡が壊れるので vim.schedule で遅らせる。
 local function grow(name, spec)
-  return f(function()
-    vim.schedule(function()
-      local buf = vim.api.nvim_get_current_buf()
-      if not vim.api.nvim_buf_is_valid(buf) then
-        return
-      end
-      ensure_header(buf, spec)
-      local body = table.concat(vim.api.nvim_buf_get_lines(buf, 0, -1, false), "\n")
-      if body:find(name .. " ::", 1, true) then
-        return -- すでに定義済み
-      end
-      local add = { "" }
-      vim.list_extend(add, spec.def)
-      vim.api.nvim_buf_set_lines(buf, -1, -1, false, add)
-    end)
-    return ""
-  end, {})
+  vim.schedule(function()
+    local buf = vim.api.nvim_get_current_buf()
+    if not vim.api.nvim_buf_is_valid(buf) then
+      return
+    end
+    ensure_header(buf, spec)
+    local body = table.concat(vim.api.nvim_buf_get_lines(buf, 0, -1, false), "\n")
+    if body:find(name .. " ::", 1, true) then
+      return -- すでに定義済み
+    end
+    local add = { "" }
+    vim.list_extend(add, spec.def)
+    vim.api.nvim_buf_set_lines(buf, -1, -1, false, add)
+  end)
 end
 
 -- name を打つと name が入り、spec の中身が足される。
+--
+-- 副作用は必ず snippet の enter イベント（＝実際に展開された瞬間）で起こす。
+-- function_node に載せてはいけない: LuaSnip は docstring を作るときにノードを
+-- 静的評価するため、blink.cmp が補完候補のドキュメントを出しただけで
+-- （Enter で確定していないのに）定義と import がバッファに生えてしまう。
+-- enter は再ジャンプで複数回呼ばれうるが、grow は重複チェック済みで冪等。
 local function helper(name, spec, desc)
-  return s({ trig = name, desc = desc }, { t(name), grow(name, spec) })
+  return s({ trig = name, desc = desc }, { t(name) }, {
+    callbacks = {
+      [-1] = {
+        [events.enter] = function()
+          grow(name, spec)
+        end,
+      },
+    },
+  })
 end
 
 -- ByteString を触る定義。文字列リテラルはほぼ必ず ByteString で欲しくなるので
