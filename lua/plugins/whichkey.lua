@@ -198,6 +198,8 @@ return {
         { "<leader>xq", desc = "Diagnostics: Quickfix (クイックフィックスリスト)" },
         { "<leader>xw", desc = "Diagnostics: Workspace (ワークスペースの診断)" },
         { "<leader>xx", desc = "Diagnostics: Buffer (バッファの診断)" },
+        { "<leader>xy", desc = "Diagnostics: Yank message (診断メッセージをコピー)" },
+        { "<leader>xY", desc = "Diagnostics: Yank with location (位置つきで診断をコピー)" },
       })
 
       -- g プレフィックス（この設定で使うもの + よく使うビルトインのみ）

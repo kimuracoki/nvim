@@ -51,10 +51,18 @@ M.imports = {
 
 -- トップレベル定義は必ず 1 桁目から始まるので、行頭に固定して見る。
 -- 部分一致（"putInts ::" が "ints ::" を含む）で取りこぼさないため。
+--
+-- 型シグネチャ（readInt ::）だけでなく束縛（readInt = / readInt bs = ...）も見る。
+-- 生やす定義には必ずシグネチャが付くが、ユーザーが自分で書いた同名の定義には
+-- 付いていないことがあり、そこへ重ねて生やすと二重定義になる。
+--
+-- 束縛は "=" のある行に限る。行頭でスニペットを展開した直後はカーソル行が
+-- トリガ名（"getInts"）で始まっており、それを既存の定義と取り違えないため。
 local function defined(lines, name)
-  local pat = "^" .. vim.pesc(name) .. "%s*::"
+  local sig = "^" .. vim.pesc(name) .. "%s*::"
+  local bind = "^" .. vim.pesc(name) .. "%f[^%w'_].*="
   for _, l in ipairs(lines) do
-    if l:match(pat) then
+    if l:match(sig) or l:match(bind) then
       return true
     end
   end

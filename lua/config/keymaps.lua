@@ -205,6 +205,55 @@ map("n", "<leader>xd", function()
   vim.diagnostic.open_float()
 end, { desc = "Diagnostics: Show at cursor" })
 
+-- カーソル行の診断をクリップボードへコピー。
+-- open_float を 2 回押してフロートにフォーカスしてから yank、という手間を省くためのもの
+-- （エラーメッセージを AI や Issue にそのまま貼りたいケースが多いので専用キーにした）。
+-- verbose=true は「path:行:列: SEVERITY: メッセージ [source: code]」形式。貼り先で
+-- 場所が分かるようにするためで、複数行メッセージ（HLS 等）は 1 行に畳む。
+local function copy_line_diagnostics(verbose)
+  local lnum = vim.api.nvim_win_get_cursor(0)[1] - 1
+  local diags = vim.diagnostic.get(0, { lnum = lnum })
+
+  if vim.tbl_isempty(diags) then
+    vim.notify("この行に診断はありません", vim.log.levels.WARN)
+    return
+  end
+
+  local path = vim.fn.expand("%:.")
+  local lines = {}
+
+  for _, d in ipairs(diags) do
+    local msg = vim.trim(d.message)
+    if verbose then
+      msg = msg:gsub("%s*\n%s*", " ")
+      local severity = vim.diagnostic.severity[d.severity] or "UNKNOWN"
+      local origin = ""
+      if d.source then
+        origin = d.code and string.format(" [%s: %s]", d.source, tostring(d.code))
+          or string.format(" [%s]", d.source)
+      elseif d.code then
+        origin = string.format(" [%s]", tostring(d.code))
+      end
+      table.insert(lines, string.format("%s:%d:%d: %s: %s%s", path, d.lnum + 1, d.col + 1, severity, msg, origin))
+    else
+      table.insert(lines, msg)
+    end
+  end
+
+  local text = table.concat(lines, "\n")
+  vim.fn.setreg("+", text) -- clipboard=unnamedplus だが、明示しておくと OS 側へ確実に入る
+  vim.fn.setreg('"', text)
+  vim.notify(string.format("診断 %d 件をコピーしました", #lines), vim.log.levels.INFO)
+end
+
+map("n", "<leader>xy", function()
+  copy_line_diagnostics(false)
+end, { desc = "Diagnostics: Yank message (診断メッセージをコピー)" })
+
+map("n", "<leader>xY", function()
+  copy_line_diagnostics(true)
+end, { desc = "Diagnostics: Yank with location (位置つきで診断をコピー)" })
+
 -- カラースキーム切り替え（UI Theme）
 map("n", "<leader>ut", function()
   local colorschemes = {
