@@ -3,6 +3,8 @@ return {
   -- ミニマップ（VSCodeの右側コードマップ）
   {
     "gorbit99/codewindow.nvim",
+    -- auto_enable = true なのでファイルを開いた時点で要る。ただし起動パスに乗せる必要は無い。
+    event = { "BufReadPost", "BufNewFile" },
     config = function()
       -- ミニマップのシンタックス色は codewindow/highlight.lua の extract_highlighting
       -- （＝treesitter 経由）でしか付かない。use_lsp は診断マーカー列を足すだけで色付けはしない。

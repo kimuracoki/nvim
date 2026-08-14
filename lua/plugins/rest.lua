@@ -6,7 +6,7 @@ return {
     -- CLI が無い環境で読み込むと ENOENT で落ちるため、lsp.lua の has() と同方針でガードする。
     -- 有効化するには CLI を入れる: `brew install tree-sitter`（Mac）/ `npm i -g tree-sitter-cli`。
     cond = function()
-      return vim.fn.executable("tree-sitter") == 1
+      return require("config.platform").has("tree-sitter")
     end,
     ft = { "http", "rest" },
     keys = {

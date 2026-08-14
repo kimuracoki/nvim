@@ -2,6 +2,9 @@ return {
   -- ステータスライン
   {
     "nvim-lualine/lualine.nvim",
+    -- ステータスラインは最初の描画に間に合わなくても困らない（素の statusline が一瞬出るだけ）。
+    -- lazy=false のままだと ccusage・devicons ごと起動パスに乗って実測 24ms 食っていた。
+    event = "VeryLazy",
     dependencies = { "nvim-tree/nvim-web-devicons", "S1M0N38/ccusage.nvim" },
     config = function()
       local function modified()

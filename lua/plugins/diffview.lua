@@ -2,6 +2,9 @@ return {
   -- ブランチ差分・履歴閲覧（VSCodeの差分ビュー強化）
   {
     "sindrets/diffview.nvim",
+    -- 差分ビューは呼んだときだけ。gitgraph の hooks からは :DiffviewOpen 経由で呼ぶので cmd で拾える
+    cmd = { "DiffviewOpen", "DiffviewClose", "DiffviewFileHistory", "DiffviewToggleFiles", "DiffviewFocusFiles", "DiffviewRefresh", "DiffviewLog" },
+    keys = { "<leader>gd", "<leader>gD", "<leader>gh" },
     dependencies = { "nvim-lua/plenary.nvim" },
     config = function()
       require("diffview").setup({

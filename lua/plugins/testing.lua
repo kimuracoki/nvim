@@ -63,9 +63,7 @@ return {
         end
       end
 
-      local function has(bin)
-        return vim.fn.executable(bin) == 1
-      end
+      local has = require("config.platform").has
 
       local adapters = {}
       if has("python") or has("python3") then

@@ -4,6 +4,17 @@ return {
   -- 単語・フレーズのポップアップ翻訳
   {
     "voldikss/vim-translator",
+    -- 翻訳は呼んだときだけ。<Plug>TranslateW 系はロード後に定義されるので、
+    -- lazy が「キー押下 → プラグインロード → キー再送」の順で処理してくれる。
+    cmd = { "Translate", "TranslateW", "TranslateR", "TranslateH", "TranslateX" },
+    keys = {
+      { "<leader>tj", mode = { "n", "v" } },
+      { "<leader>te", mode = { "n", "v" } },
+      { "<leader>tr", mode = { "n", "v" } },
+      "<leader>tsj",
+      "<leader>tse",
+      "<leader>tsr",
+    },
     config = function()
       vim.g.translator_target_lang = "ja"
       vim.g.translator_source_lang = "auto"
@@ -89,6 +100,8 @@ return {
   -- 長文翻訳（コミットメッセージ・コメント向け）
   {
     "potamides/pantran.nvim",
+    cmd = "Pantran",
+    keys = { { "<leader>tp", mode = { "n", "x" } } },
     config = function()
       require("pantran").setup({
         default_engine = "google",

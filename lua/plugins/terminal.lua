@@ -3,6 +3,9 @@ return {
   {
     "akinsho/toggleterm.nvim",
     version = "*",
+    -- ターミナルを開くまで不要。open_mapping の <c-\> も keys に載せて初回押下でロードさせる
+    cmd = { "ToggleTerm", "ToggleTermToggleAll", "TermExec" },
+    keys = { [[<c-\>]], "<leader>gg" },
     config = function()
       require("toggleterm").setup({
         size = 20,
@@ -76,7 +79,7 @@ return {
       -- toggleterm は初回 open 時に dir = "git_dir" を実パスへ解決してキャッシュするため、
       -- 先にリポジトリが無いと lazygit がワークツリー外で起動してしまう。
       local function lazygit_toggle()
-        if vim.fn.executable("lazygit") ~= 1 then
+        if not require("config.platform").has("lazygit") then
           vim.notify("lazygit が見つかりません（インストールして PATH を通してください）", vim.log.levels.WARN)
           return
         end

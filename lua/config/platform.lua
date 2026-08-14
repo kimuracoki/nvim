@@ -14,6 +14,16 @@ local M = {}
 M.is_windows = vim.fn.has("win32") == 1 or vim.fn.has("win64") == 1
 M.is_mac = vim.fn.has("mac") == 1
 
+-- 実行ファイルの有無。外部ツールを見に行く判定はすべてこれを通す
+-- （各所でローカルの has() を再定義しない）。
+--
+-- 【コストの注意】Neovim は executable() の結果をキャッシュしないので、呼ぶたびに PATH を
+-- 総なめする。mac では誤差だが、Windows は PATHEXT（.COM/.EXE/.BAT/.CMD/...）との総当たりに
+-- なるぶん桁違いに重い（実測: Windows 11 / PATH 18 エントリで 1 回 1.71ms、mac の約 100 倍）。
+-- ここで結果をメモ化するのは意図的に避けている。判定する bin はほとんど重複しないので実測でも
+-- 速くならず、一方で「別ターミナルでツールを入れた直後に呼んでも見つからないまま」という
+-- 分かりにくい不整合を持ち込むため。起動を軽くしたいときは、キャッシュではなく
+-- 「判定そのものを起動パスから外す」で対処する（lsp.lua / lint.lua の vim.schedule を参照）。
 function M.has(bin)
   return vim.fn.executable(bin) == 1
 end

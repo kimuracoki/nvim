@@ -21,9 +21,7 @@ return {
       { "jay-babu/mason-nvim-dap.nvim", dependencies = { "williamboman/mason.nvim" } },
     },
     config = function()
-      local function has(bin)
-        return vim.fn.executable(bin) == 1
-      end
+      local has = require("config.platform").has
 
       local ensure = { "codelldb" }
       if has("python") or has("python3") then
