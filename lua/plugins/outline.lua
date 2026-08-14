@@ -2,6 +2,9 @@ return {
   -- シンボルアウトライン（VSCodeのアウトライン表示）
   {
     "stevearc/aerial.nvim",
+    -- アウトラインは開いたときだけで足りるので起動パスから外す（キーマップは config 内で定義）
+    cmd = { "AerialToggle", "AerialOpen", "AerialClose", "AerialNext", "AerialPrev", "AerialNavToggle" },
+    keys = { "<leader>o" },
     dependencies = { "nvim-tree/nvim-web-devicons" },
     config = function()
       require("aerial").setup({

@@ -332,6 +332,9 @@ return {
   -- コード折りたたみ
   {
     "kevinhwang91/nvim-ufo",
+    -- 折りたたみはバッファを読んでから。lazy=false のままだと依存の nvim-treesitter まで
+    -- 起動パスに引きずり込んでいた（実測 ufo 21.6ms + treesitter 11.0ms）。
+    event = { "BufReadPost", "BufNewFile" },
     dependencies = {
       "nvim-treesitter/nvim-treesitter",
       "MunifTanjim/nui.nvim",

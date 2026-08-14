@@ -460,7 +460,7 @@ local function run_just(recipe)
     return
   end
   -- 未インストール環境（素の Windows など）でターミナルだけ開いて即エラーになるのを防ぐ
-  if vim.fn.executable("just") ~= 1 then
+  if not require("config.platform").has("just") then
     vim.notify("just が見つかりません（インストールして PATH を通してください）", vim.log.levels.WARN)
     return
   end

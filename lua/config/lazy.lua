@@ -30,4 +30,24 @@ require("lazy").setup({
   checker = {
     enabled = false, -- 自動アップデートチェックはとりあえずOFF
   },
+  -- 設定ファイルの変更監視。lazy 配下 1.4 万ファイルを抱える Windows では
+  -- ファイル監視の張り直しが起動のたびに効いてくるうえ、変更したら nvim を
+  -- 開き直す運用なので恩恵が無い。
+  change_detection = { enabled = false },
+  performance = {
+    rtp = {
+      -- Neovim 同梱の使っていない標準プラグインを読まない。
+      -- netrw は neo-tree、zip/tar 閲覧・matchit は使っていないので丸ごと落とす。
+      disabled_plugins = {
+        "gzip",
+        "matchit",
+        "matchparen",
+        "netrwPlugin",
+        "tarPlugin",
+        "tohtml",
+        "tutor",
+        "zipPlugin",
+      },
+    },
+  },
 })

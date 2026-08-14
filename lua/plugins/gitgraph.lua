@@ -2,6 +2,9 @@ return {
   -- GitGraph相当（コミットグラフ）
   {
     "isakbm/gitgraph.nvim",
+    -- <leader>gl で開くまで不要。ハイライト設定を持つ _G.setup_gitgraph_highlights は
+    -- highlight.lua / keymaps.lua 側が存在チェック付きで呼ぶので、未ロードでも壊れない。
+    keys = { "<leader>gl" },
     dependencies = { "sindrets/diffview.nvim" },
     config = function()
       -- GitGraphハイライト設定関数（透過切り替え時にも再適用できるように）

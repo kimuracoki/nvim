@@ -3,7 +3,10 @@ return {
   -- ブックマーク/マーカー
   {
     "MattesGroeger/vim-bookmarks",
-    config = function()
+    -- ファイルを開いてから要るもの。設定は g: 変数だけなので、plugin/ が読まれる前に
+    -- 効かせる必要がある → config ではなく init（起動時に走るが変数代入だけで実質ゼロコスト）。
+    event = { "BufReadPost", "BufNewFile" },
+    init = function()
       vim.g.bookmark_sign = "󰆤"
       vim.g.bookmark_annotation_sign = "󰆥"
       vim.g.bookmark_auto_save = 1

@@ -14,8 +14,10 @@ return {
   ---------------------------------------------------------------------------
   -- スニペットエンジン（LuaSnip）と VSCode 風スニペット集。blink.cmp から利用する。
   ---------------------------------------------------------------------------
-  { "L3MON4D3/LuaSnip" },
-  { "rafamadriz/friendly-snippets" }, -- VSCode 風のスニペット集
+  -- lazy = true が要る。無いと lazy.nvim が「起動時ロード」扱いにして、blink.cmp より
+  -- 先に起動パスで読み込まれてしまう（下の dependencies 経由で blink と一緒に読まれれば十分）。
+  { "L3MON4D3/LuaSnip", lazy = true },
+  { "rafamadriz/friendly-snippets", lazy = true }, -- VSCode 風のスニペット集
 
   ---------------------------------------------------------------------------
   -- 補完エンジン（VSCode の IntelliSense 相当）。旧 nvim-cmp から移行。
