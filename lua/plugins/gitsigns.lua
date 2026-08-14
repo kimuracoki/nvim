@@ -2,6 +2,8 @@ return {
   -- 既に gitsigns を入れているなら、ここに移してもOK（移さないなら重複させないでください）
   {
     "lewis6991/gitsigns.nvim",
+    -- 実ファイルを開くまで出番がない（空バッファ起動では完全に無駄）。
+    event = { "BufReadPre", "BufNewFile" },
     config = function()
       require("gitsigns").setup({
         signs = {

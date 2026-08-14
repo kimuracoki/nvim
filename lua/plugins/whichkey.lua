@@ -2,8 +2,9 @@ return {
   -- リーダーキーの表示（スペースキーを打ったときに利用可能なキーマップを表示）
   {
     "folke/which-key.nvim",
-    lazy = false,
-    priority = 999,
+    -- ヘルプが出るのはリーダーキー押下から delay=150ms 後なので、起動直後に間に合っている
+    -- 必要はない。VeryLazy（UIEnter 直後）で十分で、そのぶん起動パスから外れる。
+    event = "VeryLazy",
     config = function()
       local wk = require("which-key")
       wk.setup({

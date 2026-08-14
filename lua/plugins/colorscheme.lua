@@ -8,7 +8,43 @@ return {
     lazy = false,
     priority = 1000,
     config = function()
-      require("catppuccin").setup({})
+      require("catppuccin").setup({
+        -- auto_integrations（既定 on）は lazy のプラグイン一覧を毎回舐めて URL を正規表現で
+        -- 分解する。実測で Windows 4.3ms / Mac 2.5ms かかり、しかも結果は毎回同じなので
+        -- 検出結果をそのまま固定リストにして検出自体を止める。
+        -- 【プラグインを増減したら更新する】次のコマンドで現在の検出結果を出せる:
+        --   :lua =vim.tbl_keys(require("catppuccin.lib.detect_integrations").create_integrations_table())
+        auto_integrations = false,
+        integrations = {
+          aerial = true,
+          -- 一部の integration は auto 検出だと既定のサブオプション付きのテーブルで返る。
+          -- ここで true と書くと tbl_deep_extend("keep") が scalar を優先してサブ設定を
+          -- 落としてしまうので、auto 検出と同じ形のテーブルで書く。
+          blink_cmp = { enabled = true, style = "bordered" },
+          dap = true,
+          dap_ui = true,
+          diffview = true,
+          dropbar = { enabled = true, color_mode = false },
+          flash = true,
+          gitgraph = true,
+          gitsigns = true,
+          grug_far = true,
+          lsp_saga = true,
+          lsp_trouble = true,
+          mason = true,
+          mini = { enabled = true, indentscope_color = "overlay2" },
+          neotest = true,
+          neotree = true,
+          octo = true,
+          rainbow_delimiters = true,
+          render_markdown = true,
+          snacks = true,
+          telescope = true,
+          treesitter_context = true,
+          ufo = true,
+          which_key = true,
+        },
+      })
       -- デフォルトカラースキームとして設定
       vim.cmd.colorscheme("catppuccin")
     end,

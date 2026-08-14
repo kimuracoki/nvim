@@ -41,6 +41,9 @@ return {
   {
     "akinsho/bufferline.nvim",
     version = "*",
+    -- lualine と同じ理由でタブバーも最初の描画に間に合わなくてよい。lazy 未指定だと
+    -- 起動パスで実測 6ms 食っていた（Windows）。
+    event = "VeryLazy",
     dependencies = { "nvim-tree/nvim-web-devicons" },
     config = function()
       require("bufferline").setup({
