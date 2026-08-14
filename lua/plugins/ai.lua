@@ -3,6 +3,9 @@ return {
   {
     "S1M0N38/ccusage.nvim",
     version = "1.*",
+    -- lualine の component としてしか使わない。lualine 自体が VeryLazy なので
+    -- ここを lazy にしないと ccusage だけ起動パスに残ってしまう（依存側が引っぱる）。
+    lazy = true,
     opts = {},
   },
 

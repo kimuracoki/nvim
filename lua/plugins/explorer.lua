@@ -3,6 +3,16 @@ return {
   {
     "nvim-neo-tree/neo-tree.nvim",
     branch = "v3.x",
+    -- 起動直後の描画には要らない。init.lua / config.startup は VimEnter の 200〜250ms 後に
+    -- :Neotree を叩くだけなので、cmd で遅延させても見た目のタイミングは変わらない。
+    -- lazy が :Neotree のスタブコマンドを作るので、両所の exists(":Neotree") == 2 も通る。
+    cmd = "Neotree",
+    -- キーマップは config の中で vim.keymap.set していたが、遅延ロードすると config が
+    -- 走るまでキーが存在しなくなるため spec 側の keys に移す（押した時点でロードされる）。
+    keys = {
+      { "<leader>e",  "<cmd>Neotree toggle<cr>",            desc = "Explorer: Toggle" },
+      { "<leader>ge", "<cmd>Neotree git_status toggle<cr>", desc = "Git: Explorer (changed files)" },
+    },
     dependencies = {
       "nvim-lua/plenary.nvim",
       "nvim-tree/nvim-web-devicons",
@@ -114,10 +124,6 @@ return {
       vim.api.nvim_create_autocmd("ColorScheme", {
         callback = function() vim.schedule(fix_git_hl) end,
       })
-
-      -- キーマップ
-      vim.keymap.set("n", "<leader>e", "<cmd>Neotree toggle<cr>", { desc = "Explorer: Toggle" })
-      vim.keymap.set("n", "<leader>ge", "<cmd>Neotree git_status toggle<cr>", { desc = "Git: Explorer (changed files)" })
     end,
   },
 }

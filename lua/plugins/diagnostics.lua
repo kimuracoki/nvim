@@ -1,6 +1,8 @@
 -- 診断（Diagnostics）の見た目・挙動の一元設定。補完エンジン（旧 completion.lua）から
 -- 移設。blink.cmp は InsertEnter 後に読まれるため、ファイルを開いた直後からサイン列・
--- 波線が出るよう、ここ（trouble は lazy=false）の import 時＝起動時に設定しておく。
+-- 波線が出るよう、このファイルの import 時＝起動時に設定しておく。
+-- （spec の import は plugin の lazy 設定と無関係に必ず起動時に走るので、下の trouble を
+--   遅延ロードにしてもこのトップレベルは実行される。）
 vim.diagnostic.config({
   virtual_text = false,
   -- カーソル行の診断表示は tiny-inline-diagnostic（下の spec）に委譲する。ネイティブの
@@ -76,7 +78,9 @@ return {
   {
     "folke/trouble.nvim",
     dependencies = { "nvim-tree/nvim-web-devicons" },
-    lazy = false,
+    -- パネルを開くまで要らない。config.startup が exists(":Trouble") を見てから叩くので、
+    -- lazy が作る :Trouble スタブで従来どおり起動レイアウトも組める。
+    cmd = "Trouble",
     opts = {
       auto_close = false,
       auto_open = false,
