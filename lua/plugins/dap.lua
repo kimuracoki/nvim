@@ -6,8 +6,17 @@ return {
   -- lsp.lua の has() と同方針で「ツールチェーンがある環境だけ」自動インストールする。
   -- codelldb はプリビルド配布なので外部ツール不要（Rust / C / C++ 用）。
   -- mason-nvim-dap の既定ハンドラが adapters と標準 configurations を自動設定する。
+  --
+  -- 【lazy にしている理由】
+  -- 以前は spec に event/keys/cmd が無く lazy.nvim が起動時ロードと判断していたため、
+  -- 起動のたびに mason-nvim-dap の ensure_installed が走っていた。デバッグを使わない日でも
+  -- インストールジョブが起動直後に走り（実測: mason-nvim-dap 系だけで累計 362ms、
+  -- さらに codelldb のダウンロードが数十秒バックグラウンドで居座る）、
+  -- mason 側のリンクが壊れていると毎回同じエラーを出し続ける。
+  -- 実際にデバッグを始めるキーを押したときだけ読み込めば、この負担はゼロになる。
   {
     "mfussenegger/nvim-dap",
+    lazy = true,
     dependencies = {
       { "jay-babu/mason-nvim-dap.nvim", dependencies = { "williamboman/mason.nvim" } },
     },
@@ -37,6 +46,28 @@ return {
   {
     "rcarriga/nvim-dap-ui",
     dependencies = { "mfussenegger/nvim-dap", "nvim-neotest/nvim-nio" },
+    -- keys に出しておくと keymap は起動時に登録され、実際に押した瞬間に dap 一式がロードされる。
+    -- ステップ実行は VSCode に寄せて F5/F1-F3 を維持。
+    keys = {
+      { "<F5>", function() require("dap").continue() end, desc = "Debug: Start/Continue" },
+      { "<F1>", function() require("dap").step_into() end, desc = "Debug: Step into" },
+      { "<F2>", function() require("dap").step_over() end, desc = "Debug: Step over" },
+      { "<F3>", function() require("dap").step_out() end, desc = "Debug: Step out" },
+      -- <leader>d 系（which-key に登録済み）
+      { "<leader>db", function() require("dap").toggle_breakpoint() end, desc = "Debug: Breakpoint toggle" },
+      {
+        "<leader>dB",
+        function()
+          require("dap").set_breakpoint(vim.fn.input("Breakpoint condition: "))
+        end,
+        desc = "Debug: Conditional breakpoint",
+      },
+      { "<leader>dc", function() require("dap").continue() end, desc = "Debug: Start/Continue" },
+      { "<leader>dr", function() require("dap").repl.toggle() end, desc = "Debug: REPL toggle" },
+      { "<leader>dl", function() require("dap").run_last() end, desc = "Debug: Run last" },
+      { "<leader>du", function() require("dapui").toggle() end, desc = "Debug: UI toggle" },
+      { "<leader>dt", function() require("dap").terminate() end, desc = "Debug: Terminate" },
+    },
     config = function()
       local dap = require("dap")
       local dapui = require("dapui")
@@ -50,21 +81,6 @@ return {
       dap.listeners.before.event_exited["dapui_config"] = function()
         dapui.close()
       end
-      -- ステップ実行は VSCode に寄せて F5/F1-F3 を維持
-      vim.keymap.set("n", "<F5>", dap.continue, { desc = "Debug: Start/Continue" })
-      vim.keymap.set("n", "<F1>", dap.step_into, { desc = "Debug: Step into" })
-      vim.keymap.set("n", "<F2>", dap.step_over, { desc = "Debug: Step over" })
-      vim.keymap.set("n", "<F3>", dap.step_out, { desc = "Debug: Step out" })
-      -- <leader>d 系（which-key に登録済み）
-      vim.keymap.set("n", "<leader>db", dap.toggle_breakpoint, { desc = "Debug: Breakpoint toggle" })
-      vim.keymap.set("n", "<leader>dB", function()
-        dap.set_breakpoint(vim.fn.input("Breakpoint condition: "))
-      end, { desc = "Debug: Conditional breakpoint" })
-      vim.keymap.set("n", "<leader>dc", dap.continue, { desc = "Debug: Start/Continue" })
-      vim.keymap.set("n", "<leader>dr", dap.repl.toggle, { desc = "Debug: REPL toggle" })
-      vim.keymap.set("n", "<leader>dl", dap.run_last, { desc = "Debug: Run last" })
-      vim.keymap.set("n", "<leader>du", dapui.toggle, { desc = "Debug: UI toggle" })
-      vim.keymap.set("n", "<leader>dt", dap.terminate, { desc = "Debug: Terminate" })
     end,
   },
 }

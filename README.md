@@ -83,7 +83,13 @@ brew install font-hack-nerd-font
 
 # コマンドラインツール
 brew install ripgrep fd lazygit
+
+# 構文ハイライト（nvim-treesitter main）のパーサービルドに必須
+brew install tree-sitter
 ```
+
+> Cコンパイラは Xcode Command Line Tools（手順1）に含まれる `clang` が使われるため、macOS では別途用意する必要はありません。
+> Windows には両方とも標準で無いので、[Windows のセットアップ](#windows-のセットアップ)の手順3を参照してください。
 
 ### 4. ターミナルの設定
 
@@ -281,10 +287,14 @@ scoop bucket add extras
 scoop bucket add nerd-fonts
 scoop bucket add java
 
-# Git と Windows Terminal（推奨ターミナル）
+# Git とターミナル
 scoop install git
-scoop install windows-terminal
+scoop install extras/warp-terminal   # macOS と同じ Warp に揃える
 ```
+
+> ターミナルは **macOS / Windows とも Warp** に統一します。公式インストーラ（<https://www.warp.dev>）で入れても構いません。
+> Warp は Windows でも `TERM_PROGRAM=WarpTerminal` を出すため、`lua/plugins/image.lua` の Warp 向け画像表示の分岐が
+> 両OSで同じように効きます。
 
 ### 2. このリポジトリをクローン
 
@@ -306,6 +316,11 @@ scoop install neovim    # Neovim（バージョン0.11以上）
 scoop install ripgrep   # <leader>sg のグローバル検索に必須
 scoop install fd        # ファイル検索の高速化
 scoop install lazygit   # <leader>gg のGit TUI
+scoop install nodejs    # tree-sitter CLI と多くの LSP の前提
+scoop install mingw     # Cコンパイラ（構文ハイライトのパーサービルドに必須）
+
+# treesitter パーサーのビルドに使う CLI
+npm install -g tree-sitter-cli
 ```
 
 > **PATH について**: scoop でインストールしたツールは自動で PATH に登録されます。反映のため **PowerShell を開き直して**ください。`nvim --version` / `rg --version` が動けばOKです。
@@ -316,12 +331,14 @@ scoop install lazygit   # <leader>gg のGit TUI
 scoop install Hack-NF
 ```
 
-### 5. Windows Terminal のフォント設定
+### 5. ターミナルのフォント設定
 
-1. Windows Terminal を開く → `Ctrl+,` で設定
-2. 「既定値」→「外観」→ **フォント フェイス**を **Hack Nerd Font** に変更
+macOS 側（[手順4](#4-ターミナルの設定)）と同じことを Windows でも行います。
+
+1. Warp を開く → `Ctrl+,` で Settings
+2. **Appearance** → **Text** のフォントを **Hack Nerd Font** に変更
 3. お好みでフォントサイズを調整（推奨: 11-13pt）
-4. （オプション）「背景」から透過（アクリル）を有効化
+4. （オプション）背景の透過を有効化
 
 > アイコンが「□」や「?」で表示される場合はフォント未設定です。手順4・5を見直してください。
 
@@ -336,11 +353,27 @@ nvim
 - すべてのプラグインがダウンロード・インストールされます
 - LSPサーバーが自動インストールされます（`:Mason` で確認可能）
 
-> **重要（構文ハイライトの前提）**: `nvim-treesitter` はパーサーを**Cコンパイラでビルド**します。Windows には標準でCコンパイラが無いため、最も手軽な **zig** を入れておいてください（無いと一部言語の構文ハイライトが効きません）。
+> **重要（構文ハイライトの前提）**: この設定の `nvim-treesitter` は main ブランチで、パーサーを
+> **`tree-sitter` CLI + Cコンパイラ**でビルドします。手順3の `mingw` と `tree-sitter-cli` が両方入っていないと、
+> ファイルを開くたびに全パーサーのダウンロードとビルド失敗が繰り返され、起動と表示が目に見えて重くなります。
+>
+> - **zig では代用できません。** `tree-sitter build` は内部で cc クレートを使い、Windows では既定で
+>   `cl.exe`（MSVC）を探します。PATH に zig があっても見に行かず `program not found` で落ちます。
+>   MSVC Build Tools を入れていない環境では、`gcc`（mingw）か `clang` が必要です。
+> - `CC` 環境変数は `lua/config/platform.lua` が起動時に自動設定するので、手動設定は不要です
+>   （`cl.exe` が無い Windows でのみ `gcc` / `clang` を探して設定します）。
+> - ツールが足りないときはインストールを試みず、起動時に一度だけ警告を出して静かにスキップします。
+>
+> 確認方法（scoop の PATH 変更は既存セッションに反映されないので、**ターミナルのタブを開き直してから**）:
 > ```powershell
-> scoop install zig
+> gcc --version
+> tree-sitter --version
 > ```
-> インストール後、PowerShell を開き直してから `nvim` を再起動してください。treesitter が自動で zig を検出してパーサーをビルドします。
+>
+> **「Downloading… のまま何度やってもパーサーが入らない」場合**: 展開途中で終了すると
+> `%TEMP%\nvim\tree-sitter-*` が残り、次回の rename が EPERM で弾かれ続けます（POSIX の rename は
+> 既存ディレクトリを上書きできるので macOS では起きません）。Neovim で `:TSCleanTemp` を実行してから
+> `:TSInstall` をやり直してください。
 
 ### 7. オプションツールのインストール（必要に応じて）
 
@@ -1276,6 +1309,51 @@ Window = ウィンドウ操作
 **Q: 透過背景が効かない**
 - `<leader>uo`で透過のオン/オフを切り替え
 - ターミナルアプリ側で透過が有効になっているか確認
+
+### Windows 特有の詰まりどころ
+
+macOS では起きず Windows でだけ再現する問題は、ほぼ「**外部ツールが無い**」か「**中断で壊れた状態が残った**」のどちらかです。
+
+**Q: 起動が遅い／ファイルを開くたびにエラー通知が大量に出る**
+
+まず不足ツールを疑ってください（ターミナルのタブを開き直してから）:
+
+```powershell
+gcc --version           # 無ければ scoop install mingw
+tree-sitter --version   # 無ければ npm install -g tree-sitter-cli
+```
+
+これらが無いと、`nvim-treesitter` がファイルを開くたびに全パーサーのダウンロードとビルド失敗を繰り返します。
+両方入れて Neovim を再起動すると、初回だけパーサーがビルドされ（数分）、以降は何も走りません。
+
+**Q: パーサーが「Downloading…」のまま何度やっても入らない**
+
+展開途中で Neovim を終了すると `%TEMP%\nvim\tree-sitter-*` が残り、次回の rename が EPERM で弾かれ続けます。
+
+```vim
+:TSCleanTemp
+```
+
+を実行してから `:TSInstall <言語>` をやり直してください。
+
+**Q: Mason のインストールが `"... is already linked."` で必ず失敗する**
+
+インストール中に Neovim を終了すると、`mason` 配下にリンクだけが残り、以降の再インストールを永久に弾きます。
+`packages/` に本体が無いのに `bin/` などにリンクが残っている状態です。該当パッケージの残骸を消してから入れ直します
+（例は `jdtls`。`codelldb` の場合は本体が `opt\lldb` にも展開されるため、そこも消します）:
+
+```powershell
+$m = "$env:LOCALAPPDATA\nvim-data\mason"
+Remove-Item -Recurse -Force `
+  "$m\packages\jdtls", "$m\share\jdtls", "$m\bin\jdtls.cmd", "$m\staging\jdtls*", `
+  "$m\share\mason-schemas\lsp\jdtls.json" -ErrorAction SilentlyContinue
+```
+
+エラーメッセージには**必ず残骸のフルパスが出る**ので、`already linked` と言われたパスを消しては再実行、を
+出なくなるまで繰り返すのが確実です（`packages\` / `share\` / `bin\` / `opt\` / `share\mason-schemas\` に散らばります）。
+
+そのうえで Neovim で `:MasonInstall jdtls` を実行し、**完了通知が出るまで終了しない**でください。
+`Lockfile exists ...` と出る場合は `staging\<パッケージ名>.lock` が残っているので、同じ手順で消してから再実行します。
 
 ### プラグインが読み込まれない
 
