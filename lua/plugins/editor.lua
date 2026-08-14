@@ -13,11 +13,12 @@ return {
     build = ":TSUpdate",
     event = { "BufReadPre", "BufNewFile" }, -- ファイルを開くときに読む（起動時ロードを避ける）
     config = function()
+      local platform = require("config.platform")
       local ts = require("nvim-treesitter")
       ts.setup({}) -- 既定の install_dir (stdpath('data')/site) を使う
 
       -- 使うパーサ群。install は非同期・インストール済みは no-op。
-      ts.install({
+      local parsers = {
         -- 基本言語
         "lua",
         "vim",
@@ -45,7 +46,33 @@ return {
         "markdown_inline", -- render-markdown のコードフェンス injection に必要
         "dockerfile",
         "sql",
-      })
+      }
+
+      -- 展開途中の一時ディレクトリが残ると rename が EPERM で弾かれ、
+      -- 「Downloading… のまま何度やってもパーサが入らない」状態が固定化する（Windows 特有）。
+      -- そこから抜けるための復旧口。
+      vim.api.nvim_create_user_command("TSCleanTemp", function()
+        platform.clean_treesitter_temp()
+      end, { desc = "Treesitter: 展開途中で残った一時ディレクトリを削除する" })
+
+      -- パーサのビルドには tree-sitter CLI と C コンパイラが要る。
+      -- 揃っていない環境（素の Windows など）でそのまま install を呼ぶと、
+      -- 24 パーサぶんのダウンロード → ビルド失敗が起動のたびに走り、
+      -- エラー通知の洪水と体感数秒の遅延になる。無いなら一度だけ知らせて何もしない。
+      -- Windows では MSVC 以外のコンパイラを tree-sitter に教えるため CC も面倒を見る（platform 側）。
+      local ok, missing = platform.treesitter_toolchain()
+      if ok then
+        ts.install(parsers)
+      else
+        vim.schedule(function()
+          vim.notify(
+            ("Treesitter パーサの自動インストールを見送りました（不足: %s）。"):format(missing)
+              .. "\nハイライトは既存パーサぶんだけ有効です。",
+            vim.log.levels.WARN,
+            { title = "nvim-treesitter" }
+          )
+        end)
+      end
 
       -- Treesitter ベースのインデント（main では experimental 扱い）。
       -- パーサがあっても indents.scm クエリが無い言語 (haskell / dockerfile / commonlisp 等) が
@@ -292,7 +319,11 @@ return {
           end,
         },
         session_lens = {
-          load_on_setup = true,
+          -- true にすると auto-session（lazy=false）が setup 時に telescope 拡張を読み、
+          -- telescope + plenary 一式が起動パスに乗る（実測 287ms / 起動時間の約 2/3）。
+          -- :SessionSearch は拡張が未ロードでも auto-session 側が必要時に読み込むので、
+          -- 起動時に前倒しする理由が無い。
+          load_on_setup = false,
         },
       }
     end,

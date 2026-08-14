@@ -1,38 +1,42 @@
 return {
   -- ファジーファインダ (Ctrl+P 的)
+  --
+  -- 以前は config() の中で keymap を張っていたため lazy.nvim が「起動時ロード」と判断し、
+  -- telescope + plenary 一式（実測 287ms）が毎回起動パスに乗っていた。
+  -- keys spec に移すと、キーを押した瞬間に初めてロードされる（keymap 自体は起動時に登録済みなので
+  -- 使い勝手は変わらない）。keymaps.lua / context_menu.lua の require("telescope.builtin") も
+  -- lazy.nvim の loader フックが拾って必要時にロードするので、そのままで動く。
   {
     "nvim-telescope/telescope.nvim",
     dependencies = { "nvim-lua/plenary.nvim" },
-    config = function()
-      local builtin = require("telescope.builtin")
-      local map = vim.keymap.set
-      
+    cmd = "Telescope",
+    keys = {
       -- ファイル検索（Files）
-      map("n", "<leader>ff", builtin.find_files, { desc = "Find: Files" })
-      map("n", "<C-p>", builtin.find_files, { desc = "Picker: Files" })
+      { "<leader>ff", function() require("telescope.builtin").find_files() end, desc = "Find: Files" },
+      { "<C-p>", function() require("telescope.builtin").find_files() end, desc = "Picker: Files" },
 
       -- ワークスペース検索（Grep）
-      map("n", "<leader>fg", builtin.live_grep, { desc = "Find: Grep (workspace)" })
+      { "<leader>fg", function() require("telescope.builtin").live_grep() end, desc = "Find: Grep (workspace)" },
 
       -- コマンドパレット（Commands）
-      map("n", "<leader>fc", builtin.commands, { desc = "Find: Commands" })
-      map("n", "<C-S-p>", builtin.commands, { desc = "Picker: Commands" })
+      { "<leader>fc", function() require("telescope.builtin").commands() end, desc = "Find: Commands" },
+      { "<C-S-p>", function() require("telescope.builtin").commands() end, desc = "Picker: Commands" },
 
       -- キーマップを日本語で検索して実行（Find: Keymap）。「どのキーだっけ」を nvim 内で解決する
-      map("n", "<leader>fk", function()
-        require("config.cheatsheet").pick()
-      end, { desc = "Find: Keymap (キーマップを日本語で検索)" })
+      { "<leader>fk", function() require("config.cheatsheet").pick() end, desc = "Find: Keymap (キーマップを日本語で検索)" },
 
       -- 最近開いたファイル（File: recent）
-      map("n", "<leader>fr", builtin.oldfiles, { desc = "File: Recent" })
-      map("n", "<C-t>", builtin.oldfiles, { desc = "File: Recent" })
+      { "<leader>fr", function() require("telescope.builtin").oldfiles() end, desc = "File: Recent" },
+      { "<C-t>", function() require("telescope.builtin").oldfiles() end, desc = "File: Recent" },
+
       -- シンボル検索（Find: Symbols）
-      map("n", "<leader>fs", builtin.lsp_document_symbols, { desc = "Find: Symbols in file" })
-      map("n", "<C-S-o>", builtin.lsp_document_symbols, { desc = "Find: Symbols in file" })
+      { "<leader>fs", function() require("telescope.builtin").lsp_document_symbols() end, desc = "Find: Symbols in file" },
+      { "<C-S-o>", function() require("telescope.builtin").lsp_document_symbols() end, desc = "Find: Symbols in file" },
+
       -- バッファ一覧（Buffer: list）
-      map("n", "<leader>fb", builtin.buffers, { desc = "Find: Buffers" })
-      map("n", "<leader>bl", builtin.buffers, { desc = "Buffer: List" })
-      map("n", "<C-S-e>", builtin.buffers, { desc = "Buffer: List" })
-    end,
+      { "<leader>fb", function() require("telescope.builtin").buffers() end, desc = "Find: Buffers" },
+      { "<leader>bl", function() require("telescope.builtin").buffers() end, desc = "Buffer: List" },
+      { "<C-S-e>", function() require("telescope.builtin").buffers() end, desc = "Buffer: List" },
+    },
   },
 }
