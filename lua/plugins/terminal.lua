@@ -31,10 +31,25 @@ return {
       -- 全ターミナルで Esc をノーマルモードにせずそのままターミナルに送る（ic/ii 含む）→ keymaps.lua の Esc マップと BufEnter で対応
       -- Lazygit用のカスタムターミナル（フローティングウィンドウ）
       local Terminal = require("toggleterm.terminal").Terminal
+
+      -- lazygit の重さは「git の中身」ではなく「git を起動する回数 x Windows のプロセス生成コスト」。
+      -- この設定リポジトリ（404KB）でも `git status` 50ms に対し `git --version` が 45ms、
+      -- つまり実作業はほぼ 0ms で全部がプロセス起動代だった。lazygit は 1 リフレッシュで
+      -- git を 15〜20 回叩くので 700ms 前後かかる。
+      --
+      -- ラッパ経由の二重起動を避けるぶんだけ（1 回あたり 13.6ms）このターミナル限定で稼ぐ。
+      -- PATH をプロセス限定にしているのは platform.git_bin_dir() のコメント参照。
+      local lazygit_env = nil
+      local git_bin = require("config.platform").git_bin_dir()
+      if git_bin then
+        lazygit_env = { PATH = git_bin .. ";" .. (vim.env.PATH or "") }
+      end
+
       local lazygit = Terminal:new({
         cmd = "lazygit",
         dir = "git_dir",
         direction = "float",
+        env = lazygit_env,
         float_opts = {
           border = "rounded",
           width = function() return math.floor(vim.o.columns * 0.9) end,
