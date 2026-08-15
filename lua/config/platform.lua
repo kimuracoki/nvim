@@ -38,6 +38,41 @@ function M.first(bins)
   return nil
 end
 
+-- Git for Windows の「本体」git.exe が置かれたディレクトリ（無ければ nil）。
+--
+-- 【なぜ要るか】PATH に載っている C:\Program Files\Git\cmd\git.exe は 47KB のラッパで、
+-- 中身は 4.3MB の mingw64\bin\git.exe を起動し直すだけ。つまり git を 1 回叩くたびに
+-- プロセス生成が 2 回走る。実測（Windows 11 / 本機）:
+--   cmd /c exit          19.6ms  ← Windows のプロセス生成の下限
+--   cmd\git.exe --version 38.1ms  ← 下限 x2
+--   mingw64\bin\git.exe   24.5ms  ← 下限 + git 自身の初期化 5ms
+-- lazygit は 1 リフレッシュで git を 15〜20 回叩くので、この 13.6ms/回 の差が
+-- そのまま体感になる（実測: 14 コマンドのバッチで 660ms → 400ms、-40%）。
+--
+-- 【PATH 全体を差し替えない理由】mingw64\bin には libssl / libcrypto / zlib など msys2 の
+-- DLL が同居していて、Git for Windows のインストーラがここを PATH に載せないのはそのため。
+-- グローバルに前置すると無関係なアプリの DLL 解決を壊しうるので、返すだけに留めて
+-- 使う側（lazygit のターミナル）でそのプロセス限定の PATH に前置する。
+function M.git_bin_dir()
+  if not M.is_windows then
+    return nil
+  end
+  local wrapper = vim.fn.exepath("git")
+  if wrapper == "" then
+    return nil
+  end
+  -- <root>\cmd\git.exe -> <root>\mingw64\bin\git.exe（32bit 版は mingw32）
+  local root = vim.fs.dirname(vim.fs.dirname(wrapper))
+  for _, mingw in ipairs({ "mingw64", "mingw32" }) do
+    local dir = vim.fs.joinpath(root, mingw, "bin")
+    if vim.uv.fs_stat(vim.fs.joinpath(dir, "git.exe")) then
+      -- PATH に混ぜるので区切りは \ に揃える（exepath と fs.joinpath で / と \ が混ざるため）
+      return (dir:gsub("/", "\\"))
+    end
+  end
+  return nil
+end
+
 -- tree-sitter CLI が使う C コンパイラを決める。
 --
 -- tree-sitter build は内部で cc クレートを使い、Windows ターゲットでは既定で cl.exe（MSVC）を
