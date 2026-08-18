@@ -7,6 +7,11 @@ require("config.msglog").setup()
 -- キーマップ
 require("config.keymaps")
 
+-- Windows: IME が ON のとき AHK 側で jk→Esc を肩代わりさせるための状態通知。
+-- keymaps.lua が TermEnter で張るバッファローカルの jk を見て判定するので、
+-- 必ず config.keymaps より後に呼ぶ。
+require("config.ime_jk").setup()
+
 -- gitflow 初期化（:GitFlowInit / <leader>gf、lazygit を開くときの初期化提案）
 require("config.gitflow").setup()
 
