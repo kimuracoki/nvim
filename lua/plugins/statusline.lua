@@ -7,6 +7,18 @@ return {
     event = "VeryLazy",
     dependencies = { "nvim-tree/nvim-web-devicons", "S1M0N38/ccusage.nvim" },
     config = function()
+      -- コンテナの中で動いているときに出すインジケータ（VSCode の左下 "Dev Container: xxx" 相当）。
+      -- config/docker_nvim.lua が nvim 起動時に NVIM_IN_CONTAINER を渡す。
+      -- ホスト側で動いているときは空文字なので何も出ない。
+      -- 自分でコンテナに入って nvim を起動した場合でも、この環境変数を設定しておけば同じ表示になる。
+      local function container()
+        local name = vim.env.NVIM_IN_CONTAINER
+        if not name or name == "" then
+          return ""
+        end
+        return "\u{f308} " .. name -- nf-dev-docker
+      end
+
       local function modified()
         if vim.bo.modified then
           return "●"
@@ -16,7 +28,12 @@ return {
       end
       require("lualine").setup({
         sections = {
-          lualine_a = { "mode" },
+          -- コンテナ表示は mode の隣（＝一番目に付く位置）に置く。
+          -- 「今どこで編集しているか分からない」が一番困るので、色も専用にして目立たせる
+          lualine_a = {
+            "mode",
+            { container, color = { fg = "#1e1e2e", bg = "#89b4fa", gui = "bold" } },
+          },
           lualine_b = { "branch", "diff", "diagnostics" },
           lualine_c = { 
             { "filename", path = 1 },

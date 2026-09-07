@@ -106,7 +106,13 @@ opt.foldlevelstart = 99  -- ファイルを開いたときに折りたたみを�
 -- この構成には当てはまらない: Treesitter ハイライトは FileType autocmd で起動しており
 -- （plugins/editor.lua）、セッション復元は各ファイルを edit し直すので
 -- filetype 検出 → FileType 発火で作り直される。検証済み（ft/ハイライト/LSP とも復元される）。
-opt.sessionoptions = { "blank", "buffers", "curdir", "folds", "help", "tabpages", "winsize", "winpos", "terminal" }
+-- 【"terminal" を外している理由】
+-- これを入れると端末バッファがセッションに保存され、次に開いたとき「プロセスの死んだ端末」が
+-- そのまま復元される。lazygit や Docker 連携（config/docker*.lua）の端末が対象になると、
+-- コンテナに入っていないのに `81911:docker exec -it ...` というバッファが毎回居座り、
+-- しかも中身は前回の画面のまま操作もできない（実機で確認。セッションファイルに docker exec が
+-- 保存されていた）。復元しても再実行されるわけではないので、保存する意味がない。
+opt.sessionoptions = { "blank", "buffers", "curdir", "folds", "help", "tabpages", "winsize", "winpos" }
 
 -- HTML/XML の charset / encoding を先頭から検出し、あればそのエンコーディングで開き直す（全探索しない）
 local function charset_to_vim_enc(name)
