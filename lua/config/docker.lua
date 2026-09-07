@@ -21,10 +21,8 @@
 local M = {}
 
 local platform = require("config.platform")
-
--- 用途ごとに Terminal を使い回す。同じコンテナで SPC Ds を押し直したとき、
--- セッションを増やさず前のシェルに戻れるようにする（VSCode のターミナル再利用と同じ感覚）。
-local terms = {}
+-- 端末ウィンドウの生成と後始末は config/docker_term.lua に切り出してある
+local dterm = require("config.docker_term")
 
 ---選択 UI。snacks のピッカーを直接呼ぶ。
 ---
@@ -59,242 +57,6 @@ function M.ensure_docker()
     vim.log.levels.WARN
   )
   return false
-end
-
----toggleterm の端末を 1 枚開く。同じ key なら前のセッションに戻る。
----@param key string 再利用キー（"shell:<id>" など）
----@param cmd string シェルに渡すコマンド行
----@param opts? { on_exit?: fun(code:integer), keep_on_error?: boolean, nested?: boolean, direction?: string, fullscreen?: boolean, display_name?: string, indicator?: string }
-function M.term(key, cmd, opts)
-  opts = opts or {}
-  local cached = terms[key]
-  if cached and cached.bufnr and vim.api.nvim_buf_is_valid(cached.bufnr) then
-    cached:toggle()
-    return cached
-  end
-
-  local Terminal = require("toggleterm.terminal").Terminal
-  local exit_code = 0
-  -- 専用タブで開いた場合のタブ番号を覚えておく。
-  -- 端末が閉じた直後に、このタブへ neo-tree や空バッファが開き直されることがあり
-  -- （実測: TermClose 後にタブ 2 が neo-tree + 無名バッファになる）、
-  -- 「端末バッファを映しているウィンドウ」を後から探す方式では取りこぼす。
-  local state = {}
-  local term
-  term = Terminal:new({
-    cmd = cmd,
-    -- フロートの枠にコンテナ名を出す（どのコンテナを触っているか一目で分かるように）
-    display_name = opts.display_name,
-    direction = opts.direction or "float",
-    hidden = true, -- <c-\>（通常ターミナルのトグル）の巡回対象に混ぜない
-    close_on_exit = false, -- 下の TermClose で順序を制御するため toggleterm には任せない
-    float_opts = {
-      border = "rounded",
-      title_pos = "center",
-      width = function() return math.floor(vim.o.columns * 0.9) end,
-      height = function() return math.floor(vim.o.lines * 0.9) end,
-    },
-    on_open = function(t)
-      vim.cmd("startinsert!")
-      if (opts.direction or "float") == "tab" then
-        state.tabpage = vim.api.nvim_get_current_tabpage()
-      end
-      if opts.fullscreen then
-        -- 【狙い】VSCode の Reopen in Container はウィンドウごとコンテナ側に切り替わる。
-        -- こちらも、コンテナ内 Neovim を開いている間は外側の飾り（タブライン・ステータスライン・
-        -- winbar）と、そのタブに紛れ込む他のウィンドウを全部どけて、画面を明け渡す。
-        --
-        -- 【前の実装が効かなかった理由（実機のスクリーンショットで判明）】
-        -- 1. 新しいタブには neo-tree が勝手に開く。結果、専用タブのはずが
-        --    「neo-tree ＋ コンテナ内 nvim」の 2 分割になり、入れ子に見えていた。
-        -- 2. その neo-tree にフォーカスが移った瞬間、端末バッファの BufLeave が走って
-        --    畳んだはずのタブライン・ステータスラインが復活していた。
-        -- なので判定をバッファ単位からタブページ単位に変え、割り込んだウィンドウは閉じる。
-        local saved
-        local function hide()
-          saved = saved or { showtabline = vim.o.showtabline, laststatus = vim.o.laststatus }
-          vim.o.showtabline = 0
-          vim.o.laststatus = 0
-        end
-        local function restore()
-          if saved then
-            vim.o.showtabline = saved.showtabline
-            vim.o.laststatus = saved.laststatus
-            saved = nil
-          end
-        end
-        state.restore = restore
-
-        -- インジケータの色。透過設定（config/highlight.lua）は「透過が有効なときだけ」走るので
-        -- あちらには置けない。テーマを変えても消えないよう、開くたびにここで定義する
-        vim.api.nvim_set_hl(0, "DockerContainerBar", { fg = "#1e1e2e", bg = "#89b4fa", bold = true })
-
-        local function decorate()
-          for _, win in ipairs(vim.api.nvim_list_wins()) do
-            if vim.api.nvim_win_is_valid(win) and vim.api.nvim_win_get_buf(win) == t.bufnr then
-              -- 枠は畳むが「今どこに居るか」だけは常に見せる（VSCode の左下インジケータ相当）
-              vim.wo[win].winbar = opts.indicator or ""
-              vim.wo[win].number = false
-              vim.wo[win].relativenumber = false
-              vim.wo[win].signcolumn = "no"
-            end
-          end
-        end
-
-        -- このタブは端末専用にする。neo-tree など後から割り込んできたウィンドウは閉じる
-        local function claim_tab()
-          local tab = state.tabpage
-          if not (tab and vim.api.nvim_tabpage_is_valid(tab)) then
-            return
-          end
-          if not vim.api.nvim_buf_is_valid(t.bufnr) then
-            return -- 端末が終わっていれば触らない（後始末は TermClose 側の仕事）
-          end
-          local wins = vim.api.nvim_tabpage_list_wins(tab)
-          local ours = vim.tbl_filter(function(w)
-            return vim.api.nvim_win_is_valid(w) and vim.api.nvim_win_get_buf(w) == t.bufnr
-          end, wins)
-          if #ours == 0 then
-            return -- このタブに端末が無いなら、もう専用タブではない
-          end
-          for _, w in ipairs(wins) do
-            if vim.api.nvim_win_is_valid(w) and vim.api.nvim_win_get_buf(w) ~= t.bufnr then
-              pcall(vim.api.nvim_win_close, w, true)
-            end
-          end
-          decorate()
-        end
-        state.claim_tab = claim_tab
-
-        local group = vim.api.nvim_create_augroup("DockerTerm" .. t.bufnr, { clear = true })
-        state.group = group
-
-        if state.tabpage then
-          -- タブページ単位で判定する。専用タブに居る間だけ枠を畳み、他のタブへ移れば戻す
-          vim.api.nvim_create_autocmd({ "TabEnter", "WinEnter", "BufWinEnter" }, {
-            group = group,
-            callback = function()
-              if vim.api.nvim_get_current_tabpage() == state.tabpage then
-                vim.schedule(function()
-                  claim_tab()
-                  hide()
-                end)
-              else
-                restore()
-              end
-            end,
-          })
-          -- 開いた直後にも割り込みを掃除する（neo-tree は少し遅れて開くので schedule 越し）
-          vim.schedule(claim_tab)
-          vim.defer_fn(claim_tab, 100)
-          vim.defer_fn(claim_tab, 400)
-        else
-          vim.api.nvim_create_autocmd({ "BufEnter", "TermEnter" }, {
-            group = group,
-            buffer = t.bufnr,
-            callback = hide,
-          })
-          vim.api.nvim_create_autocmd("BufLeave", { group = group, buffer = t.bufnr, callback = restore })
-        end
-        vim.api.nvim_create_autocmd("BufWipeout", {
-          group = group,
-          buffer = t.bufnr,
-          once = true,
-          callback = restore,
-        })
-        decorate()
-        hide()
-      end
-
-      if opts.nested then
-        -- コンテナ内で Neovim を動かす場合、ホスト側のターミナルマッピングが先に食ってしまうと
-        -- 中の nvim に Esc も C-hjkl も届かない（＝まともに操作できない）。
-        -- このバッファだけホスト側の割り込みを外し、キーをそのまま PTY へ流す。
-        -- keymaps.lua の Esc / jk はこのフラグを見て素通しに切り替える。
-        vim.b[t.bufnr].nested_nvim = true
-        -- TermOpen はこのフラグを立てる前に走っているので、既に張られたローカルマップを外す。
-        -- 特に <leader>w* が残っていると、中の nvim のリーダーキー（Space）を押すたびに
-        -- 外側が 300ms 待ち受けてしまい「固まった」ように見える。
-        for _, lhs in ipairs(vim.g.term_window_keys or {}) do
-          pcall(vim.keymap.del, "t", lhs, { buffer = t.bufnr })
-        end
-        pcall(vim.keymap.del, "t", "jk", { buffer = t.bufnr })
-        -- toggleterm の open_mapping（<C-\>）はグローバルなので消せない。同じ長さの
-        -- ローカルマップで上書きして、中の nvim にそのまま送る（<C-\><C-n> を効かせるため）。
-        vim.keymap.set("t", "<C-\\>", "<C-\\>", {
-          buffer = t.bufnr,
-          noremap = true,
-          desc = "Terminal: Pass key to nested Neovim (コンテナ内 nvim へ透過)",
-        })
-      end
-      -- プロセス終了後にフロートを畳んでバッファを消す。
-      -- 「先に close、そのあと buf_delete」の順序が必須な理由は terminal.lua（lazygit）の
-      -- コメントに書いたとおりで、逆にすると空のフロートが残る。
-      vim.api.nvim_create_autocmd("TermClose", {
-        buffer = t.bufnr,
-        once = true,
-        callback = function()
-          vim.schedule(function()
-            -- 失敗したビルドログなどは消さずに残す（読めないと原因が分からないため）
-            if opts.keep_on_error and exit_code ~= 0 then
-              return
-            end
-            terms[key] = nil
-            if state.group then
-              pcall(vim.api.nvim_del_augroup_by_id, state.group)
-              state.group = nil
-            end
-            if state.restore then
-              state.restore()
-            end
-
-            -- 【順序が重要】バッファを先に消してはいけない。
-            -- そのウィンドウに回せる通常バッファが無いと、Neovim は閉じる代わりに
-            -- 空バッファを割り当てるため、タブ（やフロート）が残り続ける。
-            -- しかも残るのは空の名無しバッファなので、SPC bc / SPC ba でも消せない
-            -- （実機で確認: コンテナから :qa で戻ってもタブが残る）。
-            -- 専用タブごと閉じる。中身が何に差し替わっていても、開いたタブは開いた側が畳む。
-            if state.tabpage and vim.api.nvim_tabpage_is_valid(state.tabpage) and #vim.api.nvim_list_tabpages() > 1 then
-              pcall(vim.cmd, vim.api.nvim_tabpage_get_number(state.tabpage) .. "tabclose")
-              state.tabpage = nil
-            end
-
-            -- フロートの場合はウィンドウを閉じる。
-            -- バッファを先に消すと、表示に回せる通常バッファが無いときに Neovim が
-            -- 空バッファを割り当ててフロートが残る（terminal.lua の lazygit と同じ理由）。
-            local bufnr = t.bufnr
-            if vim.api.nvim_buf_is_valid(bufnr) then
-              for _, win in ipairs(vim.api.nvim_list_wins()) do
-                if vim.api.nvim_win_is_valid(win) and vim.api.nvim_win_get_buf(win) == bufnr then
-                  local only_window = #vim.api.nvim_tabpage_list_wins(vim.api.nvim_win_get_tabpage(win)) == 1
-                  local more_tabs = #vim.api.nvim_list_tabpages() > 1
-                  if not (only_window and not more_tabs) then
-                    pcall(vim.api.nvim_win_close, win, true)
-                  end
-                end
-              end
-            end
-            if t:is_open() then
-              pcall(function() t:close() end)
-            end
-
-            if vim.api.nvim_buf_is_valid(t.bufnr) then
-              pcall(vim.api.nvim_buf_delete, t.bufnr, { force = true })
-            end
-          end)
-        end,
-      })
-    end,
-    on_exit = function(_, _, code)
-      exit_code = code or 0
-      if opts.on_exit then
-        vim.schedule(function() opts.on_exit(exit_code) end)
-      end
-    end,
-  })
-  terms[key] = term
-  term:open()
-  return term
 end
 
 ---起動中のコンテナ一覧。cb には { id, name, image, status } の配列が渡る
@@ -339,13 +101,43 @@ function M.project_root()
   return root or vim.uv.cwd()
 end
 
+---パスを比較できる形に揃える。
+---
+---【Windows 対応】ホスト側は `C:\Users\...`（\ 区切り）で来るのに対し、
+---docker のラベルやマウント元は `/` 区切り、さらに Docker Desktop は
+---`/host_mnt/c/Users/...` や `/run/desktop/mnt/host/c/Users/...` の形で返すことがある。
+---生の文字列比較のままだと、Windows では「このプロジェクトのコンテナ」を一切見つけられず、
+---毎回「起動中のコンテナ全部から選ぶ」に落ちてしまう。
+---@param p string|nil
+---@return string|nil
+local function normalize(p)
+  if not p or p == "" then
+    return nil
+  end
+  p = p:gsub("\\", "/")
+  -- Docker Desktop がホストのドライブを見せる形を C:/ 形式へ戻す
+  p = p:gsub("^/run/desktop/mnt/host/(%a)/", "%1:/")
+  p = p:gsub("^/host_mnt/(%a)/", "%1:/")
+  p = p:gsub("/+$", "")
+  if platform.is_windows then
+    -- Windows のファイルシステムは大文字小文字を区別しない（ドライブレターも揺れる）
+    p = p:lower()
+  end
+  return p
+end
+
 ---a が b と同じか、b の下にあるか
 local function under(a, b)
-  if not a or not b or a == "" or b == "" then
+  a, b = normalize(a), normalize(b)
+  if not a or not b then
     return false
   end
   return a == b or a:sub(1, #b + 1) == b .. "/"
 end
+
+-- パス判定はプラットフォーム差（Windows の \ 区切り・Docker Desktop のマウント表記）の
+-- 影響を受けるので、mac 上からでも Windows の挙動を検証できるよう外へ出しておく
+M._under_for_test = under
 
 ---コンテナがこのプロジェクトのものかを判定して c.mine に入れる。
 ---判定材料は 2 つ:
@@ -501,7 +293,7 @@ end
 function M.shell()
   M.pick("コンテナに入る（シェル）", function(c)
     detect_shell(c.id, function(sh)
-      M.term("shell:" .. c.id, ("docker exec -it %s %s"):format(c.id, sh), {
+      dterm.open("shell:" .. c.id, ("docker exec -it %s %s"):format(c.id, sh), {
         display_name = "\u{f308} " .. c.name,
       })
       M.notify(("%s に %s で入りました（exit で抜ける）"):format(c.name, sh))
@@ -512,7 +304,7 @@ end
 -- コンテナのログを追う（VSCode の "View Logs"）
 function M.logs()
   M.pick("ログを表示するコンテナ", function(c)
-    M.term("logs:" .. c.id, ("docker logs -f --tail 200 %s"):format(c.id), {
+    dterm.open("logs:" .. c.id, ("docker logs -f --tail 200 %s"):format(c.id), {
       display_name = "\u{f308} " .. c.name .. " logs",
     })
   end)
@@ -530,7 +322,7 @@ function M.lazydocker()
     )
     return
   end
-  M.term("lazydocker", "lazydocker")
+  dterm.open("lazydocker", "lazydocker")
 end
 
 ---devcontainer.json を持つワークスペースルートを上方向に探す（docker_nvim.lua とも共有）
@@ -578,7 +370,7 @@ function M.rebuild()
     if choice == "キャッシュを使わず作り直す" then
       cmd = cmd .. " --build-no-cache"
     end
-    M.term("devcontainer:rebuild:" .. root, cmd, {
+    dterm.open("devcontainer:rebuild:" .. root, cmd, {
       keep_on_error = true,
       display_name = "\u{f308} rebuild",
       on_exit = function(code)
@@ -616,7 +408,7 @@ function M.devcontainer()
 
   local ws = vim.fn.shellescape(root)
   M.notify(("Dev Container を起動します: %s（初回はビルドで数分かかります）"):format(root))
-  M.term("devcontainer:up:" .. root, ("devcontainer up --workspace-folder %s"):format(ws), {
+  dterm.open("devcontainer:up:" .. root, ("devcontainer up --workspace-folder %s"):format(ws), {
     keep_on_error = true,
     on_exit = function(code)
       if code ~= 0 then
@@ -624,7 +416,7 @@ function M.devcontainer()
         return
       end
       -- devcontainer の公式イメージ・features は bash を前提にしているので bash 決め打ちで良い
-      M.term(
+      dterm.open(
         "devcontainer:exec:" .. root,
         ("devcontainer exec --workspace-folder %s /bin/bash"):format(ws)
       )

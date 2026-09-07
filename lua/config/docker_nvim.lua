@@ -19,6 +19,7 @@
 local M = {}
 
 local docker = require("config.docker")
+local dterm = require("config.docker_term")
 
 ---コンテナ内でコマンドを実行する（引数配列なのでホスト側のシェルを経由しない = クォート事故が無い）
 ---@param id string
@@ -161,6 +162,11 @@ if command -v apt-get >/dev/null 2>&1; then
   $SUDO rm -rf /var/lib/apt/lists/* >/dev/null 2>&1 || true
 fi
 
+# 中断されたパーサビルドのロックが残っていると、次回以降ずっと
+# "Lock file ... concurrent tree-sitter instance" で失敗し続ける。
+# ここで nvim を起動する前に必ず掃除する（このコンテナで他に nvim は動いていない）
+rm -rf "$HOME/.cache/tree-sitter/lock" 2>/dev/null || true
+
 ver=$(nvim --version | head -1)
 # この設定は 0.11+ の LSP API（vim.lsp.config）を使う。古いものが入ったら黙らずに知らせる
 set -- $(nvim --version | head -1 | sed -n 's/^NVIM v\([0-9][0-9]*\)\.\([0-9][0-9]*\).*/\1 \2/p')
@@ -186,7 +192,7 @@ local function setup_container(c, cb)
         return
       end
       docker.notify(("%s に Neovim を用意します（初回はダウンロードで数十秒）"):format(c.name))
-      docker.term("nvim-setup:" .. c.id, ("docker exec -it %s sh /tmp/nvim-setup.sh"):format(c.id), {
+      dterm.open("nvim-setup:" .. c.id, ("docker exec -it %s sh /tmp/nvim-setup.sh"):format(c.id), {
         keep_on_error = true, -- 失敗したらログを残す（原因が分からないと直せないため）
         on_exit = function(code)
           if code ~= 0 then
@@ -215,7 +221,7 @@ local function sync_config(c, home, cb)
         -- プラグインはコンテナ内で入れ直す。ホストの ~/.local/share/nvim を持ち込むと、
         -- treesitter パーサのような .so をアーキテクチャ違いのまま読み込んで壊れる。
         docker.notify("設定を送りました。コンテナ内でプラグインを入れます（初回は数分）")
-        docker.term(
+        dterm.open(
           "nvim-lazy:" .. c.id,
           ('docker exec -it %s nvim --headless "+Lazy! sync" +qa'):format(c.id),
           {
@@ -261,7 +267,7 @@ local function launch(c)
   -- フロートではなく専用タブの全画面で開く。フロートだと「窓の中に窓」に見えてしまい、
   -- ウィンドウごとコンテナ側に切り替わる VSCode の Reopen in Container と操作感が違いすぎる。
   -- fullscreen でタブライン／ステータスライン／winbar も畳むので、画面はコンテナ側の Neovim だけになる。
-  docker.term("nvim:" .. c.id, nvim_command(c), {
+  dterm.open("nvim:" .. c.id, nvim_command(c), {
     nested = true,
     direction = "tab",
     fullscreen = true,

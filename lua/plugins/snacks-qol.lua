@@ -24,12 +24,6 @@ return {
       -- 診断アイコンが行番号のすぐ左に出る VSCode 風 gutter。実際の適用は options.lua で
       -- vim.opt.statuscolumn を設定して行う（enabled だけでは自動適用されない仕様）。
       statuscolumn = { enabled = true },
-      -- vim.ui.select をフロートのピッカーに置き換える（ui_select は既定 true）。
-      -- 素の vim.ui.select は inputlist（コマンドライン）で、選択肢とプロンプトが
-      -- noice のポップアップ内で折り返されて読めなくなる。選択 UI は Docker 連携
-      -- （config/docker*.lua）で多用するので、ここを揃えておく。
-      -- 検索ピッカー本体は telescope のままで、こちらは vim.ui.select 専用。
-      picker = { enabled = true },
     },
     keys = {
       { "<leader>uz", function() require("snacks").zen() end, desc = "UI: Zen mode" },
