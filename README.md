@@ -1143,6 +1143,34 @@ VSCode の Dev Containers / Remote も、**コンテナの中に VS Code Server 
 `<leader>Ds`（シェル） / `<leader>Dl`（ログ） / `<leader>Dd`（lazydocker）は**コンテナの中身を変更しない**ので、
 本番コンテナに対して使っても状態は変わらない（もちろん中で何をするかは自己責任）。
 
+### Windows でも動くか
+
+動く。ホスト側で実行するのは `docker` / `devcontainer` / `lazydocker` の各 CLI だけで、
+`sh` や `rm` を使う処理はすべて **コンテナの中（Linux）** で実行している
+（`docker exec ... sh -c` を引数配列で渡すので、ホストのシェルを経由しない）。
+`&&` や `|` のようなシェル演算子を含む文字列コマンドをホスト側で組み立てている箇所も無いので、
+cmd.exe / PowerShell のどちらでも壊れない。
+
+Windows 固有の対応として、コンテナとプロジェクトの紐付けに使うパス比較を正規化している:
+
+| ホスト側の表記 | docker 側の表記 | 判定 |
+|---|---|---|
+| `C:\Users\me\app` | `C:\Users\me\app` | 一致 |
+| `C:\Users\me\app` | `c:/Users/me/app` | 一致（区切り・大小の揺れを吸収） |
+| `C:\Users\me\app` | `/host_mnt/c/Users/me/app` | 一致（Docker Desktop のマウント表記） |
+| `C:\Users\me\app` | `/run/desktop/mnt/host/c/Users/me/app` | 一致（同上・新しい形式） |
+| `C:\Users\me\app` | `C:/Users/me/other` | 不一致（誤検出しない） |
+
+これが無いと Windows では「このプロジェクトのコンテナ」を一切見つけられず、
+毎回「起動中のコンテナ全部から選ぶ」に落ちる。
+
+```powershell
+# Windows での前提ツール
+scoop install main/docker            # または Docker Desktop
+scoop install extras/lazydocker      # <leader>Dd を使う場合のみ（任意）
+npm install -g @devcontainers/cli    # <leader>Dc / <leader>Db を使う場合のみ（任意）
+```
+
 ### 必要なツール（すべて任意）
 
 ```bash
