@@ -120,6 +120,10 @@ end
 -- Windows では展開途中で終了すると `<tmp>/tree-sitter-<lang>` が残り、次回の rename が
 -- EPERM で弾かれて「Downloading… のまま何度やっても入らない」状態が固定化する
 -- （POSIX の rename は既存ディレクトリを上書きできるので mac では起きない）。
+--
+-- もう 1 つの残骸が tree-sitter CLI 側のロック（`<cache>/tree-sitter/lock/<lang>-*.lock`）。
+-- ビルド中に nvim を強制終了すると残り、次回以降 "Lock file ... If there isn't another
+-- concurrent tree-sitter instance" で毎回失敗し続ける（コンテナ内 Neovim で発生を確認）。
 -- 自動で消すと別インスタンスの進行中インストールを壊しうるので、明示コマンドとして提供する。
 function M.clean_treesitter_temp()
   -- nvim-treesitter の cache_dir は stdpath("cache")（Windows では %TEMP%\nvim）
@@ -130,8 +134,17 @@ function M.clean_treesitter_temp()
       removed = removed + 1
     end
   end
+  -- tree-sitter CLI のロックは stdpath("cache") ではなく XDG のキャッシュ直下に置かれる
+  local locks = 0
+  local lock_dir = (vim.env.XDG_CACHE_HOME or (vim.env.HOME or "") .. "/.cache") .. "/tree-sitter/lock"
+  for _, path in ipairs(vim.fn.glob(lock_dir .. "/*.lock", false, true)) do
+    if vim.fn.delete(path) == 0 then
+      locks = locks + 1
+    end
+  end
   vim.notify(
-    ("Treesitter の一時ディレクトリを %d 件削除しました。:TSInstall をやり直してください。"):format(removed),
+    ("Treesitter の一時ディレクトリを %d 件、ロックを %d 件削除しました。:TSInstall をやり直してください。")
+      :format(removed, locks),
     vim.log.levels.INFO,
     { title = "nvim-treesitter" }
   )

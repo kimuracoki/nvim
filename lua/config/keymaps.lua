@@ -88,6 +88,10 @@ map("n", "<C-S-z>", "<C-r>", { desc = "Redo" })
 
 -- これらのターミナルでは jk マッピングを設定しない（j の遅延を防ぐ）
 local function is_terminal_no_jk_mapping()
+  -- コンテナ内 Neovim（config/docker_nvim.lua）では jk も中の nvim へ渡す必要がある
+  if vim.b.nested_nvim then
+    return true
+  end
   local bufname = vim.api.nvim_buf_get_name(0)
   return bufname:match("claude") or bufname:match("ClaudeCode") or bufname:match("cursor") or bufname:match("cursor%-agent") or bufname:match("lazygit")
 end
@@ -95,6 +99,10 @@ end
 -- Cursor CLI（cursor-agent.nvim）: Esc をそのまま送ると CLI が終了し Terminal exited -1 になる。
 -- Claude / lazygit のみ Esc を端末に透過する。
 local function is_terminal_esc_passthrough()
+  -- コンテナ内で動いている Neovim にとって Esc は生命線なので、必ずそのまま流す
+  if vim.b.nested_nvim then
+    return true
+  end
   local bufname = vim.api.nvim_buf_get_name(0)
   return bufname:match("claude") or bufname:match("ClaudeCode") or bufname:match("lazygit")
 end
@@ -147,18 +155,43 @@ vim.api.nvim_create_autocmd("BufEnter", {
   desc = "Terminal: AI panels only — start job mode on focus",
 })
 
--- ターミナルモードでもウィンドウ移動をノーマルモードと同じキーで行えるようにする
--- （Claude Codeを含め、どのターミナルでも有効）
-map("t", "<C-h>", [[<C-\><C-n><C-w>h]], { silent = true, desc = "Terminal: Move to left window" })
-map("t", "<C-j>", [[<C-\><C-n><C-w>j]], { silent = true, desc = "Terminal: Move to bottom window" })
-map("t", "<C-k>", [[<C-\><C-n><C-w>k]], { silent = true, desc = "Terminal: Move to top window" })
-map("t", "<C-l>", [[<C-\><C-n><C-w>l]], { silent = true, desc = "Terminal: Move to right window" })
+-- ターミナルモードのウィンドウ操作（移動 C-hjkl / リサイズ leader+whjkl）。
+--
+-- 【なぜグローバルではなくバッファローカルなのか】
+-- 以前はこれらを map("t", ...) でグローバルに張っていたが、リーダーが Space のため
+-- 「ターミナル内で Space を押すと、<leader>wh 等の続きが来るか 300ms（timeoutlen）待つ」
+-- 状態になっていた。普通のシェルでは打鍵が続くので気づきにくいが、
+-- コンテナ内で Neovim を動かす（config/docker_nvim.lua の SPC Dn）と、
+-- 中の nvim のリーダーキーが毎回 300ms 食われたうえ <leader>w* は外側に奪われるため、
+-- 「押しても反応しない＝固まった」ように見える。
+-- ターミナルバッファが開かれたときにローカルで張れば、張らないバッファ
+-- （＝コンテナ内 Neovim）では Space が素通しになり、この問題が消える。
+local term_window_keys = {
+  ["<C-h>"] = { [[<C-\><C-n><C-w>h]], "Terminal: Move to left window" },
+  ["<C-j>"] = { [[<C-\><C-n><C-w>j]], "Terminal: Move to bottom window" },
+  ["<C-k>"] = { [[<C-\><C-n><C-w>k]], "Terminal: Move to top window" },
+  ["<C-l>"] = { [[<C-\><C-n><C-w>l]], "Terminal: Move to right window" },
+  ["<leader>wh"] = { [[<C-\><C-n><C-w><]], "Terminal: Resize decrease width" },
+  ["<leader>wl"] = { [[<C-\><C-n><C-w>>]], "Terminal: Resize increase width" },
+  ["<leader>wk"] = { [[<C-\><C-n><C-w>+]], "Terminal: Resize increase height" },
+  ["<leader>wj"] = { [[<C-\><C-n><C-w>-]], "Terminal: Resize decrease height" },
+}
 
--- ターミナルモードでもウィンドウリサイズ（leader + whjkl）
-map("t", "<leader>wh", [[<C-\><C-n><C-w><]], { silent = true, desc = "Terminal: Resize decrease width" })
-map("t", "<leader>wl", [[<C-\><C-n><C-w>>]], { silent = true, desc = "Terminal: Resize increase width" })
-map("t", "<leader>wk", [[<C-\><C-n><C-w>+]], { silent = true, desc = "Terminal: Resize increase height" })
-map("t", "<leader>wj", [[<C-\><C-n><C-w>-]], { silent = true, desc = "Terminal: Resize decrease height" })
+vim.api.nvim_create_autocmd("TermOpen", {
+  callback = function(args)
+    -- コンテナ内 Neovim には何も張らない（キーは全部中の nvim のもの）
+    if vim.b[args.buf].nested_nvim then
+      return
+    end
+    for lhs, spec in pairs(term_window_keys) do
+      vim.keymap.set("t", lhs, spec[1], { buffer = args.buf, silent = true, desc = spec[2] })
+    end
+  end,
+  desc = "ターミナルのウィンドウ操作キーをバッファローカルに張る（Space の待ちを作らないため）",
+})
+
+-- コンテナ内 Neovim 用に、既に張ったローカルマップを外すためのリスト（config/docker.lua が使う）
+vim.g.term_window_keys = vim.tbl_keys(term_window_keys)
 
 -- ウィンドウ（Window）
 map("n", "<leader>ww", function()
@@ -532,3 +565,37 @@ end, { desc = "キーマップ検索に載っていないキーマップを一�
 -- Lazy（プラグイン管理）
 map("n", "<leader>ll", ":Lazy<CR>", { desc = "Lazy: Status" })
 map("n", "<leader>ls", ":Lazy sync<CR>", { desc = "Lazy: Sync" })
+
+-- Docker / Dev Container（VSCode の Docker 拡張 + Dev Containers 相当）
+-- 実処理は config/docker.lua。docker が無い環境ではキーを押したときに通知するだけで、
+-- ここでは require しないので起動には一切影響しない。
+map("n", "<leader>Ds", function()
+  require("config.docker").shell()
+end, { desc = "Docker: Shell (コンテナに入る)" })
+map("n", "<leader>Dl", function()
+  require("config.docker").logs()
+end, { desc = "Docker: Logs (コンテナのログを追う)" })
+map("n", "<leader>Dd", function()
+  require("config.docker").lazydocker()
+end, { desc = "Docker: Lazydocker (コンテナ管理 TUI)" })
+map("n", "<leader>Dc", function()
+  require("config.docker").devcontainer()
+end, { desc = "Docker: Dev Container (起動してコンテナ内シェルに入る)" })
+-- コンテナの中で Neovim ごと動かす（VSCode Dev Containers と同じモデル）。
+-- ホスト側の Neovim では LSP がホストのツールチェーンを見てしまうので、
+-- コンテナ内の依存で補完・型チェック・デバッグまでやりたいときはこちらを使う。
+map("n", "<leader>Dn", function()
+  require("config.docker_nvim").open()
+end, { desc = "Docker: Neovim in container (コンテナ内で Neovim を起動)" })
+-- ホスト側で設定をいじったら、コンテナ内の Neovim へ送り直す
+map("n", "<leader>DN", function()
+  require("config.docker_nvim").sync()
+end, { desc = "Docker: Sync config to container (設定をコンテナへ送り直す)" })
+-- devcontainer.json を変えたあとに作り直す（VSCode の Rebuild Container 相当）
+map("n", "<leader>Db", function()
+  require("config.docker").rebuild()
+end, { desc = "Docker: Rebuild dev container (Dev Container を作り直す)" })
+-- コンテナのポートをホストへ転送（VSCode の Forward a Port / Ports ビュー相当）
+map("n", "<leader>Dp", function()
+  require("config.docker_ports").ports()
+end, { desc = "Docker: Ports (ポート転送の追加・停止)" })

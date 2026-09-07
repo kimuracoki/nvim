@@ -102,8 +102,15 @@ return {
         }
 
         -- npm 経由でインストールされる LSP（Node.js が必要）
+        --
+        -- 【コンテナ内では絞る理由】
+        -- npm 製の LSP は 1 つあたり 95MB 前後（node_modules を丸ごと抱えるため）で、
+        -- 11 個入れると Mason だけで 763MB になる（実測）。ホストなら一度きりの出費だが、
+        -- コンテナ内 Neovim（config/docker_nvim.lua）はコンテナを作り直すたびに払うことになり、
+        -- Python のプロジェクトのために PHP や CSS のサーバまで落とす羽目になる。
+        -- コンテナのときだけ、プロジェクトに関係するものへ絞る。ホストの挙動は変えない。
         if has("node") then
-          vim.list_extend(servers, {
+          local npm_servers = {
             "ts_ls",
             "html",
             "cssls",
@@ -115,7 +122,35 @@ return {
             "dockerls",
             "intelephense", -- PHP
             "prismals",     -- Prisma (.prisma)
-          })
+          }
+
+          if (vim.env.NVIM_IN_CONTAINER or "") ~= "" then
+            local root = vim.uv.cwd()
+            local function found(pattern)
+              return #vim.fn.glob(root .. "/" .. pattern, false, true) > 0
+            end
+            -- 目印になるファイルがあるものだけ入れる（走査はプロジェクト直下のみ）
+            local wanted = {}
+            local rules = {
+              { { "package.json", "tsconfig.json", "*.ts", "*.tsx", "*.js" }, { "ts_ls", "eslint", "html", "cssls", "jsonls" } },
+              { { "pyproject.toml", "requirements.txt", "setup.py", "*.py" }, { "pyright" } },
+              { { "composer.json", "*.php" }, { "intelephense" } },
+              { { "schema.prisma", "prisma" }, { "prismals" } },
+              { { "Dockerfile", "docker-compose.yml", "compose.yaml" }, { "dockerls", "yamlls" } },
+              { { "*.sh", "*.bash" }, { "bashls" } },
+            }
+            for _, rule in ipairs(rules) do
+              for _, marker in ipairs(rule[1]) do
+                if found(marker) then
+                  vim.list_extend(wanted, rule[2])
+                  break
+                end
+              end
+            end
+            npm_servers = vim.fn.uniq(vim.fn.sort(wanted))
+          end
+
+          vim.list_extend(servers, npm_servers)
         end
 
         -- 各言語のツールチェーンがある場合のみ追加
