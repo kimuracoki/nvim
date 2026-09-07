@@ -9,6 +9,7 @@ VSCodeのような操作感を実現するためのNeovim設定です。
 - **LSP・補完**: Mason経由で簡単にLSPサーバーをインストール
 - **スニペット機能**: VSCode互換のスニペット（HTML、TSX、JS/TS等の定型文を素早く入力）
 - **Git統合**: lazygit、GitHub PR/Issue管理（octo.nvim）、Gitグラフ表示
+- **Docker / Dev Container**: コンテナのシェル・ログ・lazydocker に加え、**コンテナの中で Neovim ごと動かせる**（LSP もデバッガもコンテナ側のツールチェーンで動く＝VSCode Dev Containers と同じモデル）
 - **AI機能**: Claude Code と Cursor CLI 統合（どちらも同じ右分割UIで利用可能）
 - **豊富なUI**: ミニマップ、アウトライン、問題パネル、通知システム
 - **テスト・デバッグ・Lint**: neotest（エディタ内でテスト実行/監視）、nvim-dap（多言語デバッグ）、nvim-lint（保存時に自動リント）
@@ -574,6 +575,7 @@ scoop install tree-sitter   # 無い場合は kulala が無効化される（エ
 - [スニペット](#スニペット)
 - [Diagnostics](#diagnostics-leaderx)
 - [Git操作](#git操作-leaderg)
+- [Docker / Dev Container](#docker--dev-container-leaderd)
 - [Translate（翻訳）](#translate翻訳-leadert)
 - [Run（コード実行）](#run-leaderr)
 - [Rest（REST クライアント）](#rest-leaderr)
@@ -1019,6 +1021,194 @@ PRやIssueを開いた後、以下のキーバインドが利用可能です。
 - 差分を見やすく表示
 - `:DiffviewFileHistory` で表示
 
+## Docker / Dev Container (`<leader>D`)
+
+Docker = コンテナ操作。VSCode の Docker 拡張 / Dev Containers 拡張に相当する。
+プラグインは使わず、`docker` / `devcontainer` CLI をフローティングターミナルに流している（`lua/config/docker.lua`）。
+
+| キー | 機能 | 由来 |
+|------|------|------|
+| `<leader>Ds` | コンテナに入る（シェル） | **D**ocker: **s**hell |
+| `<leader>Dl` | コンテナのログを追う | **D**ocker: **l**ogs |
+| `<leader>Dd` | lazydocker（コンテナ管理 TUI） | **D**ocker: lazy**d**ocker |
+| `<leader>Dc` | Dev Container を起動して中のシェルに入る | **D**ocker: dev **c**ontainer |
+| `<leader>Dn` | **コンテナの中で Neovim を起動**（LSP もコンテナ側） | **D**ocker: **n**vim |
+| `<leader>DN` | ホストの設定をコンテナへ送り直す | **D**ocker: **N**vim sync |
+
+### 対象コンテナは「今のプロジェクトのもの」が自動で選ばれる
+
+VSCode の Reopen in Container がそのプロジェクトのコンテナに繋ぐのと同じで、一覧から毎回選ばせたりはしない。
+プロジェクトルート（`.devcontainer` / `docker-compose.yml` / `.git` を上方向に探して決定）と、
+次のどちらかが一致するコンテナを「このプロジェクトのもの」とみなす:
+
+1. `docker compose` が付けるラベル `com.docker.compose.project.working_dir`
+2. bind mount の元パス（`docker run -v` だけで動かしている場合もこれで拾える）
+
+該当が 1 つなら選択画面は出ない。**他プロジェクトの DB などは一覧に出ない。**
+該当が 1 つも無いときだけ、警告を出したうえで起動中のコンテナ全部から選ばせる。
+
+#### 複数コンテナ（app + db など）のとき
+
+| 操作 | 候補 |
+|---|---|
+| `<leader>Ds` シェル / `<leader>Dl` ログ | プロジェクトのコンテナすべて（app も db も選べる。DB のシェルに入りたいことがあるため） |
+| `<leader>Dn` コンテナ内 Neovim / `<leader>DN` 送り直し | **開発用コンテナだけに自動で絞る**（1 つに決まれば選択画面すら出ない） |
+
+「開発用コンテナ」の判定は次のどちらか:
+
+- `devcontainer` CLI が作ったコンテナ（`devcontainer.local_folder` ラベルが付く）
+- プロジェクトのディレクトリが bind mount されているコンテナ（＝ソースが載っている方）
+
+db にソースを bind mount することはまず無いので、これで app 側が選ばれる。
+
+### devcontainer.json との付き合い方
+
+**仕様の解釈は公式 CLI に任せ、この設定では再実装しない。** `features` / `remoteUser` /
+`workspaceFolder` / `postCreateCommand` などは仕様追従が要る部分で、自前で解釈すると必ず古くなる。
+
+- `<leader>Dc` … `devcontainer up` → `devcontainer exec` を公式 CLI に投げる
+- `<leader>Dn` … 対象が **`devcontainer` CLI で作られたコンテナなら `devcontainer exec` を使う**。
+  こうすると `remoteUser`（root で入らない）や `workspaceFolder`（開始ディレクトリ）が
+  devcontainer.json の指定どおりになる。そうでなければ `docker exec` にフォールバックする
+
+判定はファイルの有無ではなく **`devcontainer.local_folder` ラベルの有無**で行う。
+`.devcontainer/devcontainer.json` があっても、自分で `docker compose up` したコンテナには
+このラベルが付かず、`devcontainer exec` は `Dev container not found` で失敗するため（実測）。
+
+#### Neovim をイメージ側に入れておく（推奨・より標準的）
+
+devcontainer.json を使うプロジェクトなら、送り込みスクリプトに頼らず
+[Dev Container Features](https://containers.dev/features) で Neovim を入れておく方が仕様に沿う:
+
+```jsonc
+{
+  "features": {
+    "ghcr.io/duduribeiro/devcontainer-features/neovim:1": {}
+  }
+}
+```
+
+`<leader>Dn` はコンテナに `nvim` が既にあればインストールを飛ばすので、この場合は
+設定のコピーだけで起動する。
+
+### 使い方
+
+- `<leader>Ds` … `docker exec -it <container> bash`（bash が無ければ sh）でフロートが開く。
+  `exit` で抜けるとフロートも閉じる。
+  同じコンテナでもう一度押すと、新しいセッションを作らず前のシェルに戻る。
+- `<leader>Dl` … `docker logs -f --tail 200` を流す。`q` ではなく `<C-c>` で止めて `exit`、または `<C-\>` でフロートを隠す。
+- `<leader>Dd` … lazydocker があればコンテナ/イメージ/ボリュームをまとめて操作できる（要インストール、任意）。
+- `<leader>Dc` … `.devcontainer/`（または `.devcontainer.json`）を上方向に探し、
+  `devcontainer up` → `devcontainer exec` の順に実行してコンテナ内シェルに入る。
+  初回はイメージのビルドで数分かかる。ビルドに失敗したときはログのフロートを閉じずに残す。
+- `<leader>Dn` … **VSCode の Dev Containers と同じモデル**。コンテナに Neovim 本体とこの設定を
+  送り込み、コンテナの中で Neovim を起動する。**専用タブの全画面**で開き、外側のタブライン・
+  ステータスライン・winbar（パンくず）を畳むので、画面はコンテナ側の Neovim だけになる
+  （フロートの中にエディタが浮いている状態にはしない）。タブを離れれば元の表示に戻る。
+  中の nvim には Esc / `jk` / `C-hjkl` / `C-\` がそのまま届く。戻るときは中の nvim で `:qa`。
+- `<leader>DN` … ホスト側で設定を直したあと、コンテナ内の Neovim へ送り直す。
+  `<leader>Dn` は一度送り込んだ設定をそのまま使うので、設定を更新したらこちらを使う。
+
+### コンテナに送り込んで大丈夫？（VSCode も同じことをしている）
+
+VSCode の Dev Containers / Remote も、**コンテナの中に VS Code Server と拡張機能をダウンロードして常駐させている**
+（[公式 FAQ](https://code.visualstudio.com/docs/remote/faq): サーバはリモート側にインストールされ、
+`update.code.visualstudio.com` への 443 outbound が必要。拡張も
+[コンテナ内にインストールされて動く](https://code.visualstudio.com/docs/remote/containers)）。
+`<leader>Dn` がやっているのは同じことなので、VSCode を使えている環境なら同じ前提で使える。
+
+| | 影響 |
+|---|---|
+| イメージ / Dockerfile | **変更しない**。書き込みはコンテナの書き込み層だけ |
+| `docker rm` したら | 送り込んだものは消える（VSCode の `~/.vscode-server` と同じ。もう一度 `<leader>Dn` で入れ直す） |
+| 他の人 / CI | 影響なし。イメージを push したりコミットしたりはしない |
+| ディスク（実測 / python:3.12-slim） | 合計 **約 785MB**（プラグイン 236MB + Mason 138MB + Neovim と C コンパイラ等 115MB + treesitter パーサ 34MB + その他） |
+| 必要な権限 | root か sudo。どちらも無ければ何もせず中止する |
+| ネットワーク | コンテナから GitHub への outbound が必要（Neovim 本体とプラグインの取得） |
+
+**使わない方がいい相手**: 本番相当のコンテナや、他人と共有しているコンテナ。
+`apt` / `apk` でパッケージを入れるので、そのコンテナの状態が変わる。開発用コンテナに対して使うこと
+（対象は上記のとおりプロジェクトに紐づくコンテナに絞られるので、他プロジェクトの本番 DB が
+候補に出ることは通常ない）。
+
+コンテナへ書き込むのは `<leader>Dn` と `<leader>DN` だけで、どちらも**対象を明示的に選ばせてから確認する**:
+
+- プロジェクトに紐づくコンテナが特定できないときは、起動中のコンテナ全部が候補になる。
+  この場合は 1 個しか無くても選択を省略しない（書き込み系は `always_ask`）。
+  「唯一動いているのが本番 DB」という状況で、目視せずに書き込みが始まらないようにするため
+- 送り込み前に「コンテナ名（イメージ名）」と書き込み量を出して確認する
+- `<leader>DN`（送り直し）は削除するフルパスを出して確認する
+  （例: `app-1（node:22）の /root/.config/nvim を削除して、ホストの設定を入れ直します。よろしいですか？`）
+
+`<leader>Ds`（シェル） / `<leader>Dl`（ログ） / `<leader>Dd`（lazydocker）は**コンテナの中身を変更しない**ので、
+本番コンテナに対して使っても状態は変わらない（もちろん中で何をするかは自己責任）。
+
+### 必要なツール（すべて任意）
+
+```bash
+# コンテナ操作の前提（Docker Desktop など）
+docker --version
+
+# lazydocker（<leader>Dd）
+brew install lazydocker            # macOS
+scoop install extras/lazydocker    # Windows
+
+# devcontainer CLI（<leader>Dc）
+npm install -g @devcontainers/cli
+```
+
+未インストールのときはキーを押した時点で「何をどう入れるか」を通知するだけなので、起動には影響しない。
+
+### 2 つのモードの使い分け（ここが VSCode との勝負どころ）
+
+| | ホスト側の Neovim（`<leader>Ds` / `<leader>Dc`） | コンテナ内の Neovim（`<leader>Dn`） |
+|---|---|---|
+| Neovim が動く場所 | ホスト | **コンテナ内**（VSCode Server と同じ位置づけ） |
+| ファイル編集 | ホスト（bind mount 経由で同じ実体） | コンテナ内 |
+| ターミナル / ログ / ビルド | コンテナ内 | コンテナ内 |
+| **LSP・補完・型チェック** | ホストのツールチェーン | **コンテナのツールチェーン** |
+| **デバッガ / lint / format / テスト** | ホストのツールチェーン | **コンテナのツールチェーン** |
+| 起動の速さ | 即時 | 初回のみ送り込みで数分（2 回目以降は即時） |
+
+コンテナにしか依存が入っていないプロジェクト（Python の venv、node_modules、gem、cabal store など）で
+補完や型チェックを効かせたいなら `<leader>Dn`。それ以外は `<leader>Ds` の方が軽くて速い。
+
+`<leader>Dn` が初回にやること（VSCode が Dev Container に VSCode Server と拡張を入れるのと同じ）:
+
+1. コンテナに Neovim が無ければ、公式のビルド済み tarball を展開して入れる
+   （musl の Alpine は tarball が動かないので `apk`）。あわせて次も入れる:
+   - `git`（lazy.nvim がプラグインを clone するのに必須）
+   - **C コンパイラ + tree-sitter CLI**（これが無いと treesitter パーサをビルドできず、
+     同梱の 7 個以外はハイライトが効かない＝コードが色無しで表示される。実測で確認済み）
+2. この設定一式を `docker cp` でコンテナの `$HOME/.config/nvim` へ送る
+3. コンテナ内で `:Lazy! sync` を走らせてプラグインを入れる
+   （ホストの `~/.local/share/nvim` は持ち込まない。treesitter パーサなどネイティブビルドを含むものが
+   アーキテクチャ違いで壊れるため）
+4. `docker exec -it` でコンテナ内の Neovim を起動する
+
+なお LSP サーバは Mason がコンテナ内へ自動インストールする。`lua/plugins/lsp.lua` の
+`has()` 判定がコンテナ側のツールチェーンを見るので、**コンテナに入っている言語の分だけ**
+セットアップされる。
+
+さらにコンテナ内では、npm 製 LSP を**プロジェクトの目印ファイルがあるものだけ**に絞る
+（`package.json` があれば ts_ls/eslint/html/cssls/jsonls、`*.py` があれば pyright…）。
+npm 製 LSP は 1 つ 95MB 前後あり、11 個すべて入れると Mason だけで 763MB になる。
+ホストなら一度きりの出費だが、コンテナは作り直すたびに払うため。
+
+実測（Python + Dockerfile のプロジェクト）: **763MB → 138MB**。
+入ったのは pyright / dockerls / yamlls と、プリビルド配布の lua_ls / marksman / rust_analyzer だけ。
+ホスト側の挙動は変えていない。
+
+### 今どこに居るか分かるようにする（VSCode の左下インジケータ相当）
+
+コンテナ内 Neovim は全画面で開くので、放っておくとホスト側と見分けが付かない。2 か所に出す:
+
+- **画面上端**（ホスト側が描く）: `🐳 Container: <名前>` と `:qa で戻る`
+- **ステータスライン**（コンテナ内の Neovim が描く）: モードの隣に `🐳 <名前>`
+
+後者は `NVIM_IN_CONTAINER` 環境変数を見て `lua/plugins/statusline.lua` が出している。
+自分でコンテナに入って `nvim` を起動する場合でも、この変数を設定すれば同じ表示になる。
+
 ## Translate（翻訳） (`<leader>t`)
 
 Translate = 翻訳。コメントやコミットメッセージを書く際の英日翻訳に使用。
@@ -1384,6 +1574,8 @@ Remove-Item -Recurse -Force `
 │   │   ├── keymaps.lua      # キーマップ設定
 │   │   ├── lazy.lua         # プラグインマネージャー設定
 │   │   ├── highlight.lua    # ハイライト・透過設定
+│   │   ├── docker.lua       # Docker / Dev Container 連携
+│   │   ├── docker_nvim.lua  # コンテナ内で Neovim を動かす（VSCode Dev Containers 相当）
 │   │   └── startup.lua      # 起動時レイアウト設定
 │   └── plugins/
 │       ├── ui.lua           # UI関連（カラースキーム、ステータスライン、ファイラ、AI統合）

@@ -144,6 +144,17 @@ M.sections = {
     },
   },
   {
+    title = "Docker",
+    keys = {
+      { "SPC Ds", "コンテナに入る（シェル）" },
+      { "SPC Dl", "コンテナのログを追う" },
+      { "SPC Dd", "lazydocker（コンテナ管理 TUI）" },
+      { "SPC Dc", "Dev Container を起動して中のシェルに入る" },
+      { "SPC Dn", "コンテナ内で Neovim を起動（LSP もコンテナ側で動く）" },
+      { "SPC DN", "ホストの設定をコンテナ内 Neovim へ送り直す" },
+    },
+  },
+  {
     title = "Test",
     keys = {
       { "SPC Tt", "最寄りのテストを実行" },

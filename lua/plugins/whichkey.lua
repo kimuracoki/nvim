@@ -57,6 +57,7 @@ return {
         { "<leader>b", icon = "\u{f0c5}", group = "Buffer (バッファ)" },
         { "<leader>c", icon = "\u{f121}", group = "Code (コード)" },
         { "<leader>d", icon = "\u{f188}", group = "Debug (デバッグ)" },
+        { "<leader>D", icon = "\u{f21f}", group = "Docker (コンテナ)" },
         { "<leader>e", icon = "\u{f07c}", desc = "Explorer (ファイルツリー)" },
         { "<leader>f", icon = "\u{f002}", group = "Find/File (検索/ファイル)" },
         { "<leader>g", icon = "\u{f1d3}", group = "Git" },
@@ -98,6 +99,13 @@ return {
         { "<leader>dl", desc = "Debug: Run last (前回の構成で実行)" },
         { "<leader>du", desc = "Debug: UI toggle (デバッグ UI のトグル)" },
         { "<leader>dt", desc = "Debug: Terminate (デバッグを終了)" },
+        -- Docker
+        { "<leader>Ds", desc = "Docker: Shell (コンテナに入る)" },
+        { "<leader>Dl", desc = "Docker: Logs (コンテナのログを追う)" },
+        { "<leader>Dd", desc = "Docker: Lazydocker (コンテナ管理 TUI)" },
+        { "<leader>Dc", desc = "Docker: Dev Container (起動してコンテナ内シェルに入る)" },
+        { "<leader>Dn", desc = "Docker: Neovim in container (コンテナ内で Neovim を起動)" },
+        { "<leader>DN", desc = "Docker: Sync config to container (設定をコンテナへ送り直す)" },
         -- Find/File
         { "<leader>ff", desc = "Find: Files (ファイル検索)" },
         { "<leader>fb", desc = "Find: Buffers (バッファ一覧)" },
