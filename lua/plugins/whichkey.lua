@@ -106,6 +106,8 @@ return {
         { "<leader>Dc", desc = "Docker: Dev Container (起動してコンテナ内シェルに入る)" },
         { "<leader>Dn", desc = "Docker: Neovim in container (コンテナ内で Neovim を起動)" },
         { "<leader>DN", desc = "Docker: Sync config to container (設定をコンテナへ送り直す)" },
+        { "<leader>Db", desc = "Docker: Rebuild dev container (Dev Container を作り直す)" },
+        { "<leader>Dp", desc = "Docker: Ports (ポート転送の追加・停止)" },
         -- Find/File
         { "<leader>ff", desc = "Find: Files (ファイル検索)" },
         { "<leader>fb", desc = "Find: Buffers (バッファ一覧)" },

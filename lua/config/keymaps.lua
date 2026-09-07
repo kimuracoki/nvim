@@ -591,3 +591,11 @@ end, { desc = "Docker: Neovim in container (コンテナ内で Neovim を起動)
 map("n", "<leader>DN", function()
   require("config.docker_nvim").sync()
 end, { desc = "Docker: Sync config to container (設定をコンテナへ送り直す)" })
+-- devcontainer.json を変えたあとに作り直す（VSCode の Rebuild Container 相当）
+map("n", "<leader>Db", function()
+  require("config.docker").rebuild()
+end, { desc = "Docker: Rebuild dev container (Dev Container を作り直す)" })
+-- コンテナのポートをホストへ転送（VSCode の Forward a Port / Ports ビュー相当）
+map("n", "<leader>Dp", function()
+  require("config.docker_ports").ports()
+end, { desc = "Docker: Ports (ポート転送の追加・停止)" })

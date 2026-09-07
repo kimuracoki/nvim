@@ -100,10 +100,16 @@ function M.term(key, cmd, opts)
         state.tabpage = vim.api.nvim_get_current_tabpage()
       end
       if opts.fullscreen then
-        -- 「入れ子の窓の中にエディタがある」ように見えるのを避ける。
-        -- VSCode の Reopen in Container はウィンドウ自体がコンテナ側に切り替わるので、
-        -- こちらもタブライン・ステータスライン・winbar を畳んで画面を明け渡す。
-        -- このバッファに居る間だけ隠し、離れたら元に戻す。
+        -- 【狙い】VSCode の Reopen in Container はウィンドウごとコンテナ側に切り替わる。
+        -- こちらも、コンテナ内 Neovim を開いている間は外側の飾り（タブライン・ステータスライン・
+        -- winbar）と、そのタブに紛れ込む他のウィンドウを全部どけて、画面を明け渡す。
+        --
+        -- 【前の実装が効かなかった理由（実機のスクリーンショットで判明）】
+        -- 1. 新しいタブには neo-tree が勝手に開く。結果、専用タブのはずが
+        --    「neo-tree ＋ コンテナ内 nvim」の 2 分割になり、入れ子に見えていた。
+        -- 2. その neo-tree にフォーカスが移った瞬間、端末バッファの BufLeave が走って
+        --    畳んだはずのタブライン・ステータスラインが復活していた。
+        -- なので判定をバッファ単位からタブページ単位に変え、割り込んだウィンドウは閉じる。
         local saved
         local function hide()
           saved = saved or { showtabline = vim.o.showtabline, laststatus = vim.o.laststatus }
@@ -117,21 +123,86 @@ function M.term(key, cmd, opts)
             saved = nil
           end
         end
+        state.restore = restore
+
         -- インジケータの色。透過設定（config/highlight.lua）は「透過が有効なときだけ」走るので
         -- あちらには置けない。テーマを変えても消えないよう、開くたびにここで定義する
         vim.api.nvim_set_hl(0, "DockerContainerBar", { fg = "#1e1e2e", bg = "#89b4fa", bold = true })
-        if t.window and vim.api.nvim_win_is_valid(t.window) then
-          -- 枠は畳むが、「今どこに居るのか」だけは常に見えるようにする。
-          -- VSCode がリモート接続中に左下へインジケータを出し続けるのと同じ役割で、
-          -- これが無いと全画面ゆえに「ホストの nvim なのかコンテナの nvim なのか」が分からなくなる。
-          vim.wo[t.window].winbar = opts.indicator or ""
-          vim.wo[t.window].number = false
-          vim.wo[t.window].relativenumber = false
-          vim.wo[t.window].signcolumn = "no"
+
+        local function decorate()
+          for _, win in ipairs(vim.api.nvim_list_wins()) do
+            if vim.api.nvim_win_is_valid(win) and vim.api.nvim_win_get_buf(win) == t.bufnr then
+              -- 枠は畳むが「今どこに居るか」だけは常に見せる（VSCode の左下インジケータ相当）
+              vim.wo[win].winbar = opts.indicator or ""
+              vim.wo[win].number = false
+              vim.wo[win].relativenumber = false
+              vim.wo[win].signcolumn = "no"
+            end
+          end
         end
-        vim.api.nvim_create_autocmd({ "BufEnter", "TermEnter" }, { buffer = t.bufnr, callback = hide })
-        vim.api.nvim_create_autocmd("BufLeave", { buffer = t.bufnr, callback = restore })
-        vim.api.nvim_create_autocmd("BufWipeout", { buffer = t.bufnr, once = true, callback = restore })
+
+        -- このタブは端末専用にする。neo-tree など後から割り込んできたウィンドウは閉じる
+        local function claim_tab()
+          local tab = state.tabpage
+          if not (tab and vim.api.nvim_tabpage_is_valid(tab)) then
+            return
+          end
+          if not vim.api.nvim_buf_is_valid(t.bufnr) then
+            return -- 端末が終わっていれば触らない（後始末は TermClose 側の仕事）
+          end
+          local wins = vim.api.nvim_tabpage_list_wins(tab)
+          local ours = vim.tbl_filter(function(w)
+            return vim.api.nvim_win_is_valid(w) and vim.api.nvim_win_get_buf(w) == t.bufnr
+          end, wins)
+          if #ours == 0 then
+            return -- このタブに端末が無いなら、もう専用タブではない
+          end
+          for _, w in ipairs(wins) do
+            if vim.api.nvim_win_is_valid(w) and vim.api.nvim_win_get_buf(w) ~= t.bufnr then
+              pcall(vim.api.nvim_win_close, w, true)
+            end
+          end
+          decorate()
+        end
+        state.claim_tab = claim_tab
+
+        local group = vim.api.nvim_create_augroup("DockerTerm" .. t.bufnr, { clear = true })
+        state.group = group
+
+        if state.tabpage then
+          -- タブページ単位で判定する。専用タブに居る間だけ枠を畳み、他のタブへ移れば戻す
+          vim.api.nvim_create_autocmd({ "TabEnter", "WinEnter", "BufWinEnter" }, {
+            group = group,
+            callback = function()
+              if vim.api.nvim_get_current_tabpage() == state.tabpage then
+                vim.schedule(function()
+                  claim_tab()
+                  hide()
+                end)
+              else
+                restore()
+              end
+            end,
+          })
+          -- 開いた直後にも割り込みを掃除する（neo-tree は少し遅れて開くので schedule 越し）
+          vim.schedule(claim_tab)
+          vim.defer_fn(claim_tab, 100)
+          vim.defer_fn(claim_tab, 400)
+        else
+          vim.api.nvim_create_autocmd({ "BufEnter", "TermEnter" }, {
+            group = group,
+            buffer = t.bufnr,
+            callback = hide,
+          })
+          vim.api.nvim_create_autocmd("BufLeave", { group = group, buffer = t.bufnr, callback = restore })
+        end
+        vim.api.nvim_create_autocmd("BufWipeout", {
+          group = group,
+          buffer = t.bufnr,
+          once = true,
+          callback = restore,
+        })
+        decorate()
         hide()
       end
 
@@ -169,6 +240,13 @@ function M.term(key, cmd, opts)
               return
             end
             terms[key] = nil
+            if state.group then
+              pcall(vim.api.nvim_del_augroup_by_id, state.group)
+              state.group = nil
+            end
+            if state.restore then
+              state.restore()
+            end
 
             -- 【順序が重要】バッファを先に消してはいけない。
             -- そのウィンドウに回せる通常バッファが無いと、Neovim は閉じる代わりに
@@ -354,15 +432,28 @@ function M.pick(prompt, cb, opts)
         return c.mine
       end, all)
       -- コンテナ内で Neovim を動かすような「開発用コンテナに用がある」操作では、
-      -- ソースが載っているコンテナ（devcontainer CLI 製、または bind mount あり）に絞る。
-      -- app + db の 2 つが動いていても、db を選ばせる意味は無いため。
+      -- ソースが載っているコンテナ（devcontainer CLI 製、または bind mount あり）を先頭に出す。
+      --
+      -- 【絞り込まない理由】以前はここで開発用コンテナだけに絞っていたが、そうすると
+      -- app + db の構成で db 側に入る手段が完全に消える（選択肢に出てこない）。
+      -- 「よく使う方を先頭に置く」に留めて、選ぶ自由は残す。
+      -- 候補が 1 つのときは下で自動選択されるので、単一コンテナの構成では何も聞かれない。
       if opts.prefer_dev then
-        local dev = vim.tbl_filter(function(c)
-          return c.devcontainer_folder ~= nil or c.workspace
-        end, mine)
-        if #dev > 0 then
-          mine = dev
-        end
+        table.sort(mine, function(a, b)
+          local function rank(x)
+            if x.devcontainer_folder then
+              return 1
+            elseif x.workspace then
+              return 2
+            end
+            return 3
+          end
+          local ra, rb = rank(a), rank(b)
+          if ra ~= rb then
+            return ra < rb
+          end
+          return a.name < b.name
+        end)
       end
 
       local target, scoped = mine, true
@@ -455,6 +546,50 @@ function M.devcontainer_root()
     return name == ".devcontainer" or name == ".devcontainer.json"
   end, { upward = true, path = start, limit = 1 })[1]
   return hit and vim.fs.dirname(hit) or nil
+end
+
+-- Dev Container を作り直す（VSCode の "Rebuild Container" / "Rebuild Without Cache" 相当）。
+-- devcontainer.json を書き換えたあとに必要になる。
+-- 【注意】コンテナの書き込み層は捨てられるので、SPC Dn で送り込んだ Neovim も消える
+-- （VSCode でも VS Code Server が入れ直しになるのと同じ）。
+function M.rebuild()
+  local root = M.devcontainer_root()
+  if not root then
+    M.notify(".devcontainer が見つかりません", vim.log.levels.WARN)
+    return
+  end
+  if not platform.has("devcontainer") then
+    M.notify("devcontainer CLI が見つかりません（npm install -g @devcontainers/cli）", vim.log.levels.WARN)
+    return
+  end
+  if not M.ensure_docker() then
+    return
+  end
+
+  M.notify(("%s を作り直します。コンテナ内に入れたもの（Neovim 含む）は消えます"):format(root))
+  M.select({ "作り直す", "キャッシュを使わず作り直す", "やめる" }, {
+    prompt = "Dev Container を作り直す",
+  }, function(choice)
+    if not choice or choice == "やめる" then
+      return
+    end
+    local ws = vim.fn.shellescape(root)
+    local cmd = ("devcontainer up --workspace-folder %s --remove-existing-container"):format(ws)
+    if choice == "キャッシュを使わず作り直す" then
+      cmd = cmd .. " --build-no-cache"
+    end
+    M.term("devcontainer:rebuild:" .. root, cmd, {
+      keep_on_error = true,
+      display_name = "\u{f308} rebuild",
+      on_exit = function(code)
+        if code ~= 0 then
+          M.notify("作り直しに失敗しました（ログを確認してください）", vim.log.levels.ERROR)
+          return
+        end
+        M.notify("作り直しました。SPC Dn で Neovim を入れ直せます")
+      end,
+    })
+  end)
 end
 
 -- Dev Container を起動してその中のシェルに入る（VSCode の "Reopen in Container" 相当）。

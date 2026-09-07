@@ -29,7 +29,9 @@ local function running(cb)
         local list = {}
         for name in (res.stdout or ""):gmatch("[^\r\n]+") do
           -- <prefix><コンテナ名>-<ホスト側ポート>-<コンテナ側ポート>
-          local target, host, cport = name:match("^" .. PREFIX .. "(.+)%-(%d+)%-(%d+)$")
+          -- PREFIX には "-" が含まれる。Lua のパターンで "-" は「最短一致の量指定子」なので、
+          -- そのまま連結すると一致しない（実測: 転送中なのに一覧に出なかった）。必ずエスケープする。
+          local target, host, cport = name:match("^" .. vim.pesc(PREFIX) .. "(.+)%-(%d+)%-(%d+)$")
           if target then
             table.insert(list, { name = name, target = target, host = host, container = cport })
           end
@@ -84,13 +86,17 @@ local function candidates(c, cb)
       for p in (res.stdout or ""):gmatch("%d+") do
         add(p)
       end
-      -- devcontainer.json 側の指定（CLI が読める形で持っている）
-      if c.devcontainer_folder and require("config.platform").has("devcontainer") then
+      -- devcontainer.json 側の指定（forwardPorts）。
+      -- これは設定ファイルの内容なので、コンテナがどう起動されたか（CLI 製かどうか）とは無関係。
+      -- ラベルが無い＝素の compose 起動でも devcontainer.json は読めるので、
+      -- ラベルではなくワークスペースの場所から引く。
+      local ws = c.devcontainer_folder or require("config.docker").devcontainer_root()
+      if ws and require("config.platform").has("devcontainer") then
         vim.system({
           "devcontainer",
           "read-configuration",
           "--workspace-folder",
-          c.devcontainer_folder,
+          ws,
         }, { text = true }, function(dc)
           vim.schedule(function()
             local ok, parsed = pcall(vim.json.decode, vim.trim((dc.stdout or ""):match("[^\r\n]*$") or ""))
