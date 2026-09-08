@@ -1321,7 +1321,11 @@ Docker Desktop 固有の機能は使っていないので、素の Docker Engine
 |---|---|---|
 | **WSL の中で nvim を動かす**（推奨） | そのまま動く | 中では素の Linux なので、パスもソケットもそのまま。VSCode の Remote-WSL と同じ考え方 |
 | Windows の nvim ＋ Docker Desktop | そのまま動く | `docker.exe` が PATH にある |
-| Windows の nvim ＋ WSL の Docker Engine | **docker CLI の用意が要る** | Windows 側に `docker.exe` が無いと使えない。`DOCKER_HOST` を WSL のデーモンへ向けるか、WSL の中で nvim を動かす |
+| Windows の nvim ＋ WSL の Docker Engine | **WSL の中で nvim を動かすこと** | Windows 側に `docker.exe` が無いため、Windows の nvim からは Docker 連携が使えない |
+
+Docker Desktop を入れられない環境（ライセンスの都合など）では、**WSL の中で nvim を動かす**のが答え。
+上の「Linux / WSL のセットアップ」のとおりに入れれば、中は素の Linux なので全機能がそのまま動く。
+VSCode も同じ状況では Remote-WSL でエディタごと WSL に入る。
 
 3 番目の構成で `docker` が見つからない場合は、その旨と対処（WSL の中で nvim を起動する）を
 通知で案内する。パス比較は `/mnt/c/...` にも対応しているので、

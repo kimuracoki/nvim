@@ -139,6 +139,11 @@ local function normalize(p)
   p = p:gsub("^/run/desktop/mnt/host/(%a)/", "%1:/")
   p = p:gsub("^/host_mnt/(%a)/", "%1:/")
   p = p:gsub("^/mnt/(%a)/", "%1:/")
+  -- Windows の Neovim から WSL のファイルを開いている場合、パスは
+  -- //wsl$/Ubuntu/home/me/app や //wsl.localhost/Ubuntu/home/me/app になる。
+  -- コンテナ側（WSL の Docker Engine）は /home/me/app と言ってくるので、UNC 部分を落として揃える。
+  p = p:gsub("^//wsl%$/[^/]+", "")
+  p = p:gsub("^//wsl%.localhost/[^/]+", "")
   p = p:gsub("/+$", "")
   if platform.is_windows then
     -- Windows のファイルシステムは大文字小文字を区別しない（ドライブレターも揺れる）

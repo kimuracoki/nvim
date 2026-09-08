@@ -144,6 +144,9 @@ local function tidy_placeholder_buffers()
       end
     end
     vim.o.showtabline = 0
+    -- 何も開いていない状態になったことを知らせる。起動画面（snacks dashboard）を
+    -- 出し直すのは起動画面側の関心事なので lua/plugins/dashboard.lua が拾う。
+    vim.api.nvim_exec_autocmds("User", { pattern = "NoBuffersLeft" })
   else
     -- bufferline 未ロード（起動直後）のうちに 2 にすると素の tabline が一瞬見えるので、
     -- そのときは既定値の 1 に戻すだけにして、表示は bufferline のロード後に任せる。
