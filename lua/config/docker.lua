@@ -52,10 +52,26 @@ function M.ensure_docker()
   if platform.has("docker") then
     return true
   end
-  M.notify(
-    "docker が見つかりません（Docker Desktop / docker CLI を入れて PATH を通してください）",
-    vim.log.levels.WARN
-  )
+  -- コンテナの中で動いている Neovim（SPC Dn で開いたもの）には、普通 docker CLI が入っていない。
+  -- そこで出すべき案内は「入れてください」ではなく「ホスト側の Neovim でやってください」。
+  -- VSCode も Docker 拡張は UI 拡張（ホスト側で動く）として扱っている。
+  local container = vim.env.NVIM_IN_CONTAINER
+  if container and container ~= "" then
+    M.notify(
+      ("ここは %s の中なので Docker 操作はできません（ホスト側の Neovim で実行してください）"):format(container),
+      vim.log.levels.WARN
+    )
+    return false
+  end
+
+  -- Windows で「WSL の中にだけ Docker Engine がある」構成は、Windows 側に docker CLI が無く
+  -- ここに落ちる。その場合は WSL の中で nvim を動かすのが素直（VSCode の Remote-WSL と同じ考え方）。
+  local hint = "Docker Desktop / docker CLI を入れて PATH を通してください"
+  if platform.is_windows and platform.has("wsl") then
+    hint = "WSL 上に Docker Engine がある構成なら、WSL の中で nvim を起動してください"
+      .. "（Windows 側の docker CLI を使う場合は DOCKER_HOST の設定が必要です）"
+  end
+  M.notify(("docker が見つかりません（%s）"):format(hint), vim.log.levels.WARN)
   return false
 end
 
@@ -115,9 +131,14 @@ local function normalize(p)
     return nil
   end
   p = p:gsub("\\", "/")
-  -- Docker Desktop がホストのドライブを見せる形を C:/ 形式へ戻す
+  -- ホストのドライブがコンテナ側でどう見えるかは、Docker の載せ方で表記が変わる。
+  -- どれも同じ場所を指すので C:/ 形式へ揃える。
+  --   /run/desktop/mnt/host/c/... : Docker Desktop（現行）
+  --   /host_mnt/c/...             : Docker Desktop（旧）
+  --   /mnt/c/...                  : WSL2 上の Docker Engine
   p = p:gsub("^/run/desktop/mnt/host/(%a)/", "%1:/")
   p = p:gsub("^/host_mnt/(%a)/", "%1:/")
+  p = p:gsub("^/mnt/(%a)/", "%1:/")
   p = p:gsub("/+$", "")
   if platform.is_windows then
     -- Windows のファイルシステムは大文字小文字を区別しない（ドライブレターも揺れる）

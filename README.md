@@ -25,6 +25,7 @@ VSCodeのような操作感を実現するためのNeovim設定です。
 - [セットアップ（初回インストール）](#セットアップ初回インストール)
   - [macOS のセットアップ](#macos-のセットアップ)
   - [Windows のセットアップ](#windows-のセットアップ)
+  - [Linux / WSL のセットアップ](#linux--wsl-のセットアップ)
 - [キーマップ一覧](#キーマップ一覧)
 - [プラグイン一覧](#プラグイン一覧)
 - [トラブルシューティング](#トラブルシューティング)
@@ -509,6 +510,152 @@ scoop install tree-sitter   # 無い場合は kulala が無効化される（エ
 - **クリップボード**: `clipboard = "unnamedplus"` は最近の Neovim（Windows版）に組み込みのクリップボード連携で動くため、追加ツールは不要です。
 - **IME切り替え**: この設定はOSを自動判定し、Windows では `im-select.exe`、macOS では `macism` を呼び分けます（`lua/plugins/im.lua`）。どちらのCLIも無ければ、IME切り替えだけ静かにスキップされます。
 - **PATHの反映**: scoop でツールを入れた直後は PowerShell を開き直さないと PATH が反映されません。「コマンドが見つからない」ときはまず開き直してください。
+
+---
+
+## Linux / WSL のセットアップ
+
+WSL（Windows Subsystem for Linux）も中身は Linux なので手順は共通。
+違うのはクリップボードと IME まわりだけで、それは最後の「WSL 特有の注意点」にまとめてある。
+
+> **なぜ WSL の中に入れるのか**: Docker Engine を WSL の中だけに入れている場合、
+> Windows 側には `docker.exe` が無いため Windows の Neovim から Docker 連携（`<leader>D`）が使えない。
+> Neovim ごと WSL 側に置けば、中は素の Linux なので全機能がそのまま動く（VSCode の Remote-WSL と同じ考え方）。
+> Docker Desktop を使っているなら Windows 側の Neovim のままでよい。
+
+### 1. 基本環境のセットアップ
+
+```bash
+# Debian / Ubuntu
+sudo apt update
+sudo apt install -y git curl unzip build-essential
+
+# Fedora / RHEL
+sudo dnf install -y git curl unzip gcc make
+
+# Arch
+sudo pacman -S --needed git curl unzip base-devel
+```
+
+`build-essential`（C コンパイラ）は treesitter のパーサビルドに必須。
+入れないと構文ハイライトが Neovim 同梱の分だけになる。
+
+### 2. Neovim 本体（0.11 以上が必要）
+
+ディストリのパッケージは古いことが多いので、公式のビルド済みを使う。
+
+```bash
+# x86_64 の場合（arm64 なら nvim-linux-arm64.tar.gz）
+curl -LO https://github.com/neovim/neovim/releases/latest/download/nvim-linux-x86_64.tar.gz
+sudo tar xzf nvim-linux-x86_64.tar.gz -C /usr/local --strip-components=1
+rm nvim-linux-x86_64.tar.gz
+nvim --version | head -1   # v0.11 以上であること
+```
+
+### 3. この設定をクローン
+
+```bash
+# 既存の設定があればバックアップ
+[ -d ~/.config/nvim ] && mv ~/.config/nvim ~/.config/nvim.bak
+[ -d ~/.local/share/nvim ] && mv ~/.local/share/nvim ~/.local/share/nvim.bak
+
+git clone <このリポジトリのURL> ~/.config/nvim
+```
+
+### 4. 必須ツール
+
+```bash
+# Node.js（Mason が入れる LSP の大半が npm 製。これが無いと ts_ls / pyright などが入らない）
+curl -fsSL https://deb.nodesource.com/setup_22.x | sudo -E bash -
+sudo apt install -y nodejs
+
+# treesitter のパーサビルドに必要（C コンパイラと両方揃って初めて動く）
+sudo npm install -g tree-sitter-cli
+
+# 検索（telescope が使う）
+sudo apt install -y ripgrep fd-find
+# Debian/Ubuntu では fd が fdfind という名前になるので別名を張る
+mkdir -p ~/.local/bin && ln -sf "$(which fdfind)" ~/.local/bin/fd
+```
+
+`~/.local/bin` が PATH に無ければ `.bashrc` / `.zshrc` に追加しておく。
+
+### 5. Nerd Font
+
+フォントを描画するのは**端末側**なので、WSL の中ではなく **Windows 側**にインストールする
+（Windows Terminal や Warp の設定でフォントを指定する）。ネイティブ Linux なら:
+
+```bash
+mkdir -p ~/.local/share/fonts
+cd ~/.local/share/fonts
+curl -fLO https://github.com/ryanoasis/nerd-fonts/releases/latest/download/JetBrainsMono.zip
+unzip -o JetBrainsMono.zip && rm JetBrainsMono.zip
+fc-cache -f
+```
+
+### 6. 初回起動
+
+```bash
+nvim
+```
+
+プラグインが自動でインストールされる。終わったら `:checkhealth` で警告を確認する。
+
+### 7. オプションツール（必要に応じて）
+
+```bash
+sudo apt install -y python3 python3-pip   # pyright / ruff 用
+sudo apt install -y golang-go             # gopls 用
+sudo apt install -y default-jdk           # jdtls 用
+
+# Git UI（<leader>gg）
+sudo apt install -y lazygit || {
+  curl -Lo /tmp/lazygit.tar.gz "https://github.com/jesseduffield/lazygit/releases/latest/download/lazygit_$(curl -s https://api.github.com/repos/jesseduffield/lazygit/releases/latest | grep -Po '"tag_name": "v\K[^"]*')_Linux_x86_64.tar.gz"
+  tar xzf /tmp/lazygit.tar.gz -C /tmp lazygit && sudo install /tmp/lazygit /usr/local/bin
+}
+
+# Docker（<leader>D 系）
+sudo apt install -y docker.io && sudo usermod -aG docker "$USER"   # 再ログインが必要
+
+# Dev Container CLI（<leader>Dc / <leader>Db）
+sudo npm install -g @devcontainers/cli
+
+# コンテナ管理 TUI（<leader>Dd）
+# https://github.com/jesseduffield/lazydocker のリリースから取得
+```
+
+リンタ（`<leader>cl` / 保存時に自動実行）は入っているものだけ有効になる:
+
+```bash
+pipx install ruff yamllint      # Python / YAML
+sudo npm install -g markdownlint-cli jsonlint
+sudo apt install -y shellcheck  # sh / bash
+```
+
+### WSL 特有の注意点
+
+- **クリップボード**: この設定は `clipboard = "unnamedplus"` なので、WSL では橋渡しが要る。
+  入れないとヤンクが Windows 側に届かない。
+
+  ```bash
+  curl -sLo /tmp/win32yank.zip https://github.com/equalsraf/win32yank/releases/latest/download/win32yank-x64.zip
+  unzip -p /tmp/win32yank.zip win32yank.exe > /tmp/win32yank.exe
+  chmod +x /tmp/win32yank.exe && sudo mv /tmp/win32yank.exe /usr/local/bin/
+  ```
+
+  （WSLg が有効な環境なら `sudo apt install -y wl-clipboard` でも可）
+
+- **IME 切り替え**: IME は Windows 側にあるので、WSL でも **Windows 用の `im-select.exe`** を使う。
+  `lua/plugins/im.lua` は `has("wsl")` を見て自動でそちらへ切り替える。
+  `im-select.exe` を Windows 側の PATH に置けば、WSL からそのまま呼べる。
+
+- **Docker**: WSL の中に Docker Engine があるなら、この Neovim も WSL の中で動かすこと。
+  `<leader>D` 系がそのまま使える。Windows 側の Neovim から WSL のデーモンを触るには
+  `docker.exe` と `DOCKER_HOST` の設定が別途必要になる。
+
+- **ファイルの置き場所**: `/mnt/c/...`（Windows 側）に置いたリポジトリは WSL からのアクセスが遅い。
+  可能なら `~/`（WSL のファイルシステム）に置く。Docker のバインドマウント判定は
+  `/mnt/c/...` 形式にも対応しているので、どちらに置いてもコンテナの紐付けは動く。
 
 ---
 
@@ -1157,12 +1304,28 @@ Windows 固有の対応として、コンテナとプロジェクトの紐付け
 |---|---|---|
 | `C:\Users\me\app` | `C:\Users\me\app` | 一致 |
 | `C:\Users\me\app` | `c:/Users/me/app` | 一致（区切り・大小の揺れを吸収） |
-| `C:\Users\me\app` | `/host_mnt/c/Users/me/app` | 一致（Docker Desktop のマウント表記） |
-| `C:\Users\me\app` | `/run/desktop/mnt/host/c/Users/me/app` | 一致（同上・新しい形式） |
+| `C:\Users\me\app` | `/run/desktop/mnt/host/c/Users/me/app` | 一致（Docker Desktop・現行） |
+| `C:\Users\me\app` | `/host_mnt/c/Users/me/app` | 一致（Docker Desktop・旧） |
+| `C:\Users\me\app` | `/mnt/c/Users/me/app` | 一致（**WSL2 上の Docker Engine**） |
 | `C:\Users\me\app` | `C:/Users/me/other` | 不一致（誤検出しない） |
 
 これが無いと Windows では「このプロジェクトのコンテナ」を一切見つけられず、
 毎回「起動中のコンテナ全部から選ぶ」に落ちる。
+
+#### Docker Desktop でなくてもよい（WSL2 の Docker Engine）
+
+Docker Desktop 固有の機能は使っていないので、素の Docker Engine でも動く。
+構成によって前提が変わる:
+
+| 構成 | 動作 | 備考 |
+|---|---|---|
+| **WSL の中で nvim を動かす**（推奨） | そのまま動く | 中では素の Linux なので、パスもソケットもそのまま。VSCode の Remote-WSL と同じ考え方 |
+| Windows の nvim ＋ Docker Desktop | そのまま動く | `docker.exe` が PATH にある |
+| Windows の nvim ＋ WSL の Docker Engine | **docker CLI の用意が要る** | Windows 側に `docker.exe` が無いと使えない。`DOCKER_HOST` を WSL のデーモンへ向けるか、WSL の中で nvim を動かす |
+
+3 番目の構成で `docker` が見つからない場合は、その旨と対処（WSL の中で nvim を起動する）を
+通知で案内する。パス比較は `/mnt/c/...` にも対応しているので、
+WSL 側から Windows のディレクトリを触っていてもプロジェクトの紐付けは成立する。
 
 ```powershell
 # Windows での前提ツール
