@@ -40,6 +40,40 @@ opt.cursorcolumn = true
 opt.splitright = true  -- 右側に分割
 opt.splitbelow = true  -- 下側に分割
 opt.clipboard = "unnamedplus"  -- システムクリップボードを使用
+
+-- コンテナの中で動いている Neovim（config/docker_nvim.lua の SPC Dn）のクリップボード。
+--
+-- コンテナには xclip も win32yank も入っていないので、そのままだとヤンクが黙って捨てられる。
+-- 端末エスケープ OSC 52 で「今いる端末」へ渡せば、外側の Neovim がそれを受け取って
+-- ホストのクリップボードへ橋渡ししてくれる（実測で確認済み）。
+--
+-- Neovim 0.11+ は「クリップボードツールが無ければ OSC 52 にフォールバック」する機能を持つが、
+-- それは端末に対応可否を問い合わせて応答が返った場合のみ有効になる。
+-- docker exec 越しの入れ子端末では応答が返らず無効のままになるため、ここで明示的に指定する。
+--
+-- 貼り付けは OSC 52 の読み出しに対応した端末が少なく、応答待ちで固まる危険があるので使わない。
+-- 代わりに直前のヤンク内容を返す（コンテナ内で完結する貼り付けはこれで足りる）。
+-- 【終端に BEL を使う理由】Neovim 標準の vim.ui.clipboard.osc52 は ST（ESC \）で終端するが、
+-- 外側が Neovim の :terminal の場合、ST 終端の OSC 52 は取りこぼされてクリップボードに届かない。
+-- 実測: BEL 終端 → ホストのクリップボードが書き換わる / ST 終端 → 何も起きない。
+-- 標準実装をそのまま使うとコンテナ内のヤンクが黙って消えるので、終端だけ変えた版を使う。
+if (vim.env.NVIM_IN_CONTAINER or "") ~= "" then
+  local function copy(reg)
+    local clipboard = reg == "+" and "c" or "p"
+    return function(lines)
+      local data = vim.base64.encode(table.concat(lines, "\n"))
+      vim.api.nvim_ui_send(("\027]52;%s;%s\007"):format(clipboard, data))
+    end
+  end
+  local function from_register()
+    return vim.split(vim.fn.getreg('"') or "", "\n")
+  end
+  vim.g.clipboard = {
+    name = "OSC 52 (container)",
+    copy = { ["+"] = copy("+"), ["*"] = copy("*") },
+    paste = { ["+"] = from_register, ["*"] = from_register },
+  }
+end
 opt.hidden = true  -- バッファを切り替えてもファイルを閉じない（複数ファイルを開くため）
 opt.cmdheight = 0  -- コマンドラインの高さを0にして、noice.nvimのフローティングウィンドウを使用
 opt.wrap = false  -- 行の折り返しを無効化（ミニマップと重ならないように）

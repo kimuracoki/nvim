@@ -5,17 +5,19 @@ map("n", "<C-s>", ":w<CR>", { desc = "Save" })
 map("i", "<C-s>", "<Esc>:w<CR>a", { desc = "Save" })
 
 -- バッファ移動（Buffer操作）
--- buflisted=false のバッファ（gitgraph等）にいるときは bprev/bnext でリスト済みバッファへ移動
+-- buflisted=false のバッファ（gitgraph等）にいるときは bprev/bnext でリスト済みバッファへ移動。
+-- 全部閉じた直後の [No Name] も unlisted なのでここを通るが、その時点では移動先が
+-- 1つも無く bprevious/bnext は E85 を投げる。移動できないだけなので pcall で黙らせる。
 map("n", "<S-h>", function()
   if not vim.bo.buflisted then
-    vim.cmd("bprevious")
+    pcall(vim.cmd, "bprevious")
   else
     vim.cmd("BufferLineCyclePrev")
   end
 end, { desc = "Buffer: Previous" })
 map("n", "<S-l>", function()
   if not vim.bo.buflisted then
-    vim.cmd("bnext")
+    pcall(vim.cmd, "bnext")
   else
     vim.cmd("BufferLineCycleNext")
   end

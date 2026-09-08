@@ -119,6 +119,46 @@ vim.api.nvim_create_autocmd("BufEnter", {
   desc = "Delete unused empty buffers",
 })
 
+-- 全バッファを閉じたときに残る「No Name」タブを消す。
+-- 最後の1つを閉じると Neovim は必ず listed な無名バッファを1つ作るので、以前は
+-- ファイルを1つも開いていないのにタブバーに「No Name」だけが居座っていた。
+-- 実ファイルが1つも無くなったら無名バッファを unlisted にしてタブから外し、
+-- タブバーごと隠す（VSCode で全タブを閉じたときと同じ見た目）。
+local function tidy_placeholder_buffers()
+  local listed = {}
+  local has_real = false
+  for _, buf in ipairs(vim.api.nvim_list_bufs()) do
+    if vim.api.nvim_buf_is_valid(buf) and vim.bo[buf].buflisted then
+      listed[#listed + 1] = buf
+      -- 名前付き、または未保存の書きかけは「実バッファ」として残す
+      if vim.api.nvim_buf_get_name(buf) ~= "" or vim.bo[buf].modified then
+        has_real = true
+      end
+    end
+  end
+
+  if not has_real then
+    for _, buf in ipairs(listed) do
+      if vim.bo[buf].buftype == "" then
+        vim.bo[buf].buflisted = false
+      end
+    end
+    vim.o.showtabline = 0
+  else
+    -- bufferline 未ロード（起動直後）のうちに 2 にすると素の tabline が一瞬見えるので、
+    -- そのときは既定値の 1 に戻すだけにして、表示は bufferline のロード後に任せる。
+    vim.o.showtabline = package.loaded["bufferline"] and 2 or 1
+  end
+end
+
+vim.api.nvim_create_autocmd({ "BufEnter", "BufAdd", "BufDelete", "BufFilePost" }, {
+  callback = function()
+    -- bdelete の途中（バッファがまだ listed のまま）に数えないよう、次のループへ回す
+    vim.schedule(tidy_placeholder_buffers)
+  end,
+  desc = "Hide the placeholder [No Name] buffer/tabline when nothing is open",
+})
+
 -- 特殊バッファ（Diffview、Octo、GitGraphなど）の自動クリーンアップ
 vim.api.nvim_create_autocmd("FileType", {
   pattern = { "DiffviewFiles", "DiffviewFileHistory", "octo", "octo_panel", "octo_issue", "octo_pr" },
