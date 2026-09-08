@@ -41,6 +41,26 @@ local function container_home(id, cb)
   end)
 end
 
+-- 送り込んだ設定がいつ時点のものかを控えておく置き場所（home からの相対）。
+-- ホスト側で設定を直したあと SPC DN を忘れると、コンテナの中だけ古い挙動のままになるため。
+local STAMP = "/.config/nvim/.sync-stamp"
+
+---ホスト側の設定ディレクトリの最終更新時刻（epoch 秒）。
+---.git は数千ファイルある上に設定の中身とは関係ないので降りない。
+local function host_config_mtime()
+  local root = vim.fn.stdpath("config")
+  local newest = 0
+  for name, type in vim.fs.dir(root, { depth = 8, skip = function(d) return d ~= ".git" end }) do
+    if type == "file" then
+      local st = vim.uv.fs_stat(root .. "/" .. name)
+      if st and st.mtime.sec > newest then
+        newest = st.mtime.sec
+      end
+    end
+  end
+  return newest
+end
+
 -- コンテナに Neovim と最低限の依存（git）を入れるスクリプト。
 -- ホストのシェルを一切経由させないため、一時ファイルに書いて docker cp で持ち込み、
 -- コンテナ内の sh に実行させる。こうしておけば Windows の cmd / PowerShell でも壊れない。
@@ -218,6 +238,8 @@ local function sync_config(c, home, cb)
           docker.notify("設定のコピーに失敗しました\n" .. vim.trim(res.stderr or ""), vim.log.levels.ERROR)
           return
         end
+        -- いつ時点の設定を送ったかを中に残す（次に開くとき古さの判定に使う）
+        exec(c.id, { "sh", "-c", ("echo %d > %s%s"):format(host_config_mtime(), home, STAMP) }, function() end)
         -- プラグインはコンテナ内で入れ直す。ホストの ~/.local/share/nvim を持ち込むと、
         -- treesitter パーサのような .so をアーキテクチャ違いのまま読み込んで壊れる。
         docker.notify("設定を送りました。コンテナ内でプラグインを入れます（初回は数分）")
@@ -330,7 +352,29 @@ function M.open()
         exec(c.id, { "test", "-d", home .. "/.config/nvim" }, function(cfg)
           local has_config = cfg.code == 0
           if has_nvim and has_config then
-            launch(c)
+            -- 中の設定は docker cp したときのコピーなので、ホスト側を直しても自動では追随しない。
+            -- 送り直しを忘れると「直したはずの挙動がコンテナの中だけ古い」ことになるので、
+            -- 前回送った時刻と比べて、新しければ開く前に気づかせる。
+            exec(c.id, { "sh", "-c", "cat " .. home .. STAMP .. " 2>/dev/null" }, function(stamp)
+              local sent = tonumber(vim.trim(stamp.stdout or "")) or 0
+              if sent >= host_config_mtime() then
+                launch(c)
+                return
+              end
+              docker.notify(
+                ("ホストの設定が %s の中のコピーより新しいです（送り直すと数十秒かかります）"):format(c.name),
+                vim.log.levels.WARN
+              )
+              docker.select({ "送り直して開く", "そのまま開く" }, {
+                prompt = ("設定が更新されています: %s"):format(c.name),
+              }, function(choice)
+                if choice == "送り直して開く" then
+                  sync_config(c, home, function() launch(c) end)
+                elseif choice == "そのまま開く" then
+                  launch(c)
+                end
+              end)
+            end)
             return
           end
 
