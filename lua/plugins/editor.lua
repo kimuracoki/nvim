@@ -206,6 +206,7 @@ return {
     config = function()
       require("csvview").setup()
       vim.api.nvim_create_autocmd("FileType", {
+        group = vim.api.nvim_create_augroup("user_csvview", { clear = true }),
         pattern = { "csv", "tsv" },
         callback = function()
           vim.schedule(function()

@@ -12,6 +12,7 @@ return {
       -- 「もう何も開いていない」の判定は init.lua の tidy_placeholder_buffers が持っていて、
       -- ここへは User NoBuffersLeft で伝わってくる。
       vim.api.nvim_create_autocmd("User", {
+        group = vim.api.nvim_create_augroup("user_dashboard_reopen", { clear = true }),
         pattern = "NoBuffersLeft",
         callback = function()
           if not package.loaded["snacks"] then

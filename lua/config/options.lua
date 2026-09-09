@@ -2,6 +2,16 @@
 vim.g.mapleader = " "
 vim.g.maplocalleader = "\\"
 
+-- 使っていないリモートプラグインプロバイダ（Python/Ruby/Perl/Node のホスト）を明示的に切る。
+-- この設定に Lua 以外のリモートプラグインは 1 つも無いので実害はなく、切ると
+--   - :checkhealth が毎回 6 件の WARNING で埋まって本当の問題が埋もれるのを防げる
+--   - 起動時のホスト探索（Windows では PATHEXT との総当たりで 1 回 1.7ms 級）が消える
+-- 新しくリモートプラグインを入れるときだけ、該当する行を消す。
+vim.g.loaded_python3_provider = 0
+vim.g.loaded_ruby_provider = 0
+vim.g.loaded_perl_provider = 0
+vim.g.loaded_node_provider = 0
+
 -- .env.dev / .env.local など（組み込みは .env のみ拡張子 env で sh 判定）
 vim.filetype.add({
   pattern = {
@@ -11,6 +21,11 @@ vim.filetype.add({
 
 local opt = vim.opt
 
+-- autocmd は必ず augroup（clear = true）に入れる。設定を再読み込みしても二重登録されない。
+local function augroup(name)
+  return vim.api.nvim_create_augroup("user_" .. name, { clear = true })
+end
+
 -- ファイル読み込み時のエンコーディング候補（左から順に試し、最初に成功したら終了）
 -- BOM → UTF-8 → CP932(Shift-JIS) → 環境依存 → Latin1（候補を絞って試行回数を抑える）
 opt.fileencodings = "ucs-bom,utf-8,cp932,default,latin1"
@@ -18,10 +33,13 @@ opt.fileencodings = "ucs-bom,utf-8,cp932,default,latin1"
 opt.number = true            -- 行番号
 opt.relativenumber = true    -- 相対行番号
 opt.signcolumn = "yes"       -- サイン列を常時確保（診断アイコン出現時の横ずれを防ぐ。VSCode 相当）
--- gutter を snacks.statuscolumn で1列に統合描画（行番号＋診断/mark sign＋git＋fold）。
--- モダンな作法。文字列は描画時に遅延評価されるので snacks ロード前に設定して問題ない。
--- 有効化フラグは snacks 側（snacks-qol.lua の statuscolumn = { enabled = true }）にある。
-opt.statuscolumn = [[%!v:lua.require'snacks.statuscolumn'.get()]]
+-- gutter（行番号＋診断/mark sign＋git＋fold の統合描画）は snacks.statuscolumn が担当する。
+-- ここでは設定しない: snacks は setup() で statuscolumn.enabled を見て自分で vim.o.statuscolumn を
+-- 立てる（snacks/init.lua）。以前はここでも同じ式を入れていたが、二重管理なうえ
+-- 「snacks がまだ入っていない初回起動・オフライン環境」では最初の描画で
+-- require が失敗して E5108 が出るだけの式になっていた。設定しなければ Neovim 既定の
+-- gutter で普通に使えるので、snacks の有無に関わらず壊れない。
+-- 有効化フラグは lua/plugins/snacks-qol.lua の statuscolumn = { enabled = true }。
 opt.tabstop = 2
 opt.shiftwidth = 2
 opt.expandtab = true
@@ -35,15 +53,15 @@ opt.undofile = true
 opt.undolevels = 10000
 opt.scrolloff = 4
 opt.sidescrolloff = 25  -- ミニマップ分の余白を確保
-opt.cursorline = true
 opt.cursorcolumn = true
 opt.splitright = true  -- 右側に分割
 opt.splitbelow = true  -- 下側に分割
 opt.clipboard = "unnamedplus"  -- システムクリップボードを使用
 
--- コンテナの中で動いている Neovim（config/docker_nvim.lua の SPC Dn）のクリップボード。
+-- クリップボードツールが無い環境（コンテナ・素の Linux サーバ・SSH 先）のクリップボード。
 --
--- コンテナには xclip も win32yank も入っていないので、そのままだとヤンクが黙って捨てられる。
+-- 代表例はコンテナの中で動いている Neovim（config/docker_nvim.lua の SPC Dn）で、
+-- xclip も win32yank も入っていないため、そのままだとヤンクが黙って捨てられる。
 -- 端末エスケープ OSC 52 で「今いる端末」へ渡せば、外側の Neovim がそれを受け取って
 -- ホストのクリップボードへ橋渡ししてくれる（実測で確認済み）。
 --
@@ -57,7 +75,30 @@ opt.clipboard = "unnamedplus"  -- システムクリップボードを使用
 -- 外側が Neovim の :terminal の場合、ST 終端の OSC 52 は取りこぼされてクリップボードに届かない。
 -- 実測: BEL 終端 → ホストのクリップボードが書き換わる / ST 終端 → 何も起きない。
 -- 標準実装をそのまま使うとコンテナ内のヤンクが黙って消えるので、終端だけ変えた版を使う。
-if (vim.env.NVIM_IN_CONTAINER or "") ~= "" then
+--
+-- 【判定を「コンテナかどうか」で終わらせない理由】
+-- 同じことは xclip / wl-copy を入れていない Linux や SSH 先でも起きる。環境名で分岐すると
+-- 環境が増えるたびに「そこだけヤンクが効かない」を踏むので、条件は
+-- 「実際にクリップボードツールが見つからないか」で判定する。
+-- ツールがある mac / Windows では従来どおり OS のクリップボードをそのまま使う（挙動は不変）。
+local function needs_osc52()
+  if (vim.env.NVIM_IN_CONTAINER or "") ~= "" then
+    return true
+  end
+  local platform = require("config.platform")
+  if platform.is_mac then
+    return not platform.has("pbcopy")
+  end
+  if platform.is_windows then
+    return not platform.first({ "win32yank.exe", "clip.exe" })
+  end
+  return not platform.first({
+    "wl-copy", "xclip", "xsel", "win32yank.exe", "clip.exe",
+    "termux-clipboard-set", "lemonade", "doitclient", "putclip",
+  })
+end
+
+if needs_osc52() then
   local function copy(reg)
     local clipboard = reg == "+" and "c" or "p"
     return function(lines)
@@ -69,7 +110,7 @@ if (vim.env.NVIM_IN_CONTAINER or "") ~= "" then
     return vim.split(vim.fn.getreg('"') or "", "\n")
   end
   vim.g.clipboard = {
-    name = "OSC 52 (container)",
+    name = "OSC 52",
     copy = { ["+"] = copy("+"), ["*"] = copy("*") },
     paste = { ["+"] = from_register, ["*"] = from_register },
   }
@@ -85,6 +126,7 @@ opt.titlestring = "⚡%{fnamemodify(getcwd(), ':t')}"
 
 -- :cd でディレクトリを変えたときもタブタイトルを更新
 vim.api.nvim_create_autocmd("DirChanged", {
+  group = augroup("title"),
   pattern = "*",
   callback = function()
     vim.opt.title = true
@@ -104,6 +146,7 @@ opt.autoread = true  -- ファイルが外部で変更された場合に自動�
 -- コマンドラインウィンドウ（q: / q/）では checktime が E11 になるので必ず除外する。
 -- mode() は cmdwin 内でも "n" を返すため、mode() だけのガードでは弾けない。
 vim.api.nvim_create_autocmd({ "FocusGained", "BufEnter", "CursorHold", "CursorHoldI" }, {
+  group = augroup("autoread"),
   pattern = "*",
   callback = function()
     if vim.fn.mode() == "c" or vim.fn.getcmdwintype() ~= "" then
@@ -116,6 +159,7 @@ vim.api.nvim_create_autocmd({ "FocusGained", "BufEnter", "CursorHold", "CursorHo
 
 -- ファイルが変更された場合に通知
 vim.api.nvim_create_autocmd("FileChangedShellPost", {
+  group = augroup("autoread"),
   pattern = "*",
   callback = function()
     vim.notify("File changed on disk. Buffer reloaded.", vim.log.levels.WARN)
@@ -160,6 +204,7 @@ local function charset_to_vim_enc(name)
 end
 
 vim.api.nvim_create_autocmd("BufReadPost", {
+  group = augroup("encoding_detect"),
   pattern = { "*.html", "*.htm", "*.xml", "*.xhtml" },
   callback = function(args)
     local path = vim.api.nvim_buf_get_name(args.buf)

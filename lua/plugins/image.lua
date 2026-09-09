@@ -59,8 +59,11 @@ return {
       local terminal = require("snacks.image.terminal")
       local reloading = false
 
+      local image_group = vim.api.nvim_create_augroup("user_snacks_image", { clear = true })
+
       -- 画像バッファを離れるとき: ターミナル上の全画像をクリア
       vim.api.nvim_create_autocmd("BufLeave", {
+        group = image_group,
         callback = function()
           if vim.bo.filetype == "image" then
             pcall(function()
@@ -72,6 +75,7 @@ return {
 
       -- 画像バッファに入るとき: :edit で再レンダリングをトリガー
       vim.api.nvim_create_autocmd("BufEnter", {
+        group = image_group,
         callback = function()
           if reloading then return end
           if vim.bo.filetype == "image" then

@@ -21,6 +21,10 @@ lua/config/
   highlight.lua          -- 透過（transparency）の一元管理。M.setup() / M.toggle_transparency()
   startup.lua            -- 起動レイアウト
   indent_guides.lua      -- 自作: ネストの背景色ガイド（縦線でなく深さ別の背景ブロック）。<leader>ug でトグル
+  platform.lua           -- OS 差分と外部ツールの有無判定の唯一の置き場（is_windows / is_mac / has / first）
+scripts/
+  check.sh               -- 変更後に必ず通す確認（構文 + 起動ロード + キーマップ棚卸し）
+  syntax.lua             -- 全 Lua ファイルの構文チェック（25ms。Claude Code の PostToolUse フックが自動実行）
 lua/plugins/                 -- 1ファイル=1関心事（lazy.lua が直下の全 .lua を自動 import）
   -- 見た目
   colorscheme.lua        -- カラースキーム（テーマ群）
@@ -110,24 +114,58 @@ nvim --headless lua/config/keymaps.lua \
 
 ## 透過・カラースキーム
 
-- 透過は `lua/config/highlight.lua` に一元化。`ColorScheme` autocmd（init.lua）で再適用される。新しく透過させたい UI 要素が出たら **highlight.lua の `M.setup()` にハイライト群を足す**。個別プラグインの config に散らさない。
+- 透過は `lua/config/highlight.lua` に一元化。`ColorScheme` autocmd（init.lua）で再適用される。新しく透過させたい UI 要素が出たら **highlight.lua の `transparent_groups` にグループ名を足す**。個別プラグインの config に散らさない。
+- **`nvim_set_hl` は「置換」であって「更新」ではない。** `nvim_set_hl(0, "Normal", { bg = "none" })` と書くと fg も属性も消える。実際にこれで Normal / LineNr / StatusLine / TabLine / SignColumn が空定義になり、行番号やステータスラインがテーマの色を失い、Normal の fg を読む snacks.gh は require 時に落ちていた（`:checkhealth snacks` が "attempt to index local 'fg'" で失敗）。既存値を `nvim_get_hl(0, { name = ..., link = false })` で読んでから背景だけ外す（highlight.lua の `clear_bg`）。
 - カラースキーム切り替えは `keymaps.lua` の `<leader>ut`。新テーマを足したら `colorscheme.lua`（spec）と `keymaps.lua` の `colorschemes` / `plugin_map` の両方に追加する。
 
-## クロスプラットフォーム
+## 環境堅牢性（どのマシンでも同じように動かす）
 
-Mac / Windows 両対応。OS 依存・実行ファイル依存の分岐は `vim.fn.executable()` や `vim.fn.has()` でガードする。ハードコードした絶対パスやシェル固有コマンドを直書きしない。
+Mac / Windows / WSL / Docker コンテナ内で同じリポジトリを使う。「自分の Mac では動く」は完了条件ではない。
+
+- **OS・外部コマンドの判定は `lua/config/platform.lua` に集約**する。各所でローカルの `has()` を再定義しない。
+  - `platform.is_windows` / `platform.is_mac` / `platform.has(bin)` / `platform.first({...})`
+  - `open`（mac 専用）・`python3`（Windows は `python`）・`xdg-open` のような**コマンド名の決め打ちを直書きしない**。
+    過去に `lspsaga` の `open_browser = "silent !open"` と `code_runner` の `python3` / `html = "open"` がこれで壊れていた。
+  - 絶対パスやシェル固有の書き方（`&&` 前提のワンライナー等）を書かない。外部コマンドは
+    `vim.system({ "cmd", "arg" }, ...)` のリスト形式で呼ぶ（既存コードはすべてこの形）。
+- **必要な Neovim のバージョンは init.lua 冒頭でガードしている**（0.11 未満は設定を読まずに起動）。
+  このガードを消さない。新しい API を使うときは要求バージョンを上げるか、機能ごとに分岐する。
+- **autocmd は必ず `group = augroup(...)`（`clear = true`）に入れる。** 設定の再読み込みで二重登録されると
+  「自動保存やバッファ掃除がたまに多重に走る」という再現しにくい不具合になる。
+  バッファローカルなものも、再アタッチ（`:LspRestart` 等）で積み上がるならバッファごとの augroup にする
+  （`config/hls_codelens.lua` が実例）。グローバルな autocmd は対象（`pattern` / `buffer` / 早期 return）で必ず絞る。
+- **同じ設定を 2 箇所で持たない。** 例: `vim.o.statuscolumn` は snacks が `statuscolumn.enabled` を見て自分で立てるので、
+  options.lua では設定しない。二重管理は「片方だけ直して直っていない」を生むうえ、
+  プラグイン未取得の初回起動で描画のたびにエラーを吐く式が残る原因になった。
+- **プラグイン・外部ツールが無い状態でも起動できること。** 初回起動・オフライン・`:Lazy clean` 直後でも
+  致命的に壊れない書き方にする（`pcall`、素の動作へのフォールバック）。
+  Mason の `ensure_installed` や neotest のアダプタは `platform.has()` で絞る（未インストール環境で延々失敗させない）。
+- **リモートプラグインプロバイダ（python3/ruby/perl/node）は options.lua で切ってある。**
+  Lua 以外のリモートプラグインを入れるときだけ該当行を消す。
+- **クリップボード**はツールが見つからない環境（コンテナ・素の Linux・SSH 先）で OSC 52 に自動フォールバックする
+  （options.lua の `needs_osc52`）。環境名ではなく「ツールがあるか」で判定する方針を崩さない。
 
 ## 動作確認（必須）
 
-変更後は必ずヘッドレスでロードエラーが無いことを確認する。
+変更後は必ず `./scripts/check.sh` を通す。**構文 → 起動ロード（エラー・非推奨警告） → キーマップ棚卸し**を
+まとめて見る。ここが通らないものは完了ではない。
+
+```bash
+./scripts/check.sh          # これ 1 本でよい
+nvim -l scripts/syntax.lua  # 構文だけ（25ms）。Claude Code の PostToolUse フックが編集のたびに自動で走る
+```
+
+`:checkhealth` の ERROR は 0 を保つ（残っているのは snacks の任意ツール未導入と Neovim の更新通知だけ）。
+
+```bash
+nvim --headless -c "checkhealth" -c "w! /tmp/health.txt" -c "qa!" && grep -nE "ERROR|WARNING" /tmp/health.txt
+```
+
+個別に確認したいときは以下。
 
 ```bash
 # プラグイン追加時: 取得
 nvim --headless "+Lazy! sync" +qa
-
-# ロード時エラー / 非推奨警告の確認（何も出なければ OK）
-nvim --headless -c "lua vim.defer_fn(function() vim.cmd('qa') end, 800)" 2>&1 \
-  | grep -iE "error|warn|deprecat|invalid|no longer"
 
 # 特定モジュール / ハイライト群の存在確認
 nvim --headless -c "lua vim.defer_fn(function() print(vim.inspect(vim.api.nvim_get_hl(0,{name='RainbowDelimiterRed'}))); vim.cmd('qa') end, 500)"

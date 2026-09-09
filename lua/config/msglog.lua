@@ -212,6 +212,7 @@ function M.setup()
   -- noice が vim.notify を持っていったら、こちらは手を引く（上の説明を参照）。
   -- vim.print / nvim_echo のラップは noice と競合しないのでそのまま残す。
   vim.api.nvim_create_autocmd("User", {
+    group = vim.api.nvim_create_augroup("user_msglog", { clear = true }),
     pattern = "VeryLazy",
     callback = function()
       vim.defer_fn(function()

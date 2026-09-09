@@ -21,8 +21,9 @@ return {
         win = { wo = { wrap = true, linebreak = true } },
       },
       -- gutter（行番号＋診断/mark sign＋git＋折りたたみ）を1列に統合描画する statuscolumn。
-      -- 診断アイコンが行番号のすぐ左に出る VSCode 風 gutter。実際の適用は options.lua で
-      -- vim.opt.statuscolumn を設定して行う（enabled だけでは自動適用されない仕様）。
+      -- 診断アイコンが行番号のすぐ左に出る VSCode 風 gutter。
+      -- vim.o.statuscolumn は snacks.setup() がこのフラグを見て自分で設定するので、
+      -- こちら以外（options.lua 等）で二重に設定しない。
       statuscolumn = { enabled = true },
     },
     keys = {

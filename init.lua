@@ -1,3 +1,22 @@
+-- この設定は Neovim 0.11+ の API（vim.lsp.config / vim.o.winborder / vim.uv など）を前提にする。
+-- 古い Neovim では「読み込みの途中で謎のエラーが出て中途半端に起動する」という一番わかりにくい
+-- 壊れ方をするので、最初に一度だけはっきり伝えて素の状態で立ち上げる。
+if vim.fn.has("nvim-0.11") == 0 then
+  vim.api.nvim_echo({
+    { "この Neovim 設定は 0.11 以降が必要です（現在: ", "ErrorMsg" },
+    { tostring(vim.version()), "ErrorMsg" },
+    { "）。設定を読み込まずに起動します。\n", "ErrorMsg" },
+  }, true, {})
+  return
+end
+
+-- グローバル autocmd はすべて augroup にまとめる（clear = true）。
+-- :source $MYVIMRC や設定の再読み込みで同じ autocmd が二重・三重に積まれると、
+-- 自動保存やバッファ掃除が多重に走って「たまに挙動がおかしい」に化けるため。
+local function augroup(name)
+  return vim.api.nvim_create_augroup("user_" .. name, { clear = true })
+end
+
 -- オプション（mapleader など含む）
 require("config.options")
 
@@ -18,11 +37,13 @@ local highlight = require("config.highlight")
 highlight.setup()
 
 vim.api.nvim_create_autocmd("ColorScheme", {
+  group = augroup("transparency"),
   callback = function()
     vim.defer_fn(function()
       highlight.setup()
     end, 10)
   end,
+  desc = "カラースキーム変更後に透過を再適用",
 })
 
 -- ネストの背景色ガイド（自作: インデント幅を深さごとに虹色の背景で塗る／<leader>ug でトグル）
@@ -30,6 +51,7 @@ require("config.indent_guides").setup()
 
 -- 起動時にすべての分割画面を自動的に開く
 vim.api.nvim_create_autocmd("VimEnter", {
+  group = augroup("startup_layout"),
   callback = function()
     -- 透過設定を再適用
     vim.defer_fn(function()
@@ -58,6 +80,7 @@ vim.api.nvim_create_autocmd("VimEnter", {
 -- buftype == "" の実ファイルだけを書く。octo:// や dap-repl のような特殊バッファ（acwrite/nofile）は
 -- write に副作用（コメント投稿など）があり、うっかり走らせると取り返しがつかないので対象外にする。
 vim.api.nvim_create_autocmd("FocusLost", {
+  group = augroup("autosave"),
   callback = function()
     local buf = vim.api.nvim_get_current_buf()
     if
@@ -79,6 +102,7 @@ vim.api.nvim_create_autocmd("FocusLost", {
 -- defer_fn(100ms) を積んでいて、バッファ数×イベント数ぶんの全バッファ走査が重なっていた）。
 local cleanup_pending = false
 vim.api.nvim_create_autocmd("BufEnter", {
+  group = augroup("empty_buffer_cleanup"),
   callback = function()
     if cleanup_pending then
       return
@@ -155,6 +179,7 @@ local function tidy_placeholder_buffers()
 end
 
 vim.api.nvim_create_autocmd({ "BufEnter", "BufAdd", "BufDelete", "BufFilePost" }, {
+  group = augroup("placeholder_buffer"),
   callback = function()
     -- bdelete の途中（バッファがまだ listed のまま）に数えないよう、次のループへ回す
     vim.schedule(tidy_placeholder_buffers)
@@ -164,6 +189,7 @@ vim.api.nvim_create_autocmd({ "BufEnter", "BufAdd", "BufDelete", "BufFilePost" }
 
 -- 特殊バッファ（Diffview、Octo、GitGraphなど）の自動クリーンアップ
 vim.api.nvim_create_autocmd("FileType", {
+  group = augroup("scratch_filetypes"),
   pattern = { "DiffviewFiles", "DiffviewFileHistory", "octo", "octo_panel", "octo_issue", "octo_pr" },
   callback = function(args)
     vim.bo[args.buf].buflisted = false
@@ -180,6 +206,7 @@ vim.api.nvim_create_autocmd("FileType", {
 -- 巻き込む。掃除するのは「名前で判別できる使い捨てビューアだけ」に限定する。
 local gitview_pattern = { "GitGraph", "Diffview", "octo://" }
 vim.api.nvim_create_autocmd("WinClosed", {
+  group = augroup("gitview_cleanup"),
   callback = function()
     vim.defer_fn(function()
       local shown = {}
