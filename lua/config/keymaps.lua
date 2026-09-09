@@ -410,13 +410,14 @@ map("n", "<leader>uw", function()
     vim.wo.wrap = true
     if not vim.g._wrap_ui_active then
       vim.g._wrap_saved_sidescrolloff = vim.o.sidescrolloff
+      -- ミニマップは config.minimap の状態フラグごと落とす。close_minimap() を直接
+      -- 呼ぶだけだと「表示したい」状態が残るので、バッファ切り替えのたびに開き直される。
+      -- 横余白（sidescrolloff）はこの折り返しトグル側で保存・復元しているので任せない。
       local had_minimap = false
-      local ok_cw, codewindow = pcall(require, "codewindow")
-      if ok_cw and type(codewindow.is_minimap_open) == "function" and codewindow.is_minimap_open() then
+      local ok_mm, mm = pcall(require, "config.minimap")
+      if ok_mm and mm.is_enabled() then
         had_minimap = true
-        pcall(function()
-          codewindow.close_minimap()
-        end)
+        mm.set(false, { sidescrolloff = false })
       end
       vim.g._wrap_saved_minimap_open = had_minimap
       vim.g._wrap_ui_active = true
@@ -427,9 +428,10 @@ map("n", "<leader>uw", function()
     vim.wo.wrap = false
     if not any_window_wrapped() and vim.g._wrap_ui_active then
       if vim.g._wrap_saved_minimap_open then
-        pcall(function()
-          require("codewindow").open_minimap()
-        end)
+        local ok_mm2, mm2 = pcall(require, "config.minimap")
+        if ok_mm2 then
+          mm2.set(true, { sidescrolloff = false })
+        end
       end
       if vim.g._wrap_saved_sidescrolloff ~= nil then
         vim.opt.sidescrolloff = vim.g._wrap_saved_sidescrolloff
