@@ -96,10 +96,14 @@ function M.setup()
   end
 
   vim.api.nvim_create_autocmd("LspAttach", {
+    group = vim.api.nvim_create_augroup("user_hls_codelens", { clear = true }),
     callback = function(args)
       local c = vim.lsp.get_client_by_id(args.data.client_id)
       if not c or c.name ~= "hls" then return end
       local bufnr = args.buf
+      -- :LspRestart 等で同じバッファに再アタッチしたときに古いハンドラが残らないよう、
+      -- バッファごとの augroup（clear = true）に入れる。
+      local group = vim.api.nvim_create_augroup("user_hls_codelens_buf" .. bufnr, { clear = true })
 
       local function debounced_show()
         local tick = (hls_type_sig_debounce[bufnr] or 0) + 1
@@ -111,15 +115,18 @@ function M.setup()
       end
 
       vim.api.nvim_create_autocmd({ "BufWritePost", "InsertLeave" }, {
+        group = group,
         buffer = bufnr,
         callback = function() show_hls_type_sigs(bufnr) end,
       })
       -- grl や LSP のテキスト編集では InsertLeave が来ないことがある → 仮想行が古いまま残る
       vim.api.nvim_create_autocmd({ "TextChanged", "TextChangedI" }, {
+        group = group,
         buffer = bufnr,
         callback = debounced_show,
       })
       vim.api.nvim_create_autocmd("BufUnload", {
+        group = group,
         buffer = bufnr,
         callback = function(ev) hls_type_sig_debounce[ev.buf] = nil end,
       })

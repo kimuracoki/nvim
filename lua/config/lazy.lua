@@ -30,6 +30,11 @@ require("lazy").setup({
   checker = {
     enabled = false, -- 自動アップデートチェックはとりあえずOFF
   },
+  -- luarocks 連携を切る。この構成に luarocks を要求するプラグインは 1 つも無い一方、
+  -- 有効なままだと lazy が hererocks（Lua 5.1 + luarocks のローカルビルド）を用意しようとして、
+  -- 用意できない環境では :checkhealth lazy が毎回 ERROR を出す（実機で発生）。
+  -- ビルドには C コンパイラと Python が要るので、まっさらな Windows ほど確実に失敗する。
+  rocks = { enabled = false },
   -- 設定ファイルの変更監視。lazy 配下 1.4 万ファイルを抱える Windows では
   -- ファイル監視の張り直しが起動のたびに効いてくるうえ、変更したら nvim を
   -- 開き直す運用なので恩恵が無い。

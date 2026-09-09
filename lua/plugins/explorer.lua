@@ -122,6 +122,7 @@ return {
       end
       fix_git_hl()
       vim.api.nvim_create_autocmd("ColorScheme", {
+        group = vim.api.nvim_create_augroup("user_neotree_hl", { clear = true }),
         callback = function() vim.schedule(fix_git_hl) end,
       })
     end,

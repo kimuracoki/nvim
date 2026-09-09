@@ -294,6 +294,7 @@ return {
 
       -- Register localleader groups for octo.nvim
       vim.api.nvim_create_autocmd("FileType", {
+        group = vim.api.nvim_create_augroup("user_whichkey_octo", { clear = true }),
         pattern = "octo",
         callback = function()
           require("which-key").add({

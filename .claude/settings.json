@@ -1,0 +1,24 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(./scripts/check.sh)",
+      "Bash(nvim -l scripts/syntax.lua)",
+      "Bash(nvim --headless:*)"
+    ]
+  },
+  "hooks": {
+    "PostToolUse": [
+      {
+        "matcher": "Edit|Write|MultiEdit",
+        "hooks": [
+          {
+            "type": "command",
+            "statusMessage": "Lua の構文チェック",
+            "timeout": 30,
+            "command": "jq -r '.tool_input.file_path // .tool_response.filePath // \"\"' | { read -r f; case \"$f\" in *.lua) out=$(cd \"${CLAUDE_PROJECT_DIR:-.}\" && nvim -l scripts/syntax.lua 2>&1) || { printf '%s\\n' \"$out\" >&2; exit 2; };; esac; }"
+          }
+        ]
+      }
+    ]
+  }
+}

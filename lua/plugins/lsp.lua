@@ -1,3 +1,5 @@
+local platform = require("config.platform")
+
 return {
   ---------------------------------------------------------------------------
   -- LSP 設定
@@ -18,7 +20,11 @@ return {
           max_width = 0.9,
           max_height = 0.8,
           open_link = "gx",
-          open_browser = "silent !open",
+          -- mac / Windows / WSL / xdg-open は lspsaga 側が自動判定するので、ここは最後の砦。
+          -- 未設定（nil）だと文字列連結でエラーになるため、OS 相応の値を必ず入れておく
+          -- （"silent !open" 決め打ちだと mac 以外で "open: command not found" になる）。
+          open_browser = platform.is_windows and "!explorer"
+            or (platform.is_mac and "!open" or "!xdg-open"),
         },
         symbol_in_winbar = { enable = false },
         lightbulb = { enable = false },
@@ -367,6 +373,7 @@ return {
       -- LspAttach: インレイヒントを自動有効化（全言語共通）
       -----------------------------------------------------------------------
       vim.api.nvim_create_autocmd("LspAttach", {
+        group = vim.api.nvim_create_augroup("user_lsp_inlay_hint", { clear = true }),
         callback = function(args)
           local client = vim.lsp.get_client_by_id(args.data.client_id)
           if client and client:supports_method("textDocument/inlayHint") then

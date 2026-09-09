@@ -139,6 +139,7 @@ end, { desc = "Terminal: Esc (cursor-agent: leave job mode only; Claude/lazygit 
 
 -- jk は通常ターミナルのみバッファローカルで設定（Claude/Cursor CLI/lazygit では j の遅延を防ぐため設定しない）
 vim.api.nvim_create_autocmd("TermEnter", {
+  group = vim.api.nvim_create_augroup("user_term_jk", { clear = true }),
   callback = function()
     if not is_terminal_no_jk_mapping() then
       vim.keymap.set("t", "jk", [[<C-\><C-n>]], { noremap = true, buffer = true, desc = "Terminal: jk to normal mode" })
@@ -149,6 +150,7 @@ vim.api.nvim_create_autocmd("TermEnter", {
 
 -- ic/ii（Cursor CLI / Claude）ターミナルに入ったらジョブモードへ（AI パネルだけ。ToggleTerm 等は汚染しない）
 vim.api.nvim_create_autocmd("BufEnter", {
+  group = vim.api.nvim_create_augroup("user_ai_terminal", { clear = true }),
   callback = function(args)
     if vim.bo[args.buf].buftype == "terminal" and is_ai_terminal_buf(args.buf) then
       vim.cmd("startinsert")
@@ -180,6 +182,7 @@ local term_window_keys = {
 }
 
 vim.api.nvim_create_autocmd("TermOpen", {
+  group = vim.api.nvim_create_augroup("user_term_window_keys", { clear = true }),
   callback = function(args)
     -- コンテナ内 Neovim には何も張らない（キーは全部中の nvim のもの）
     if vim.b[args.buf].nested_nvim then

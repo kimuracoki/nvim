@@ -2,6 +2,7 @@
 -- blink.cmp は InsertEnter 後に読まれるため、この FileType autocmd は
 -- プラグインの config ではなく import 時（起動時）に登録しておく。
 vim.api.nvim_create_autocmd("FileType", {
+  group = vim.api.nvim_create_augroup("user_spell", { clear = true }),
   pattern = { "markdown", "text" },
   callback = function()
     vim.opt_local.spell = true

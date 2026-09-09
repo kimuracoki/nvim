@@ -40,6 +40,7 @@ return {
 
       -- ClaudeCode/Cursor CLI の diff バッファが閉じられた時に自動的に分割を整理
       vim.api.nvim_create_autocmd("BufDelete", {
+        group = vim.api.nvim_create_augroup("user_ai_diff_cleanup", { clear = true }),
         pattern = { "*claude*", "*cursor*", "*cursor-agent*" },
         callback = function()
           vim.defer_fn(function()

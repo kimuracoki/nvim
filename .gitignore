@@ -1,0 +1,11 @@
+# Neovim が吐く実行時の産物（設定ではないのでコミットしない）
+.nvimlog
+*.log
+nvim-pack-lock.json
+spell/
+
+# OS / エディタ
+.DS_Store
+Thumbs.db
+
+# lazy-lock.json は「どのマシンでも同じ版が入る」ための固定ファイルなので追跡対象

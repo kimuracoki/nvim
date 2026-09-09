@@ -101,6 +101,7 @@ return {
       end
       setup_diag_hl()
       vim.api.nvim_create_autocmd("ColorScheme", {
+        group = vim.api.nvim_create_augroup("user_minimap_hl", { clear = true }),
         callback = setup_diag_hl,
         desc = "Recompute minimap diagnostic line colors",
       })

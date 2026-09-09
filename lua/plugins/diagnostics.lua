@@ -43,8 +43,9 @@ local function apply_undercurl()
     })
   end
 end
-vim.api.nvim_create_autocmd("VimEnter", { once = true, callback = apply_undercurl })
-vim.api.nvim_create_autocmd("ColorScheme", { callback = apply_undercurl })
+local diag_hl_group = vim.api.nvim_create_augroup("user_diagnostic_hl", { clear = true })
+vim.api.nvim_create_autocmd("VimEnter", { group = diag_hl_group, once = true, callback = apply_undercurl })
+vim.api.nvim_create_autocmd("ColorScheme", { group = diag_hl_group, callback = apply_undercurl })
 
 return {
   ---------------------------------------------------------------------------

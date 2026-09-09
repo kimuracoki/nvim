@@ -30,6 +30,7 @@ VSCodeのような操作感を実現するためのNeovim設定です。
 - [プラグイン一覧](#プラグイン一覧)
 - [トラブルシューティング](#トラブルシューティング)
 - [設定ファイル構成](#設定ファイル構成)
+- [設定を編集するとき](#設定を編集するとき)
 
 ---
 
@@ -1254,7 +1255,10 @@ devcontainer.json を使うプロジェクトなら、送り込みスクリプ�
   （フロートの中にエディタが浮いている状態にはしない）。タブを離れれば元の表示に戻る。
   中の nvim には Esc / `jk` / `C-hjkl` / `C-\` がそのまま届く。戻るときは中の nvim で `:qa`。
 - `<leader>DN` … ホスト側で設定を直したあと、コンテナ内の Neovim へ送り直す。
-  `<leader>Dn` は一度送り込んだ設定をそのまま使うので、設定を更新したらこちらを使う。
+  中に入っているのは送り込んだ時点のコピーなので、ホスト側を直しても自動では追随しない。
+  ただし `<leader>Dn` は開く前に「前回送った時刻」（コンテナ内の `~/.config/nvim/.sync-stamp`）と
+  ホスト側の最終更新を比べていて、ホストのほうが新しければ **送り直して開く / そのまま開く** を聞く。
+  「直したはずの挙動がコンテナの中だけ古い」に気づけないのを防ぐため。
 
 ### コンテナに送り込んで大丈夫？（VSCode も同じことをしている）
 
@@ -1321,7 +1325,11 @@ Docker Desktop 固有の機能は使っていないので、素の Docker Engine
 |---|---|---|
 | **WSL の中で nvim を動かす**（推奨） | そのまま動く | 中では素の Linux なので、パスもソケットもそのまま。VSCode の Remote-WSL と同じ考え方 |
 | Windows の nvim ＋ Docker Desktop | そのまま動く | `docker.exe` が PATH にある |
-| Windows の nvim ＋ WSL の Docker Engine | **docker CLI の用意が要る** | Windows 側に `docker.exe` が無いと使えない。`DOCKER_HOST` を WSL のデーモンへ向けるか、WSL の中で nvim を動かす |
+| Windows の nvim ＋ WSL の Docker Engine | **WSL の中で nvim を動かすこと** | Windows 側に `docker.exe` が無いため、Windows の nvim からは Docker 連携が使えない |
+
+Docker Desktop を入れられない環境（ライセンスの都合など）では、**WSL の中で nvim を動かす**のが答え。
+上の「Linux / WSL のセットアップ」のとおりに入れれば、中は素の Linux なので全機能がそのまま動く。
+VSCode も同じ状況では Remote-WSL でエディタごと WSL に入る。
 
 3 番目の構成で `docker` が見つからない場合は、その旨と対処（WSL の中で nvim を起動する）を
 通知で案内する。パス比較は `/mnt/c/...` にも対応しているので、
@@ -1758,21 +1766,44 @@ Remove-Item -Recurse -Force `
 
 ```
 ~/.config/nvim/   (Windows: %LOCALAPPDATA%\nvim\)
-├── init.lua                 # エントリーポイント
+├── init.lua                 # エントリ。require 順とグローバル autocmd（自動保存・バッファ掃除など）
 ├── lua/
-│   ├── config/
-│   │   ├── options.lua      # Neovimオプション設定
-│   │   ├── keymaps.lua      # キーマップ設定
-│   │   ├── lazy.lua         # プラグインマネージャー設定
-│   │   ├── highlight.lua    # ハイライト・透過設定
-│   │   ├── docker.lua       # Docker / Dev Container 連携
-│   │   ├── docker_nvim.lua  # コンテナ内で Neovim を動かす（VSCode Dev Containers 相当）
-│   │   └── startup.lua      # 起動時レイアウト設定
-│   └── plugins/
-│       ├── ui.lua           # UI関連（カラースキーム、ステータスライン、ファイラ、AI統合）
-│       ├── editor.lua       # エディタ機能（構文ハイライト、補完、フォーマッター）
-│       ├── lsp.lua          # LSP・補完（Language Server設定）
-│       ├── git.lua          # Git関連（gitsigns、diffview、gitgraph、lazygit、octo）
-│       └── im.lua           # 日本語入力（IME）切り替え
+│   ├── config/              # プラグインに依存しない自前の設定・機能
+│   │   ├── options.lua      # vim.opt / leader / エンコーディング / クリップボード
+│   │   ├── keymaps.lua      # グローバルキーマップ
+│   │   ├── cheatsheet.lua   # キーマップ検索（<leader>? / <leader>fk）と登録漏れの棚卸し
+│   │   ├── context_menu.lua # <leader>m のコンテキストメニュー
+│   │   ├── lazy.lua         # lazy.nvim ブートストラップ（lua/plugins/*.lua を一括 import）
+│   │   ├── platform.lua     # OS 差分と外部ツールの有無判定（ここに集約）
+│   │   ├── highlight.lua    # 透過（背景を抜く）設定の一元管理
+│   │   ├── indent_guides.lua# 自作: ネストの背景色ガイド
+│   │   ├── startup.lua      # 起動時レイアウト
+│   │   ├── msglog.lua       # 通知ログ（:MessageLog）
+│   │   ├── gitflow.lua      # git-flow 連携
+│   │   ├── hls_codelens.lua # Haskell の型シグネチャ表示
+│   │   ├── haskell_snippets.lua
+│   │   └── docker*.lua      # Docker / Dev Container 連携、コンテナ内 Neovim、ポート転送
+│   └── plugins/             # 1ファイル=1関心事。直下の .lua は全部自動で読まれる
+│       ├── colorscheme.lua / statusline.lua / explorer.lua / finder.lua / outline.lua
+│       ├── minimap.lua / whichkey.lua / noice.lua / image.lua / dashboard.lua ...   # 見た目・UI
+│       ├── editor.lua       # treesitter / コメント / autopairs / conform / session / ufo
+│       ├── lsp.lua / completion.lua / diagnostics.lua / lint.lua / dap.lua / runner.lua
+│       ├── gitsigns.lua / diffview.lua / gitgraph.lua / octo.lua / terminal.lua     # Git
+│       └── ai.lua / im.lua / translate.lua ...                                      # AI・日本語入力
+├── scripts/
+│   ├── check.sh             # 設定を変更したら必ず通す確認（構文＋起動ロード＋キーマップ棚卸し）
+│   └── syntax.lua           # 全 Lua ファイルの構文チェック（25ms）
+├── snippets/                # 自作スニペット
+├── lazy-lock.json           # プラグインのバージョン固定（コミット対象）
+├── CLAUDE.md                # 設定を編集するときの規約（詳細は .claude/skills/nvim-config/）
 └── README.md                # このファイル
 ```
+
+## 設定を編集するとき
+
+```bash
+./scripts/check.sh   # 構文 → 起動ロード（エラー・非推奨警告） → キーマップ棚卸し
+```
+
+このリポジトリは Mac / Windows / WSL / コンテナ内で同じものを使う前提なので、
+OS 依存の分岐は `lua/config/platform.lua` に集約している。詳しい規約は `CLAUDE.md` を参照。
