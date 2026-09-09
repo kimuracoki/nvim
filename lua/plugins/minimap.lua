@@ -3,7 +3,7 @@ return {
   -- ミニマップ（VSCodeの右側コードマップ）
   {
     "gorbit99/codewindow.nvim",
-    -- auto_enable = true なのでファイルを開いた時点で要る。ただし起動パスに乗せる必要は無い。
+    -- ファイルを開いた時点で表示するので BufReadPost で要る。ただし起動パスに乗せる必要は無い。
     event = { "BufReadPost", "BufNewFile" },
     config = function()
       -- ミニマップのシンタックス色は codewindow/highlight.lua の extract_highlighting
@@ -47,7 +47,10 @@ return {
       local codewindow = require("codewindow")
       codewindow.setup({
         active_in_terminals = false,
-        auto_enable = true,
+        -- auto_enable は使わない。true にすると BufEnter/WinEnter のたびに無条件で
+        -- open_minimap() が走り、<leader>um で閉じてもタブを切り替えた瞬間に復活する
+        -- （＝トグルが効かない）。表示状態は config.minimap で持ち、そちらの autocmd が開く。
+        auto_enable = false,
         exclude_filetypes = { "NvimTree", "Trouble", "aerial" },
         max_minimap_height = nil,
         max_lines = nil,
@@ -141,17 +144,14 @@ return {
         end)
       end
 
-      -- ミニマップのトグルと同時にsidescrolloffも切り替え
-      local minimap_open = true  -- auto_enable = true なので初期状態はtrue
+      -- 表示状態の管理（自動オープンの autocmd を含む）は config.minimap に集約する
+      local minimap = require("config.minimap")
+      minimap.setup()
+
+      -- ミニマップのトグルと同時に sidescrolloff も切り替える
       vim.keymap.set("n", "<leader>um", function()
-        codewindow.toggle_minimap()
-        minimap_open = not minimap_open
-        if minimap_open then
-          vim.opt.sidescrolloff = 25  -- ミニマップON時は余白を確保
-        else
-          vim.opt.sidescrolloff = 8   -- ミニマップOFF時は通常の余白
-        end
-      end, { desc = "UI: Minimap toggle" })
+        minimap.toggle()
+      end, { desc = "UI: Minimap toggle (ミニマップのトグル)" })
     end,
   },
 }
