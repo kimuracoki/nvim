@@ -29,7 +29,6 @@ VSCodeのような操作感を実現するためのNeovim設定です。
 - [キーマップ一覧](#キーマップ一覧)
 - [プラグイン一覧](#プラグイン一覧)
 - [トラブルシューティング](#トラブルシューティング)
-- [ディレクトリ移動（zoxide）](#ディレクトリ移動zoxide)
 - [設定ファイル構成](#設定ファイル構成)
 - [設定を編集するとき](#設定を編集するとき)
 
@@ -86,10 +85,12 @@ brew tap homebrew/cask-fonts
 brew install font-hack-nerd-font
 
 # コマンドラインツール
-brew install ripgrep fd lazygit
+brew install ripgrep fd lazygit fzf
 
-# ディレクトリ移動（z / zi）
+# ディレクトリ移動（z 名前 で移動 / zi で一覧選択 / z - で直前へ / zoxide query --list で一覧）
 brew install zoxide
+# シェル初期化まで入れる（この行が無いと z は生えない。既に入っていれば何もしない）
+grep -q 'zoxide init zsh' ~/.zshrc || echo 'eval "$(zoxide init zsh)"' >> ~/.zshrc
 
 # 構文ハイライト（nvim-treesitter main）のパーサービルドに必須
 brew install tree-sitter
@@ -324,11 +325,18 @@ scoop install ripgrep   # <leader>sg のグローバル検索に必須
 scoop install fd        # ファイル検索の高速化
 scoop install lazygit   # <leader>gg のGit TUI
 scoop install zoxide    # z / zi のディレクトリ移動
+scoop install fzf       # zi の候補選択に必要
 scoop install nodejs    # tree-sitter CLI と多くの LSP の前提
 scoop install mingw     # Cコンパイラ（構文ハイライトのパーサービルドに必須）
 
 # treesitter パーサーのビルドに使う CLI
 npm install -g tree-sitter-cli
+
+# zoxide のシェル初期化まで入れる（この行が無いと z は生えない。既に入っていれば何もしない）
+if (-not (Test-Path $PROFILE)) { New-Item -ItemType File -Path $PROFILE -Force | Out-Null }
+if (-not (Select-String -Path $PROFILE -Pattern 'zoxide init' -Quiet)) {
+  Add-Content $PROFILE 'Invoke-Expression (& { (zoxide init powershell | Out-String) })'
+}
 ```
 
 > **PATH について**: scoop でインストールしたツールは自動で PATH に登録されます。反映のため **PowerShell を開き直して**ください。`nvim --version` / `rg --version` が動けばOKです。
@@ -583,11 +591,14 @@ sudo apt install -y ripgrep fd-find
 # Debian/Ubuntu では fd が fdfind という名前になるので別名を張る
 mkdir -p ~/.local/bin && ln -sf "$(which fdfind)" ~/.local/bin/fd
 
-# ディレクトリ移動（z / zi）
-sudo apt install -y zoxide || {
-  # Ubuntu 22.04 以前など、パッケージが無い/古いディストリビューション向け
+# ディレクトリ移動（z 名前 で移動 / zi で一覧選択 / z - で直前へ / zoxide query --list で一覧）
+sudo apt install -y zoxide fzf || {
+  # Ubuntu 22.04 以前など、zoxide のパッケージが無い/古いディストリビューション向け
   curl -sSfL https://raw.githubusercontent.com/ajeetdsouza/zoxide/main/install.sh | sh
 }
+# シェル初期化まで入れる（この行が無いと z は生えない。既に入っていれば何もしない）
+grep -q 'zoxide init' ~/.bashrc 2>/dev/null || echo 'eval "$(zoxide init bash)"' >> ~/.bashrc
+[ -f ~/.zshrc ] && { grep -q 'zoxide init' ~/.zshrc || echo 'eval "$(zoxide init zsh)"' >> ~/.zshrc; }
 ```
 
 `~/.local/bin` が PATH に無ければ `.bashrc` / `.zshrc` に追加しておく。
@@ -1770,43 +1781,6 @@ Remove-Item -Recurse -Force `
 - バッファ一覧は `<leader>bl` で確認可能
 
 ---
-
-## ディレクトリ移動（zoxide）
-
-「よく行くディレクトリ」を**頻度＋新しさ（frecency）**で覚えて、名前の一部を打つだけで移動する。
-`cd ~/Develop/foo/bar` と打つ代わりに `z bar` で飛べるので、プロジェクトを開くまでが短くなる。
-
-### 1. インストール
-
-各 OS のセットアップ手順に含めてある（[macOS](#macos-のセットアップ) / [Windows](#windows-のセットアップ) / [Linux / WSL](#linux--wsl-のセットアップ)）。
-対話選択の `zi` には **fzf** も必要（macOS: `brew install fzf` / Windows: `scoop install fzf` / Linux: `sudo apt install -y fzf`）。
-
-### 2. シェルの初期化（これをやらないと `z` / `zi` は生えない）
-
-インストールしただけでは `z` は使えない。シェルの設定ファイルの**末尾**に 1 行足す
-（starship などのプロンプト初期化より後ろに置く）。
-
-| シェル | 追記先 | 追記する行 |
-|---|---|---|
-| zsh | `~/.zshrc` | `eval "$(zoxide init zsh)"` |
-| bash | `~/.bashrc` | `eval "$(zoxide init bash)"` |
-| fish | `~/.config/fish/config.fish` | `zoxide init fish \| source` |
-| PowerShell | `$PROFILE`（`notepad $PROFILE`） | `Invoke-Expression (& { (zoxide init powershell \| Out-String) })` |
-
-シェルを開き直して `type z` が「shell function」と答えれば有効。
-
-### 3. 使い方（シェル）
-
-| コマンド | 動作 |
-|---|---|
-| `z nvim` | 名前に `nvim` を含む「よく行く」ディレクトリへ移動 |
-| `z conf nvim` | キーワードを複数指定して絞り込む（最後のキーワードは末尾の要素に一致する） |
-| `zi` | 候補を一覧から対話的に選ぶ（fzf） |
-| `z -` | 直前のディレクトリへ戻る |
-| `zoxide query --list` | 覚えているディレクトリを全部見る |
-| `zoxide remove <path>` | 要らない項目を消す |
-
-`cd` を普通に使っていれば勝手に学習される（最初の数日は候補が少ないので `cd` でよい）。
 
 ---
 
