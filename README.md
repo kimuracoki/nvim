@@ -861,6 +861,20 @@ Find = 検索、File = ファイル
 | `<leader>ff` | ファイル内検索 | **F**ind in **F**ile |
 | `<leader>fr` | 最近開いたファイル | **F**ile **R**ecent |
 | `<leader>fs` | シンボル検索 | **F**ind **S**ymbols |
+| `<leader>fd` | 比べるファイルを選んで差分表示 | **F**ile **D**iff with... |
+| `<leader>fD` | 差分表示を閉じる | **F**ile **D**iff off |
+
+任意の 2 ファイルの差分（VSCode の **File: Compare Active File With...** 相当）。
+Git 管理下かどうかに関係なく、別ディレクトリの同名ファイルどうしなども比べられる。
+
+- `<leader>fd` を押すと必ずピッカーが開き、**いま見ているファイルと比べる相手**をその場で選ぶ
+  （起点はバッファでも、ファイルツリーのカーソル行でもよい）
+- 対象が無いところ（ダッシュボード等）で押したときは、2 ファイルとも続けて選ぶ
+- 差分は新しいタブに左右で開き（左＝選んだ相手 / 右＝いま見ていたファイル）、`<leader>fD` でタブごと閉じて元のレイアウトに戻る
+- コマンド版: `:DiffFiles [ファイル1] [ファイル2]` / `:DiffFilesClose`
+
+Git のリビジョン間差分（作業ツリー vs HEAD、ブランチ比較、ファイル履歴）は
+diffview.nvim の `<leader>gd` / `<leader>gh` を使う。
 
 ## Picker (`<leader>p`)
 
@@ -1190,6 +1204,7 @@ PRやIssueを開いた後、以下のキーバインドが利用可能です。
 - ファイル単位の変更履歴を閲覧
 - 差分を見やすく表示
 - `:DiffviewFileHistory` で表示
+- Git と無関係な任意の 2 ファイルを比べたいときは `<leader>fd`（Find/File 操作の節）
 
 ## Docker / Dev Container (`<leader>D`)
 
@@ -1801,6 +1816,7 @@ Remove-Item -Recurse -Force `
 │   │   ├── platform.lua     # OS 差分と外部ツールの有無判定（ここに集約）
 │   │   ├── highlight.lua    # 透過（背景を抜く）設定の一元管理
 │   │   ├── indent_guides.lua# 自作: ネストの背景色ガイド
+│   │   ├── filediff.lua     # 自作: 任意の 2 ファイルの差分（<leader>fd）
 │   │   ├── startup.lua      # 起動時レイアウト
 │   │   ├── msglog.lua       # 通知ログ（:MessageLog）
 │   │   ├── gitflow.lua      # git-flow 連携

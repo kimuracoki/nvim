@@ -54,6 +54,11 @@ opt.undolevels = 10000
 opt.scrolloff = 4
 opt.sidescrolloff = 25  -- ミニマップ分の余白を確保
 opt.cursorcolumn = true
+-- 差分表示（:diffthis / diffview / DiffFiles すべてに効く）
+--   internal,algorithm:histogram … 内蔵差分エンジンの中で行の対応づけが最も素直なアルゴリズム
+--   linematch:60                  … 変更ブロック内をさらに行単位で突き合わせ、VSCode 並みに差分を絞る
+--                                   （60 行を超えるブロックでは重くなるため対象外になる）
+opt.diffopt = { "internal", "filler", "closeoff", "algorithm:histogram", "linematch:60" }
 opt.splitright = true  -- 右側に分割
 opt.splitbelow = true  -- 下側に分割
 opt.clipboard = "unnamedplus"  -- システムクリップボードを使用

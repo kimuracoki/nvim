@@ -312,7 +312,15 @@ return {
         auto_restore_enabled = true,
         auto_save_enabled = true,
         auto_session_suppress_dirs = { "~/", "~/Downloads", "/" },
-        pre_save_cmds = { close_ai_terminal_buffers },
+        pre_save_cmds = {
+          close_ai_terminal_buffers,
+          -- 差分タブ（config/filediff.lua）もセッションに残さない。
+          -- 理由はそちらの close_all() のコメント参照（復元すると diff が外れた
+          -- ただの分割になるため、保存前に畳む）。
+          function()
+            require("config.filediff").close_all()
+          end,
+        },
         post_restore_cmds = {
           function()
             vim.schedule(close_ai_terminal_buffers)

@@ -117,6 +117,8 @@ return {
         { "<leader>fr", desc = "File: Recent (最近開いたファイル)" },
         { "<leader>fs", desc = "Find: Symbols (シンボル検索・ファイル内)" },
         { "<leader>ft", desc = "Find: Todo comments (TODO コメント検索)" },
+        { "<leader>fd", desc = "File: Diff with... (比べるファイルを選んで差分表示)" },
+        { "<leader>fD", desc = "File: Diff close (差分表示を閉じる)" },
         -- Git
         { "<leader>gb", desc = "Git: Blame (行の Blame 表示)" },
         { "<leader>gD", desc = "Git: Diff close (Diff を閉じる)" },
