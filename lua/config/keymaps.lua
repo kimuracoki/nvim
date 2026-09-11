@@ -536,6 +536,17 @@ map("n", "<leader>rd", function()
   run_just("doc")
 end, { desc = "Run: just doc (doctest)" })
 
+-- 任意の 2 ファイルの差分（VSCode の File: Compare Active File With... 相当）。
+-- 実処理は config/filediff.lua。押すと必ずピッカーが開き、いま見ているファイル
+-- （バッファでもファイルツリーのカーソル行でもよい）と比べる相手をその場で選ぶ。
+-- 対象が無いところ（ダッシュボード等）で押したときは 2 ファイルとも選ばせる。
+map("n", "<leader>fd", function()
+  require("config.filediff").compare()
+end, { desc = "File: Diff with... (比べるファイルを選んで差分表示)" })
+map("n", "<leader>fD", function()
+  require("config.filediff").close()
+end, { desc = "File: Diff close (差分表示を閉じる)" })
+
 -- キーマップを日本語であいまい検索（<leader>? / <leader>fk と同じ）
 map("n", "<leader>?", function()
   require("config.cheatsheet").pick()

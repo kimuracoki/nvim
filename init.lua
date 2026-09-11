@@ -29,6 +29,9 @@ require("config.keymaps")
 -- gitflow 初期化（:GitFlowInit / <leader>gf、lazygit を開くときの初期化提案）
 require("config.gitflow").setup()
 
+-- 任意の 2 ファイルの差分（:DiffFiles / <leader>fd、VSCode の Compare Active File With... 相当）
+require("config.filediff").setup()
+
 -- プラグイン（lazy.nvim）
 require("config.lazy")
 
