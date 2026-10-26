@@ -42,6 +42,7 @@
   "material": { "branch": "main", "commit": "92f7366a9315cd386bc4fa4d716fde375dda210f" },
   "mini.nvim": { "branch": "main", "commit": "455856f765c78220fe547fb0862708942b52c42c" },
   "monokai": { "branch": "master", "commit": "fca3943173f6026347f9ffc68baab39454446c3b" },
+  "nene": { "branch": "main", "commit": "51e9e31e6b51c23116783349992719dea0152950" },
   "neo-tree.nvim": { "branch": "v3.x", "commit": "1a14083046d96e88e361d1da00761c40d45012f3" },
   "neotest": { "branch": "master", "commit": "27bf921498043f7ecd821d6db68d05de244bbd02" },
   "neotest-go": { "branch": "main", "commit": "59b50505053f9c45a9febb79e11a56206c3e3901" },
